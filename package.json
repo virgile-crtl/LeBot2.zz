@@ -1,0 +1,24 @@
+{
+  "name": "bot_ds",
+  "version": "1.0.0",
+  "description": "Bot discord for music and manage your server",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LaMeance2zz",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/voice": "^0.16.0",
+    "discord.js": "^14.9.0",
+    "distube": "^4.0.4",
+    "dotenv": "^16.0.3",
+    "fs": "^0.0.1-security",
+    "libsodium-wrappers": "^0.7.11",
+    "nodemon": "^2.0.22",
+    "path": "^0.12.7",
+    "soundcloud-audio": "^1.4.0",
+    "yt-converter": "^1.3.3"
+  }
+}
