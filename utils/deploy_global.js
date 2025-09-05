@@ -3,7 +3,7 @@ const { REST, Routes } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
-const cmds  = [];
+const cmds = [];
 
 const cmdsPath = path.join(__dirname, '../src/cmd');
 const cmdFiles = fs.readdirSync(cmdsPath).filter(file => file.endsWith('.js'));
@@ -25,7 +25,8 @@ const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
 		);
 
 		console.log(`Successfully reloaded ${data.length} application (/) cmd.`);
-	} catch (error) {
+	}
+	catch (error) {
 		console.error(error);
 	}
 })();

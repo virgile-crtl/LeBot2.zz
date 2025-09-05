@@ -3,7 +3,7 @@ const { REST, Routes } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
-const cmds  = [];
+const cmds = [];
 
 const cmdsPath = path.join(__dirname, '../src/cmd');
 const cmdFiles = fs.readdirSync(cmdsPath).filter(file => file.endsWith('.js'));
@@ -13,19 +13,20 @@ for (const file of cmdFiles) {
 	cmds.push(command.data.toJSON());
 }
 
-const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
+const rest = new REST().setToken(process.env.BOT_TOKEN);
 
 (async () => {
 	try {
 		console.log(`Started refreshing ${cmds.length} application (/) cmd.`);
 
 		const data = await rest.put(
-			Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.SERVER_ID),
+			Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
 			{ body: cmds },
 		);
 
 		console.log(`Successfully reloaded ${data.length} application (/) cmd.`);
-	} catch (error) {
+	}
+	catch (error) {
 		console.error(error);
 	}
 })();
