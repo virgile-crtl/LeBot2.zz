@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { getVoiceConnection } from '@discordjs/voice';
+import { getVoiceConnection, VoiceConnection } from '@discordjs/voice';
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -7,6 +7,8 @@ module.exports = {
 		.setDescription('Pauses the current song.'),
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		if (!interaction.guildId)
+			return interaction.reply('This command can only be used in a server.');
 		const connection = getVoiceConnection(interaction.guildId);
 		if (!connection) {
 			return interaction.reply('I am not playing musique in this server.');
