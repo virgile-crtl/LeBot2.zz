@@ -3,7 +3,7 @@ import { getVoiceConnection } from '@discordjs/voice';
 import { dbClient } from '../index';
 import GuildVoice from '../types/guildVoice';
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('unpause')
 		.setDescription('Unpauses the current song.'),

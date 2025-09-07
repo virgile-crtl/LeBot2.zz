@@ -1,18 +1,18 @@
+import "dotenv/config"
 import { AutocompleteInteraction, Guild, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import path from 'path';
 import fs from 'fs';
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
 import { dbClient } from '../index';
 import GuildVoice from '../types/guildVoice';
+import { arrayBuffer } from "stream/consumers";
 
-const SONGFOLDER = path.join(__dirname, '../../song/');
-
-function createConnection(options: CreateVoiceConnectionOptions & JoinVoiceChannelOptions, songPath: string): AudioPlayer {
+function createConnection(options: CreateVoiceConnectionOptions & JoinVoiceChannelOptions, songPath: string, guildId: string): AudioPlayer {
 	const connection: VoiceConnection = joinVoiceChannel(options);
   const player: AudioPlayer = createAudioPlayer();
   player.play(createAudioResource(songPath));
   connection.subscribe(player);
-  player.on(AudioPlayerStatus.Idle, (interaction) => playerIdle(interaction));
+  player.on(AudioPlayerStatus.Idle, () => playerIdle(guildId));
 	return player
 }
 
@@ -27,7 +27,7 @@ asserts interaction is ChatInputCommandInteraction & {
 	if (!interaction.guildId || !interaction.guild)
 		throw Error('this command can only be used in a server.');
 
-	const Path = path.join(SONGFOLDER, interaction.guildId);
+	const Path = path.join(process.env.SONG_FOLDER!, interaction.guildId);
 
 	if (!fs.existsSync(Path))
 		throw Error('there are no songs in this server.');
@@ -35,23 +35,21 @@ asserts interaction is ChatInputCommandInteraction & {
 		throw Error(interaction.options.getString('song') + ' does not exist.');
 }
 
- function playerIdle(interaction: ChatInputCommandInteraction) {
-	if (!interaction.guildId)
-		return interaction.reply('This command can only be used in a server.');
-	const guildVoice: GuildVoice | undefined = dbClient.getGuildVoice(interaction.guildId)
-	const connection = getVoiceConnection(interaction.guildId);
- 	if (guildVoice && connection) {
+function playerIdle(guildId: string) {
+	const guildVoice: GuildVoice | undefined = dbClient.getGuildVoice(guildId)
+	if (guildVoice) {
 		if (guildVoice.shuffle) {
 			guildVoice.player.play(createAudioResource(path.join(
-			SONGFOLDER, dbClient.getNextSong(interaction.guildId) + '.mp3')));
+			process.env.SONG_FOLDER!, guildId, dbClient.getNextSong(guildId) + '.mp3')));
 		} else {
-			dbClient.deleteGuildVoice(interaction.guildId)
-			connection.destroy();
+			dbClient.deleteGuildVoice(guildId)
+			const connection = getVoiceConnection(guildId);
+			if (connection) connection.destroy();
 		}
- 	}
- }
+	}
+}
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('play')
 		.setDescription('Plays a song in the voice channel you are in.')
@@ -71,31 +69,31 @@ module.exports = {
 
 	async autocomplete(interaction: AutocompleteInteraction) {
 		if (!interaction.guildId) return;
-		const Path = path.join(__dirname, '../../song/', interaction.guildId);
-		if (!fs.existsSync(Path)) {
+		const fp: string = path.join(process.env.SONG_FOLDER!, interaction.guildId);
+		if (!fs.existsSync(fp)) {
 			return interaction.respond([{ name: 'there are no songs in this server.', value: 'there are no songs in this server.' }]);
 		}
-		const focusedValue = interaction.options.getFocused();
-		const choices = fs.readdirSync(Path).filter(file => file.endsWith('.mp3'));
-		const noend = choices.map(choice => choice.substring(0, choice.length - 4));
-		const filtered = noend.filter(choice => choice.toLowerCase().includes(focusedValue.toLowerCase()));
-		if (filtered.length > 25) {
-			return;
-		}
-		await interaction.respond(
-			filtered.map(choice => ({ name: choice, value: choice })),
-		);
+		const focusedValue: string = interaction.options.getFocused();
+		const songsList: string[] = fs.readdirSync(fp)
+			.filter(file => file.endsWith('.mp3'))
+			.map(choice => choice.substring(0, choice.length - 4))
+			.filter(choice => choice.toLowerCase().includes(focusedValue.toLowerCase()));
+		if (songsList.length > 25)
+			await interaction.respond(songsList
+				.slice(0,25)
+				.map(choice => ({ name: choice, value: choice })));
+		else
+			await interaction.respond(songsList.map(choice => ({ name: choice, value: choice })));
 	},
 
 	async execute(interaction: ChatInputCommandInteraction) {
 		try {
 			checkErrors(interaction);
-			let shuf: boolean;
-			if (!interaction.options.getBoolean('shuffle'))
+			let shuf: boolean | null = interaction.options.getBoolean('shuffle');
+			if (!shuf)
 				shuf = true;
 			else
-				shuf = interaction.options.getBoolean('shuffle')!;
-
+				shuf = shuf;
 			if (!getVoiceConnection(interaction.guildId)) {
 				if (dbClient.getGuildVoice(interaction.guildId))
 					dbClient.deleteGuildVoice(interaction.guildId);
@@ -103,7 +101,7 @@ module.exports = {
 					channelId: interaction.member.voice.channelId,
 					guildId: interaction.guildId,
 					adapterCreator: interaction.guild.voiceAdapterCreator,
-					},  path.join(SONGFOLDER, interaction.guildId, interaction.options.getString('song') + '.mp3'));
+					},  path.join(process.env.SONG_FOLDER!, interaction.guildId, interaction.options.getString('song') + '.mp3'), interaction.guildId);
 				dbClient.createGuildVoice(interaction.guildId, shuf, player);
 				return interaction.reply("I am playing " + interaction.options.getString('song'));
 			} else {

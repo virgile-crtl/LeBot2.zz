@@ -1,8 +1,8 @@
-import { ChatInputApplicationCommandData, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
 import { dbClient } from '../index';
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('quit')
 		.setDescription('Quits the voice channel you are in.'),

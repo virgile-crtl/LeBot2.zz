@@ -1,5 +1,8 @@
+import "dotenv/config"
 import GuildVoice from "./types/guildVoice";
 import { AudioPlayer } from "@discordjs/voice";
+import fs from 'fs'
+import path from 'path';
 
 export default class DbClient {
   private guildsInfos: Map<string, GuildVoice>
@@ -9,7 +12,7 @@ export default class DbClient {
   }
 
   createGuildVoice(guildId: string, shuf:boolean, play: AudioPlayer): void {
-    this.guildsInfos.set('guildId', { shuffle: false, stack: [], player: play });
+    this.guildsInfos.set(guildId, { shuffle: shuf, stack: [], player: play });
   }
 
   addSongToQueue(guildId: string, song: string): void {
@@ -30,11 +33,17 @@ export default class DbClient {
 
   getNextSong(guildId: string): string | undefined {
     const guildVoice: GuildVoice | undefined = this.guildsInfos.get(guildId);
-    if (guildVoice)
-      if (guildVoice.stack.length > 0)
+    if (guildVoice) {
+      if (guildVoice.stack.length > 0) {
         return guildVoice.stack.shift();
-      else
-        return "ramdom song"
+      } else {
+        const songsList = fs.readdirSync(path.join(process.env.SONG_FOLDER + guildId))
+          .filter(file => file.endsWith('.mp3'))
+          .map(choice => choice.substring(0, choice.length - 4));
+        const random = Math.floor(Math.random() * songsList.length);
+        return songsList[random];
+      }
+    }
   }
 
   deleteGuildVoice(guildId: string): void {

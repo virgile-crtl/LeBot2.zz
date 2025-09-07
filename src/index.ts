@@ -1,10 +1,11 @@
-import 'dotenv/config'
-import { Events, GatewayIntentBits } from 'discord.js';
-import  DsClient  from './dsClient.js';
-import DbClient from './dbClient.js';
+import "dotenv/config"
+import { Client, Events, GatewayIntentBits } from 'discord.js';
+import DsClient  from './dsClient';
+import DbClient from './dbClient';
 
 
 const client: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
+// const client = new Client({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
 export const dbClient: DbClient = new DbClient();
 
 client.once(Events.ClientReady, async c => {
@@ -16,7 +17,7 @@ client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand() && !interaction.isAutocomplete()) return;
 
 	const command = (interaction.client as DsClient).commands.get(interaction.commandName);
-	if (!command) return console.error('command not found: ${interaction.commandName}');
+	if (!command) return console.error('command not found: ' + interaction.commandName);
 
 
 	if (interaction.isChatInputCommand()) {

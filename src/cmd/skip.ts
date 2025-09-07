@@ -1,28 +1,30 @@
+import "dotenv/config"
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection, createAudioResource } from '@discordjs/voice';
-import getRessources from '../utils/getRessources';
-import { Stack } from '../global.js';
 import path from 'path';
+import { dbClient } from '../index';
+import GuildVoice from '../types/guildVoice';
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('skip')
 		.setDescription('skips the current song.'),
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		if (!interaction.guildId)
+			return interaction.reply('This command can only be used in a server.');
 		const connection = getVoiceConnection(interaction.guildId);
-		if (!connection) {
+		const guildVoice: GuildVoice | undefined = dbClient.getGuildVoice(interaction.guildId)
+		if (!connection || !guildVoice)
 			return interaction.reply('I am not playing anything.');
-		}
-		const Path = path.join(__dirname, '../../song/' + interaction.guildId);
-		if (Stack.find(x => x.id === interaction.guildId).list.length === 0 && !Stack.find(x => x.id === interaction.guildId).rand) {
-			removeInfos(interaction.guildId);
-			connection.destroy();
+		if (guildVoice.shuffle) {
+			guildVoice.player.play(createAudioResource(path.join(
+			process.env.SONG_FOLDER!, interaction.guildId, dbClient.getNextSong(interaction.guildId) + '.mp3')));
+			await interaction.reply('I skipped the current song.');
+		} else {
+			dbClient.deleteGuildVoice(interaction.guildId)
+			if (connection) connection.destroy();
 			return interaction.reply('I stopped playing because there are no more songs in the queue.');
 		}
-		const song = getRessources(Path, interaction.guildId);
-		const resource = createAudioResource(path.join(Path, song + '.mp3'));
-		connection.state.subscription.player.play(resource);
-		await interaction.reply('I skipped the current song.');
-	},
+	}
 };
