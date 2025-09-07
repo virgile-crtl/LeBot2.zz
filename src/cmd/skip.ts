@@ -8,6 +8,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('skip')
 		.setDescription('skips the current song.'),
+
 	async execute(interaction: ChatInputCommandInteraction) {
 		const connection = getVoiceConnection(interaction.guildId);
 		if (!connection) {

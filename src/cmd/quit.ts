@@ -1,6 +1,6 @@
 import { ChatInputApplicationCommandData, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
-import removeInfos from '../utils/removeInfos';
+import { dbClient } from '../index';
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -8,11 +8,12 @@ module.exports = {
 		.setDescription('Quits the voice channel you are in.'),
 
 	async execute(interaction: ChatInputCommandInteraction) {
+		if (!interaction.guildId)
+			return interaction.reply('This command can only be used in a server.');
 		const connection = getVoiceConnection(interaction.guildId);
-		if (!connection) {
+		if (!connection)
 			return interaction.reply('I am not in this server.');
-		}
-		removeInfos(interaction.guildId);
+		dbClient.deleteGuildVoice(interaction.guildId)
 		connection.destroy();
 		await interaction.reply('I quit the voice channel.');
 	},

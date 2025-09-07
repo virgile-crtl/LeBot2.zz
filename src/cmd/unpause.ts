@@ -1,16 +1,21 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
+import { dbClient } from '../index';
+import GuildVoice from '../types/guildVoice';
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('unpause')
 		.setDescription('Unpauses the current song.'),
+
 	async execute(interaction: ChatInputCommandInteraction) {
-		const connection = getVoiceConnection(interaction.guildId);
-		if (!connection) {
+		if (!interaction.guildId)
+			return interaction.reply('This command can only be used in a server.');
+		const guildVoice: GuildVoice | undefined = dbClient.getGuildVoice(interaction.guildId)
+		getVoiceConnection(interaction.guildId);
+		if (!getVoiceConnection(interaction.guildId) || !guildVoice)
 			return interaction.reply('I am not playing musique in this server.');
-		}
-		connection.state.subscription.player.unpause();
+		guildVoice.player.unpause();
 		await interaction.reply('I unpaused the current song.');
 	},
 };

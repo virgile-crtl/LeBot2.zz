@@ -1,5 +1,7 @@
-import { ChatInputCommandInteraction, Guild, SlashCommandBuilder } from 'discord.js';
-import { getVoiceConnection, VoiceConnection } from '@discordjs/voice';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { getVoiceConnection } from '@discordjs/voice';
+import { dbClient } from '../index';
+import GuildVoice from '../types/guildVoice';
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -9,11 +11,10 @@ module.exports = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guildId)
 			return interaction.reply('This command can only be used in a server.');
-		const guildSongInfos: GuildsSongInfos = GuildsSongInfos.getInstance();
-		if (!connection) {
+		const guildVoice: GuildVoice | undefined = dbClient.getGuildVoice(interaction.guildId)
+		if (!getVoiceConnection(interaction.guildId) || !guildVoice)
 			return interaction.reply('I am not playing musique in this server.');
-		}
-		connection.state.subscription.player.pause();
+		guildVoice.player.pause();
 		await interaction.reply('I paused the current song.');
 	},
 };
