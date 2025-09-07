@@ -1,10 +1,11 @@
 import 'dotenv/config'
 import { Events, GatewayIntentBits } from 'discord.js';
 import  DsClient  from './dsClient.js';
-import { Command } from './types/command.js';
+import DbClient from './dbClient.js';
 
 
 const client: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
+export const dbClient: DbClient = new DbClient();
 
 client.once(Events.ClientReady, async c => {
 	await client.init();

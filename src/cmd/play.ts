@@ -1,10 +1,33 @@
-import { AutocompleteInteraction, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder, VoiceChannel } from 'discord.js';
-import manageConnection from '../utils/manageConnection.ts';
-import VoiceClient from '../voiceClient';
+import { AutocompleteInteraction, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import path from 'path';
 import fs from 'fs';
-import { getVoiceConnection } from '@discordjs/voice';
-import GuildsSongStack from '../guildsSongInfos.js';
+import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
+import { dbClient } from '../index';
+
+
+function createConnection(options: CreateVoiceConnectionOptions & JoinVoiceChannelOptions, songPath: string): AudioPlayer {
+	const connection: VoiceConnection = joinVoiceChannel(options);
+  const player: AudioPlayer = createAudioPlayer();
+  player.play(createAudioResource(songPath));
+  connection.subscribe(player);
+  player.on(AudioPlayerStatus.Idle, () => {
+  	//dev player IDLE
+  });
+	return player
+}
+
+function playerIdle(interaction, connection, player, Path) {
+	if (Stack.find(x => x.id === interaction.guildId).list.length === 0 && !Stack.find(x => x.id === interaction.guildId).rand) {
+		removeInfos(Stack, interaction);
+		connection.destroy();
+		return;
+	}
+	else {
+		const song = getRessources(Path, interaction.guildId);
+		const resource = createAudioResource(path.join(Path, song + '.mp3'));
+		player.play(resource);
+	}
+}
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -47,7 +70,9 @@ module.exports = {
 			return interaction.reply('you need to be in a voice channel to use this command.');
 		if (!interaction.guildId || !interaction.guild)
 			return interaction.reply('this command can only be used in a server.');
+
 		const Path = path.join(__dirname, '../../song/', interaction.guildId);
+
 		if (!fs.existsSync(Path))
 			return interaction.reply('there are no songs in this server.');
 		if (!fs.existsSync(path.join(Path, interaction.options.getString('song') + '.mp3')))
@@ -58,13 +83,14 @@ module.exports = {
 			shuf = interaction.options.getBoolean('shuffle')!;
 		else
 			shuf = true;
-		const guildsInfos = GuildsSongStack.getInstance();
 
 		if (!getVoiceConnection(interaction.guildId)) {
-			const voiceClient: VoiceClient = new VoiceClient({ channelId: interaction.member.voice.channelId,
-				guildId: interaction.guildId, adapterCreator: interaction.guild.voiceAdapterCreator },
-				path.join(Path, interaction.options.getString('song') + '.mp3'));
-			guildsInfos.createGuildInfos(interaction.guildId, shuf);
+			const player: AudioPlayer = createConnection({
+				channelId: interaction.member.voice.channelId,
+				guildId: interaction.guildId,
+				adapterCreator: interaction.guild.voiceAdapterCreator,
+				}, path.join(Path, interaction.options.getString('song') + '.mp3'));
+			dbClient.createGuildVoice(interaction.guildId, shuf, player);
 			return interaction.reply("I am playing " + interaction.options.getString('song'));
 		} else {
 			guildsInfos.addSongToQueue(interaction.guildId, interaction.options.getString('song')!);
