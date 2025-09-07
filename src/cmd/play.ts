@@ -3,8 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
 import { dbClient } from '../index';
-import { DbError } from '../errors';
-import { DbErrorType } from '../enum';
+import GuildVoice from '../types/guildVoice';
 
 const SONGFOLDER = path.join(__dirname, '../../song/');
 
@@ -13,9 +12,7 @@ function createConnection(options: CreateVoiceConnectionOptions & JoinVoiceChann
   const player: AudioPlayer = createAudioPlayer();
   player.play(createAudioResource(songPath));
   connection.subscribe(player);
-  player.on(AudioPlayerStatus.Idle, () => {
-  	//dev player IDLE
-  });
+  player.on(AudioPlayerStatus.Idle, (interaction) => playerIdle(interaction));
 	return player
 }
 
@@ -38,18 +35,21 @@ asserts interaction is ChatInputCommandInteraction & {
 		throw Error(interaction.options.getString('song') + ' does not exist.');
 }
 
-// function playerIdle(interaction, connection, player, Path) {
-// 	if (Stack.find(x => x.id === interaction.guildId).list.length === 0 && !Stack.find(x => x.id === interaction.guildId).rand) {
-// 		removeInfos(Stack, interaction);
-// 		connection.destroy();
-// 		return;
-// 	}
-// 	else {
-// 		const song = getRessources(Path, interaction.guildId);
-// 		const resource = createAudioResource(path.join(Path, song + '.mp3'));
-// 		player.play(resource);
-// 	}
-// }
+ function playerIdle(interaction: ChatInputCommandInteraction) {
+	if (!interaction.guildId)
+		return interaction.reply('This command can only be used in a server.');
+	const guildVoice: GuildVoice | undefined = dbClient.getGuildVoice(interaction.guildId)
+	const connection = getVoiceConnection(interaction.guildId);
+ 	if (guildVoice && connection) {
+		if (guildVoice.shuffle) {
+			guildVoice.player.play(createAudioResource(path.join(
+			SONGFOLDER, dbClient.getNextSong(interaction.guildId) + '.mp3')));
+		} else {
+			dbClient.deleteGuildVoice(interaction.guildId)
+			connection.destroy();
+		}
+ 	}
+ }
 
 module.exports = {
 	data: new SlashCommandBuilder()

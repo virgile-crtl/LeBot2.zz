@@ -12,7 +12,6 @@ module.exports = {
 		if (!interaction.guildId)
 			return interaction.reply('This command can only be used in a server.');
 		const guildVoice: GuildVoice | undefined = dbClient.getGuildVoice(interaction.guildId)
-		getVoiceConnection(interaction.guildId);
 		if (!getVoiceConnection(interaction.guildId) || !guildVoice)
 			return interaction.reply('I am not playing musique in this server.');
 		guildVoice.player.unpause();

@@ -1,7 +1,5 @@
-import { DbError } from "./errors";
 import GuildVoice from "./types/guildVoice";
 import { AudioPlayer } from "@discordjs/voice";
-import { DbErrorType } from "./enum";
 
 export default class DbClient {
   private guildsInfos: Map<string, GuildVoice>
@@ -28,6 +26,15 @@ export default class DbClient {
 
   getGuildVoice(guildId: string): GuildVoice | undefined {
     return this.guildsInfos.get(guildId);
+  }
+
+  getNextSong(guildId: string): string | undefined {
+    const guildVoice: GuildVoice | undefined = this.guildsInfos.get(guildId);
+    if (guildVoice)
+      if (guildVoice.stack.length > 0)
+        return guildVoice.stack.shift();
+      else
+        return "ramdom song"
   }
 
   deleteGuildVoice(guildId: string): void {
