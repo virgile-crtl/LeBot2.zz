@@ -1,20 +1,20 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { getVoiceConnection } from '@discordjs/voice';
-import { dbClient } from '../index';
-import GuildVoice from '../types/guildVoice';
+import VoiceClient from '../voiceClient';
+import ClientError from '../clientError';
 
 export default {
 	data: new SlashCommandBuilder()
 		.setName('pause')
-		.setDescription('Pauses the current song.'),
+		.setDescription('Pause the current song.'),
 
-	async execute(interaction: ChatInputCommandInteraction) {
-		if (!interaction.guildId)
-			return interaction.reply('This command can only be used in a server.');
-		const guildVoice: GuildVoice | undefined = dbClient.getGuildVoice(interaction.guildId)
-		if (!getVoiceConnection(interaction.guildId) || !guildVoice)
-			return interaction.reply('I am not playing musique in this server.');
-		guildVoice.player.pause();
-		await interaction.reply('I paused the current song.');
+	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
+		try {
+			VoiceClient.pause(interaction.guildId);
+			await interaction.reply('I paused the current song.');
+		} catch (err) {
+			console.error(err);
+			if (err instanceof ClientError) interaction.reply(err.message);
+			else interaction.reply('Unknow Error')
+		}
 	},
 };

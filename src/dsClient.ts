@@ -1,8 +1,9 @@
 import "dotenv/config"
 import { Client, ClientOptions, Collection } from 'discord.js';
-import { Command } from './types/command.js';
+import { Command } from './types/command';
 import fs from 'fs';
 import path from 'path';
+import ClientError from "./clientError";
 
 export default class DsClient extends Client {
   commands: Collection<string, Command>;
@@ -13,18 +14,14 @@ export default class DsClient extends Client {
   }
 
   async init() {
-    const cmdsPath = path.join(process.env.CMD_FOLDER!);
-    const cmdFiles: string[] = fs.readdirSync(cmdsPath).filter(file => file.endsWith('.ts'));
+    const cmdFiles: string[] = fs.readdirSync(process.env.CMD_FOLDER!).filter(file => file.endsWith('.ts'));
     for (const file of cmdFiles) {
-      const filePath: string = path.join(cmdsPath, file);
+      const filePath = path.join(process.env.CMD_FOLDER!, file)
       const cmdModule = await import(filePath);
       const cmd: Command = cmdModule.default || cmdModule;
-      if ('data' in cmd && 'execute' in cmd) {
-        this.commands.set(cmd.data.name, cmd);
-      }
-      else {
-        console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
-      }
+      if (!('data' in cmd) || !('execute' in cmd))
+        throw new ClientError(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+      this.commands.set(cmd.data.name, cmd);
     }
   }
 }

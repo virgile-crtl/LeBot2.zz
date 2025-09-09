@@ -1,20 +1,20 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { getVoiceConnection } from '@discordjs/voice';
-import { dbClient } from '../index';
+import VoiceClient from '../voiceClient';
+import ClientError from '../clientError';
 
 export default {
 	data: new SlashCommandBuilder()
 		.setName('quit')
 		.setDescription('Quits the voice channel you are in.'),
 
-	async execute(interaction: ChatInputCommandInteraction) {
-		if (!interaction.guildId)
-			return interaction.reply('This command can only be used in a server.');
-		const connection = getVoiceConnection(interaction.guildId);
-		if (!connection)
-			return interaction.reply('I am not in this server.');
-		dbClient.deleteGuildVoice(interaction.guildId)
-		connection.destroy();
-		await interaction.reply('I quit the voice channel.');
+	async execute(interaction: ChatInputCommandInteraction<"cached">) {
+		try {
+			VoiceClient.stop(interaction.guildId);
+			await interaction.reply('I leave it');
+		} catch (err) {
+			console.error(err);
+			if (err instanceof ClientError) interaction.reply(err.message);
+			else interaction.reply('Unknow Error')
+		}
 	},
 };

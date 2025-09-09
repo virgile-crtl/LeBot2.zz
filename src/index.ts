@@ -1,15 +1,18 @@
 import "dotenv/config"
-import { Client, Events, GatewayIntentBits } from 'discord.js';
+import { AutocompleteInteraction, ChatInputCommandInteraction, Client, Events, GatewayIntentBits } from 'discord.js';
 import DsClient  from './dsClient';
 import DbClient from './dbClient';
+import ClientError from "./clientError";
 
-
-const client: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
-// const client = new Client({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
 export const dbClient: DbClient = new DbClient();
+const client: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
 
 client.once(Events.ClientReady, async c => {
-	await client.init();
+	try {
+		await client.init();
+	} catch (err) {
+		console.error(err);
+	}
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
@@ -19,18 +22,22 @@ client.on(Events.InteractionCreate, async interaction => {
 	const command = (interaction.client as DsClient).commands.get(interaction.commandName);
 	if (!command) return console.error('command not found: ' + interaction.commandName);
 
+	if (!interaction.guildId)
+		if (interaction instanceof AutocompleteInteraction)
+			return interaction.respond([{ name: 'This command can only be used in a server.',
+				value: 'This command can only be used in a server.' }]);
+		else if (interaction instanceof ChatInputCommandInteraction)
+			return interaction.reply('This command can only be used in a server.');
 
 	if (interaction.isChatInputCommand()) {
 		try {
 			await command.execute(interaction);
 		} catch (error) {
 			console.error(error);
-			if (interaction.replied || interaction.deferred) {
+			if (interaction.replied || interaction.deferred)
 				await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-			}
-			else {
+			else
 				await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-			}
 		}
 	} else if (interaction.isAutocomplete()) {
 		try {
