@@ -5,7 +5,6 @@ import fs from 'fs';
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
 import { dbClient } from '../index';
 import GuildVoice from '../types/guildVoice';
-import { arrayBuffer } from "stream/consumers";
 
 function createConnection(options: CreateVoiceConnectionOptions & JoinVoiceChannelOptions, songPath: string, guildId: string): AudioPlayer {
 	const connection: VoiceConnection = joinVoiceChannel(options);
@@ -17,11 +16,8 @@ function createConnection(options: CreateVoiceConnectionOptions & JoinVoiceChann
 }
 
 function checkErrors(interaction: ChatInputCommandInteraction):
-asserts interaction is ChatInputCommandInteraction & {
-	guild: Guild;
-  guildId: string;
-	member: GuildMember & { voice: { channelId: string } };
-} {
+asserts interaction is ChatInputCommandInteraction & { guild: Guild;
+guildId: string; member: GuildMember & { voice: { channelId: string } };} {
 	if (!interaction.member || !(interaction.member instanceof GuildMember)  || !interaction.member.voice.channelId)
 		throw Error('you need to be in a voice channel to use this command.');
 	if (!interaction.guildId || !interaction.guild)
