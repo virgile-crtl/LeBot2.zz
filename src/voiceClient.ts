@@ -13,7 +13,7 @@ class VoiceClient {
     if (!interaction.member || !(interaction.member instanceof GuildMember)  || !interaction.member.voice.channelId)
       throw new ClientError('you need to be in a voice channel to play song.');
     try {
-      dbClient.getGuildVoice(interaction.guildId)
+      dbClient.getGuildVoice(interaction.guildId);
     } catch (err) {
       dbClient.deleteGuildVoice(interaction.guildId);
     }
@@ -36,7 +36,7 @@ class VoiceClient {
   }
 
   public unpause(guildId: string) {
-    const guildVoice: GuildVoice | undefined = dbClient.getGuildVoice(guildId)
+    const guildVoice: GuildVoice | undefined = dbClient.getGuildVoice(guildId);
 		if (!getVoiceConnection(guildId) || !guildVoice)
       throw new ClientError('I am not playing musique in this server.');
     if (guildVoice.player.state.status === AudioPlayerStatus.Playing)
@@ -61,14 +61,14 @@ class VoiceClient {
 		connection.destroy();
   }
 
-  public skip(guildId: string, followUp: (options: string | InteractionReplyOptions) => Promise<Message>): string{
+  public skip(guildId: string): string{
     const guildVoice: GuildVoice = dbClient.getGuildVoice(guildId);
     if (!getVoiceConnection(guildId))
       throw new ClientError('I am not in this server.');
-    const songName: string = dbClient.getNextSong(guildId)
+    const songName: string = dbClient.getNextSong(guildId);
     guildVoice.player.play(createAudioResource(path.join(
       process.env.SONG_FOLDER!, guildId, songName + '.mp3')));
-    return songName
+    return songName;
   }
 
   private playSong(songPath: string, guildId: string, followUp: (options: string | InteractionReplyOptions) => Promise<Message>): AudioPlayer {
@@ -85,14 +85,14 @@ class VoiceClient {
   private playerIdle(guildId: string, followUp: (options: string | InteractionReplyOptions) => Promise<Message>) {
     try {
       if (dbClient.getShuffle(guildId)) {
-			  const songName = this.skip(guildId, followUp);
-        followUp('I am playing ' + songName)
+			  const songName = this.skip(guildId);
+        followUp('I am playing ' + songName);
 		  } else {
-			  this.stop(guildId)
+			  this.stop(guildId);
 		  }
     } catch (err) {
       if (err instanceof ClientError) {
-				console.info(guildId + 'encounter this error ' + err.message)
+				console.info(guildId + 'encounter this error ' + err.message);
         followUp(err.message);
       }
       else {

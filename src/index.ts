@@ -21,7 +21,7 @@ client.once(Events.ClientReady, async c => {
 		await client.init();
 	} catch (err) {
 		console.error(err);
-		process.exit(1)
+		process.exit(1);
 	}
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 });
@@ -33,8 +33,7 @@ client.on(Events.InteractionCreate, async interaction => {
 		if (!command)
 			throw new ClientError('command not found: ' + interaction.commandName);
 		if (!interaction.guildId)
-			throw new ClientError('This command can only be used in a server.')
-
+			throw new ClientError('This command can only be used in a server.');
 		if (interaction.isChatInputCommand()) {
 			await command.execute(interaction);
 		} else {
@@ -63,7 +62,7 @@ async function manageRespond(interaction: ChatInputCommandInteraction | Autocomp
 			else
 				interaction.respond([{ name: err.message, value: err.message }]);
 		} else {
-			console.error(err)
+			console.error(err);
 			if (interaction.isChatInputCommand())
 				if (interaction.replied || interaction.deferred)
 					await interaction.followUp('There was an error while executing this command!');

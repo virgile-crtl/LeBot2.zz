@@ -17,7 +17,7 @@ async function downloadSong(url: string, outputDir: string): Promise<string> {
 	const stdot = output.toString().match(/\[ExtractAudio\] Destination: (.+\.mp3)/);
 	if (!stdot || !stdot[1]) throw Error();
 	const songName = path.basename(stdot[1]).slice(0, -4);
-	return songName
+	return songName;
 }
 
 export default {
@@ -51,7 +51,7 @@ export default {
 
 		try {
     	interaction.reply('Lancement du téléchargement');
-			const songName = await downloadSong(interaction.options.getString('url')!, songPath)
+			const songName = await downloadSong(interaction.options.getString('url')!, songPath);
 			interaction.editReply('✅ Téléchargement terminé !');
 
 			if (!interaction.options.getBoolean('toqueue')) return;
@@ -60,19 +60,19 @@ export default {
 				dbClient.createGuildVoice(interaction.guildId,
 					interaction.options.getBoolean('shuffle') ?? true,
 					voiceClient.play(interaction, songName));
-				interaction.followUp('I am playing ' + songName)
+				interaction.followUp('I am playing ' + songName);
 			} else {
 				dbClient.addSongToQueue(interaction.guildId, songName);
 				interaction.followUp('I added ' + songName + ' to the queue.');
-				const shuf = interaction.options.getBoolean('shuffle')
+				const shuf = interaction.options.getBoolean('shuffle');
 				if (shuf != null) dbClient.updateShuffle(interaction.guildId, shuf);
 			}
 		} catch (err) {
 			if (err instanceof ClientError) {
-				console.info(interaction.user.tag + 'encounter this error ' + err.message +' with ' + interaction.commandName + ' command in ' + interaction.guild!.name)
+				console.info(interaction.user.tag + 'encounter this error ' + err.message +' with ' + interaction.commandName + ' command in ' + interaction.guild!.name);
 				interaction.followUp(err.message);
 			} else
-				throw err
+				throw err;
   	}
 	},
 };

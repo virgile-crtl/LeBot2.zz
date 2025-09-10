@@ -17,7 +17,7 @@ export default class DsClient extends Client {
     const cmdFiles: string[] = fs.readdirSync(process.env.CMD_FOLDER!)
       .filter(file => file.endsWith(env === "dev" ? ".ts" : ".js"));
     for (const file of cmdFiles) {
-      const filePath = path.join(process.env.CMD_FOLDER!, file)
+      const filePath = path.join(process.env.CMD_FOLDER!, file);
       const cmdModule = await import(filePath);
       const cmd: Command = cmdModule.default || cmdModule;
       if (!('data' in cmd) || !('execute' in cmd))

@@ -13,10 +13,10 @@ export default {
 			await interaction.reply('I leave it');
 		} catch (err) {
 			if (err instanceof ClientError) {
-				console.info(err.message)
+				console.info(err.message);
 				interaction.reply(err.message);
 			} else
-				throw err
+				throw err;
 		}
 	},
 };

@@ -5,7 +5,7 @@ import GuildVoice from "./types/guildVoice";
 import path from 'path';
 
 export default class DbClient {
-  private guildsInfos: Map<string, GuildVoice>
+  private guildsInfos: Map<string, GuildVoice>;
 
   constructor() {
     this.guildsInfos = new Map();
@@ -22,18 +22,18 @@ export default class DbClient {
 
   updateShuffle(guildId: string, shuf: boolean) {
     const guildVoice: GuildVoice = this.getGuildVoice(guildId);
-    guildVoice.shuffle = shuf
+    guildVoice.shuffle = shuf;
   }
 
   getShuffle(guildId: string) {
     const guildVoice: GuildVoice = this.getGuildVoice(guildId);
-    return guildVoice.shuffle
+    return guildVoice.shuffle;
   }
 
   getGuildVoice(guildId: string): GuildVoice {
     const guildVoice = this.guildsInfos.get(guildId);
-    if (!guildVoice) throw new ClientError('I didn\'t find your Musique session' )
-    return guildVoice
+    if (!guildVoice) throw new ClientError('I didn\'t find your Musique session');
+    return guildVoice;
   }
 
   getNextSong(guildId: string): string {
@@ -48,7 +48,7 @@ export default class DbClient {
         const random = Math.floor(Math.random() * songsList.length);
         return songsList[random];
       } catch(err) {
-        throw new ClientError('Erreur during search next song')
+        throw new ClientError('Erreur during search next song');
       }
     }
   }
@@ -56,11 +56,11 @@ export default class DbClient {
   getAllsongs(guildId: string): string[] {
     const fp: string = path.join(process.env.SONG_FOLDER!, guildId);
 		if (!fs.existsSync(fp) || fs.readdirSync(fp).length === 0)
-			throw new ClientError('there are no songs in this server.')
+			throw new ClientError('there are no songs in this server.');
 		const songsList: string[] = fs.readdirSync(fp)
 			.filter(file => file.endsWith('.mp3'))
-			.map(choice => choice.substring(0, choice.length - 4))
-    return songsList
+			.map(choice => choice.substring(0, choice.length - 4));
+    return songsList;
   }
 
   deleteGuildVoice(guildId: string): void {
