@@ -39,7 +39,7 @@ client.on(Events.InteractionCreate, async interaction => {
 		} else {
 			if (!command.autocomplete) throw new ClientError('The command ' + interaction.commandName + ' does not support autocomplete.');
 			await command.autocomplete(interaction);
-			console.info(interaction.user.tag + 'used the ' + interaction.commandName + ' command in ' + interaction.guild!.name);
+			console.info(interaction.user.tag + ' used the ' + interaction.commandName + ' command in ' + interaction.guild!.name);
 		}
 	} catch (err) {
 		manageRespond(interaction, err);
