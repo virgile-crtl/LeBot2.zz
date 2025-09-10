@@ -6,24 +6,26 @@ import DsClient  from './dsClient';
 import ClientError from "./clientError";
 import checkEnv from "./utils/checkEnv";
 
-checkEnv([
+const requiredEnv = [
   { name: "BOT_TOKEN" },
   { name: "CLIENT_ID" },
   { name: "GUILD_ID" },
   { name: "CMD_FOLDER", mustBeFolder: true },
   { name: "SONG_FOLDER", mustBeFolder: true },
-]);
+].filter(v => !(v.name === "GUILD_ID" && process.env.NODE_ENV === "prod"));
+checkEnv(requiredEnv);
+
 export const dbClient: DbClient = new DbClient();
 const client: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
 
 client.once(Events.ClientReady, async c => {
 	try {
 		await client.init();
+		console.info('Ready! Logged in as ' + c.user.tag);
 	} catch (err) {
 		console.error(err);
 		process.exit(1);
 	}
-	console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
