@@ -91,9 +91,14 @@ class VoiceClient {
 			  this.stop(guildId)
 		  }
     } catch (err) {
-      console.error(err);
-      if (err instanceof ClientError) followUp(err.message);
-      else followUp('Unknow Error');
+      if (err instanceof ClientError) {
+				console.info(guildId + 'encounter this error ' + err.message)
+        followUp(err.message);
+      }
+      else {
+        console.error(err);
+        followUp('Unknow Error');
+      }
     }
   }
 }

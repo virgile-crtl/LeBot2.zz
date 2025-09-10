@@ -49,7 +49,6 @@ export default class DbClient {
         const random = Math.floor(Math.random() * songsList.length);
         return songsList[random];
       } catch(err) {
-        console.error(err)
         throw new ClientError('Erreur during search next song')
       }
     }

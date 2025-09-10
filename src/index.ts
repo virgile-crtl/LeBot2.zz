@@ -1,8 +1,18 @@
-import "dotenv/config"
-import { AutocompleteInteraction, ChatInputCommandInteraction, Client, Events, GatewayIntentBits } from 'discord.js';
+import dotenv from "dotenv";
+import { AutocompleteInteraction, ChatInputCommandInteraction, Client, Events, GatewayIntentBits, Interaction, SharedSlashCommand } from 'discord.js';
 import DsClient  from './dsClient';
 import DbClient from './dbClient';
 import ClientError from "./clientError";
+import checkEnv from "./utils/checkEnv";
+
+dotenv.config({ path: process.env.NODE_ENV === "production" ? ".env.prod" : ".env.dev"});
+checkEnv([
+  { name: "BOT_TOKEN" },
+  { name: "CLIENT_ID" },
+  { name: "GUILD_ID" },
+  { name: "CMD_FOLDER", mustBeFolder: true },
+  { name: "SONG_FOLDER", mustBeFolder: true },
+]);
 
 export const dbClient: DbClient = new DbClient();
 const client: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
@@ -12,44 +22,30 @@ client.once(Events.ClientReady, async c => {
 		await client.init();
 	} catch (err) {
 		console.error(err);
+		process.exit(1)
 	}
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand() && !interaction.isAutocomplete()) return;
+	try {
+		const command = (interaction.client as DsClient).commands.get(interaction.commandName);
+		if (!command)
+			throw new ClientError('command not found: ' + interaction.commandName);
+		if (!interaction.guildId)
+			throw new ClientError('This command can only be used in a server.')
 
-	const command = (interaction.client as DsClient).commands.get(interaction.commandName);
-	if (!command) return console.error('command not found: ' + interaction.commandName);
-
-	if (!interaction.guildId)
-		if (interaction instanceof AutocompleteInteraction)
-			return interaction.respond([{ name: 'This command can only be used in a server.',
-				value: 'This command can only be used in a server.' }]);
-		else if (interaction instanceof ChatInputCommandInteraction)
-			return interaction.reply('This command can only be used in a server.');
-
-	if (interaction.isChatInputCommand()) {
-		try {
+		if (interaction.isChatInputCommand()) {
 			await command.execute(interaction);
-		} catch (error) {
-			console.error(error);
-			if (interaction.replied || interaction.deferred)
-				await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-			else
-				await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-		}
-	} else if (interaction.isAutocomplete()) {
-		try {
-			if (!command.autocomplete) throw new Error('The command ${interaction.commandName} does not support autocomplete.');
+		} else {
+			if (!command.autocomplete) throw new ClientError('The command ' + interaction.commandName + ' does not support autocomplete.');
 			await command.autocomplete(interaction);
-		} catch (error) {
-			console.error(error);
+			console.info(interaction.user.tag + 'used the ' + interaction.commandName + ' command in ' + interaction.guild!.name);
 		}
+	} catch (err) {
+		manageRespond(interaction, err);
 	}
-
-	if (interaction.guild) console.log(`[INFO] ${interaction.user.tag} used the ${interaction.commandName} command in ${interaction.guild.name}`);
-	else console.log(`[INFO] ${interaction.user.tag} used the ${interaction.commandName} command in a DM`);
 });
 
 client.on('error', console.error);
@@ -57,3 +53,26 @@ client.on('error', console.error);
 client.on('warn', console.warn);
 
 client.login(process.env.BOT_TOKEN);
+
+async function manageRespond(interaction: ChatInputCommandInteraction | AutocompleteInteraction, err: unknown) {
+	if (err instanceof ClientError) {
+			if (interaction.isChatInputCommand())
+				if (interaction.replied || interaction.deferred)
+					await interaction.followUp(err.message);
+				else
+					await interaction.reply(err.message);
+			else
+				interaction.respond([{ name: err.message, value: err.message }]);
+		} else {
+			console.error(err)
+			if (interaction.isChatInputCommand())
+				if (interaction.replied || interaction.deferred)
+					await interaction.followUp('There was an error while executing this command!');
+				else
+					await interaction.reply('There was an error while executing this command!');
+			else
+				interaction.respond([{
+					name: 'The command ' + interaction.commandName + ' does not support autocomplete.',
+					value: 'The command ' + interaction.commandName + ' does not support autocomplete.'}]);
+		}
+}

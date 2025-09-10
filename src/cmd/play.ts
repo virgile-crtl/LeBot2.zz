@@ -6,6 +6,7 @@ import { dbClient } from '../index';
 import voiceClient from "../voiceClient";
 import { getVoiceConnection } from "@discordjs/voice";
 import ClientError from "../clientError";
+import { error } from "console";
 
 export default {
 	data: new SlashCommandBuilder()
@@ -36,9 +37,13 @@ export default {
 			else
 				await interaction.respond(songsList.map(choice => ({ name: choice, value: choice })));
 		} catch (err)  {
-			console.error(err);
-			if (err instanceof ClientError) interaction.respond([{ name: err.message, value: err.message }]);
-			else interaction.respond([{ name: 'error while listing files', value: 'error while listing files' }]);
+			if (err instanceof ClientError) {
+				console.info(interaction.user.tag + 'encounter this error ' + err.message +' with ' + interaction.commandName + ' command in ' + interaction.guild!.name)
+				interaction.respond([{ name: err.message, value: err.message }]);
+			} else {
+				interaction.respond([{ name: 'error while listing files', value: 'error while listing files' }]);
+				console.error(err);
+			}
 		}
 	},
 
@@ -61,9 +66,11 @@ export default {
 				return interaction.reply('I added ' + interaction.options.getString('song') + ' to the queue.');
 			}
 		} catch (err) {
-			console.error(err);
-			if (err instanceof ClientError) interaction.reply(err.message);
-			else interaction.reply('Unknow Error');
+			if (err instanceof ClientError) {
+				console.info(interaction.user.tag + 'encounter this error ' + err.message +' with ' + interaction.commandName + ' command in ' + interaction.guild!.name)
+				interaction.reply(err.message);
+			} else
+				throw err
 		}
 	},
 };

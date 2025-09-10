@@ -18,9 +18,11 @@ export default {
 				return interaction.reply('I stopped playing because there are no more songs in the queue.');
 			}
 		} catch (err) {
-			console.error(err);
-			if (err instanceof ClientError) interaction.reply(err.message);
-			else interaction.reply('Unknow Error');
+			if (err instanceof ClientError) {
+				console.info(err.message)
+				interaction.reply(err.message);
+			} else
+				throw err
 		}
 	}
 };

@@ -12,9 +12,11 @@ export default {
 			VoiceClient.stop(interaction.guildId);
 			await interaction.reply('I leave it');
 		} catch (err) {
-			console.error(err);
-			if (err instanceof ClientError) interaction.reply(err.message);
-			else interaction.reply('Unknow Error')
+			if (err instanceof ClientError) {
+				console.info(err.message)
+				interaction.reply(err.message);
+			} else
+				throw err
 		}
 	},
 };

@@ -69,9 +69,11 @@ export default {
 				if (shuf != null) dbClient.updateShuffle(interaction.guildId, shuf);
 			}
 		} catch (err) {
-			console.error(err);
-			if (err instanceof ClientError) interaction.followUp(err.message);
-			else interaction.followUp('Unknow Error');
+			if (err instanceof ClientError) {
+				console.info(interaction.user.tag + 'encounter this error ' + err.message +' with ' + interaction.commandName + ' command in ' + interaction.guild!.name)
+				interaction.followUp(err.message);
+			} else
+				throw err
   	}
 	},
 };
