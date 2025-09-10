@@ -5,6 +5,7 @@
   "description": "Bot discord for music and manage your server",
   "author": "LaMeance2zz",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "start": "NODE_ENV=prod node dist/index.js",
@@ -24,7 +25,10 @@
     "@eslint/js": "^9.34.0",
     "@types/node": "^24.3.1",
     "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
     "eslint": "^9.34.0",
+    "jiti": "^2.5.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   }
