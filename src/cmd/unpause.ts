@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import VoiceClient from '../voiceClient';
 import ClientError from '../clientError';
+import VoiceClient from '../voiceClient';
 
 export default {
 	data: new SlashCommandBuilder()

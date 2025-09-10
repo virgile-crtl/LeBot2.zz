@@ -1,12 +1,11 @@
-import "dotenv/config"
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { dbClient } from '../index'
-import voiceClient from "../voiceClient";
-import path from 'path';
-import fs from 'fs';
-import ytdl from 'youtube-dl-exec'
 import { getVoiceConnection } from "@discordjs/voice";
 import ClientError from "../clientError";
+import fs from 'fs';
+import path from 'path';
+import voiceClient from "../voiceClient";
+import ytdl from 'youtube-dl-exec'
 
 async function downloadSong(url: string, outputDir: string): Promise<string> {
 	const output = await ytdl(url, {

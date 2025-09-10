@@ -1,12 +1,10 @@
-import "dotenv/config"
-import { AutocompleteInteraction, Guild, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
-import path from 'path';
-import fs from 'fs';
+import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { dbClient } from '../index';
-import voiceClient from "../voiceClient";
 import { getVoiceConnection } from "@discordjs/voice";
 import ClientError from "../clientError";
-import { error } from "console";
+import fs from 'fs';
+import path from 'path';
+import voiceClient from "../voiceClient";
 
 export default {
 	data: new SlashCommandBuilder()

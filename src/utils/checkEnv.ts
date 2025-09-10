@@ -1,6 +1,5 @@
-import "dotenv/config"
-import path from 'path';
 import fs from 'fs'
+import path from 'path';
 
 export default function checkEnv(envVars: { name: string; mustBeFolder?: boolean }[]) {
   envVars.forEach(({ name, mustBeFolder }) => {

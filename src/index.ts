@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
+dotenv.config({ path: process.env.NODE_ENV === "dev" ? ".env.dev" : ".env.prod"});
 import { AutocompleteInteraction, ChatInputCommandInteraction, Client, Events, GatewayIntentBits, Interaction, SharedSlashCommand } from 'discord.js';
-import DsClient  from './dsClient';
 import DbClient from './dbClient';
+import DsClient  from './dsClient';
 import ClientError from "./clientError";
 import checkEnv from "./utils/checkEnv";
 
-dotenv.config({ path: process.env.NODE_ENV === "production" ? ".env.prod" : ".env.dev"});
 checkEnv([
   { name: "BOT_TOKEN" },
   { name: "CLIENT_ID" },
@@ -13,7 +13,6 @@ checkEnv([
   { name: "CMD_FOLDER", mustBeFolder: true },
   { name: "SONG_FOLDER", mustBeFolder: true },
 ]);
-
 export const dbClient: DbClient = new DbClient();
 const client: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
 

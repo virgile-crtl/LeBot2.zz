@@ -1,9 +1,9 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
-import GuildVoice from './types/guildVoice';
+import { ChatInputCommandInteraction, GuildMember, InteractionReplyOptions, Message } from 'discord.js';
 import { dbClient } from './index';
-import path from 'path';
-import { ChatInputCommandInteraction, Client, Guild, GuildMember, InteractionReplyOptions, Message } from 'discord.js';
 import ClientError from './clientError';
+import GuildVoice from './types/guildVoice';
+import path from 'path';
 
 
 class VoiceClient {

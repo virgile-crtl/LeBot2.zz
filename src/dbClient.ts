@@ -1,9 +1,8 @@
-import "dotenv/config"
-import GuildVoice from "./types/guildVoice";
 import { AudioPlayer } from "@discordjs/voice";
-import fs from 'fs'
-import path from 'path';
 import ClientError from "./clientError";
+import fs from 'fs'
+import GuildVoice from "./types/guildVoice";
+import path from 'path';
 
 export default class DbClient {
   private guildsInfos: Map<string, GuildVoice>

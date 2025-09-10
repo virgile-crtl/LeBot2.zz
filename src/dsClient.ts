@@ -1,9 +1,8 @@
-import "dotenv/config"
 import { Client, ClientOptions, Collection } from 'discord.js';
 import { Command } from './types/command';
+import ClientError from "./clientError";
 import fs from 'fs';
 import path from 'path';
-import ClientError from "./clientError";
 
 export default class DsClient extends Client {
   commands: Collection<string, Command>;
@@ -14,7 +13,9 @@ export default class DsClient extends Client {
   }
 
   async init() {
-    const cmdFiles: string[] = fs.readdirSync(process.env.CMD_FOLDER!).filter(file => file.endsWith('.ts'));
+    const env = process.env.NODE_ENV || "dev";
+    const cmdFiles: string[] = fs.readdirSync(process.env.CMD_FOLDER!)
+      .filter(file => file.endsWith(env === "dev" ? ".ts" : ".js"));
     for (const file of cmdFiles) {
       const filePath = path.join(process.env.CMD_FOLDER!, file)
       const cmdModule = await import(filePath);

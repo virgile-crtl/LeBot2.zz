@@ -1,4 +1,4 @@
-import { VoiceConnection, AudioPlayer } from "@discordjs/voice";
+import { AudioPlayer } from "@discordjs/voice";
 
 export default interface GuildVoice {
   player: AudioPlayer;
