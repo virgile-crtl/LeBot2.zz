@@ -91,9 +91,18 @@ class VoiceClient {
 		}
 	}
 
+	private async checkIfSomeoneIsHere(guildId: string, dsClient: Client<true>): Promise<boolean> {
+		const connection = getVoiceConnection(guildId);
+
+		if (!connection) throw new ClientError('I am not in this server.');
+		const channel = connection.joinConfig.channelId ? await dsClient.channels.fetch(connection.joinConfig.channelId) : null;
+		if (channel?.isVoiceBased() && channel.members.size > 1) { return true; }
+		return false;
+	}
+
 	private async playerIdle(guildId: string, dsClient: Client<true>) {
 		try {
-			if (dbClient.getShuffle(guildId)) {
+			if (dbClient.getShuffle(guildId) && await this.checkIfSomeoneIsHere(guildId, dsClient)) {
 			  const songName = this.skip(guildId);
 				const channel = await dsClient.channels.fetch(dbClient.getChannnelId(guildId));
 				(channel as TextChannel).send('I am playing ' + songName);
