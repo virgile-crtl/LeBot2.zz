@@ -65,7 +65,7 @@ export default {
 			}
 		} catch (err) {
 			if (err instanceof ClientError) {
-				console.info(interaction.user.tag + ' encounter this error ' + err.message +' with ' + interaction.commandName + ' command in ' + interaction.guild!.name);
+				console.info(interaction.user.tag + ' encounter this error \'' + err.message +'\' with ' + interaction.commandName + ' command in ' + interaction.guild!.name);
 				interaction.reply(err.message);
 			} else
 				throw err;
