@@ -11,23 +11,24 @@ export default class DbClient {
 		this.guildsInfos = new Map();
 	}
 
-	public createGuildVoice(guildId: string, shuf:boolean, play: AudioPlayer): void {
-		this.guildsInfos.set(guildId, { shuffle: shuf, stack: [], player: play });
+	public createGuildVoice(guildId: string, shuf:boolean, play: AudioPlayer, chanId: string): void {
+		this.guildsInfos.set(guildId, { shuffle: shuf, stack: [], player: play, randomStack: this.getAllsongs(guildId), channelId: chanId });
+	}
+
+	public getChannnelId(guildId: string) {
+		return this.getGuildVoice(guildId).channelId;
 	}
 
 	public addSongToQueue(guildId: string, song: string): void {
-		const guildVoice: GuildVoice = this.getGuildVoice(guildId);
-		guildVoice.stack.push(song);
+		this.getGuildVoice(guildId).stack.push(song);
 	}
 
 	public updateShuffle(guildId: string, shuf: boolean) {
-		const guildVoice: GuildVoice = this.getGuildVoice(guildId);
-		guildVoice.shuffle = shuf;
+		this.getGuildVoice(guildId).shuffle = shuf;
 	}
 
 	public getShuffle(guildId: string) {
-		const guildVoice: GuildVoice = this.getGuildVoice(guildId);
-		return guildVoice.shuffle;
+		return this.getGuildVoice(guildId).shuffle;
 	}
 
 	public getGuildVoice(guildId: string): GuildVoice {
@@ -41,32 +42,40 @@ export default class DbClient {
 		if (guildVoice.stack.length > 0) {
 			return guildVoice.stack.shift()!;
 		}
+		else if (guildVoice.randomStack.length > 0) {
+			return guildVoice.randomStack.shift()!;
+		}
 		else {
-			try {
-				const songsList = fs.readdirSync(path.join(process.env.SONG_FOLDER + guildId))
-					.filter(file => file.endsWith('.mp3'))
-					.map(choice => choice.substring(0, choice.length - 4));
-				const random = Math.floor(Math.random() * songsList.length);
-				return songsList[random];
-			}
-			catch {
-				throw new ClientError('Erreur during search next song');
-			}
+			guildVoice.randomStack = this.createRandomStack(guildId);
+			return guildVoice.randomStack.shift()!;
 		}
 	}
 
 	public getAllsongs(guildId: string): string[] {
 		const fp: string = path.join(process.env.SONG_FOLDER!, guildId);
-		if (!fs.existsSync(fp) || fs.readdirSync(fp).length === 0) {
+		if (!fs.existsSync(fp)) {
 			throw new ClientError('there are no songs in this server.');
 		}
 		const songsList: string[] = fs.readdirSync(fp)
 			.filter(file => file.endsWith('.mp3'))
 			.map(choice => choice.substring(0, choice.length - 4));
+		if (songsList.length <= 0) {
+			throw new ClientError('there are no songs in this server.');
+		}
 		return songsList;
 	}
 
 	public deleteGuildVoice(guildId: string): void {
 		this.guildsInfos.delete(guildId);
+	}
+
+	private createRandomStack(guildId: string): string[] {
+		const songsList = this.getAllsongs(guildId);
+
+		for (let i = songsList.length - 1; i > 0; i -= 1) {
+			const j = Math.floor(Math.random() * (i + 1));
+    	[songsList[i], songsList[j]] = [songsList[j], songsList[i]];
+  	}
+		return songsList;
 	}
 }

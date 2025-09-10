@@ -59,7 +59,7 @@ export default {
 			if (!getVoiceConnection(interaction.guildId)) {
 				dbClient.createGuildVoice(interaction.guildId,
 					interaction.options.getBoolean('shuffle') ?? true,
-					voiceClient.play(interaction, songName));
+					voiceClient.play(interaction, songName), interaction.channelId);
 				interaction.followUp('I am playing ' + songName);
 			}
 			else {
