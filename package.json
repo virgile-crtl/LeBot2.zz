@@ -5,7 +5,6 @@
   "description": "Bot discord for music and manage your server",
   "author": "LaMeance2zz",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "start": "NODE_ENV=prod node dist/index.js",

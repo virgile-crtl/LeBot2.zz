@@ -28,7 +28,7 @@ export default {
 		try {
 			const focusedValue: string = interaction.options.getFocused();
 			const songsList: string[] = dbClient.getAllsongs(interaction.guildId)
-				.filter(song => song.includes(focusedValue.toLowerCase()));
+				.filter(song => song.toLowerCase().includes(focusedValue.toLowerCase()));
 			if (songsList.length > 25) {
 				await interaction.respond(songsList.slice(0, 25)
 					.map(choice => ({ name: choice, value: choice })));
