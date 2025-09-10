@@ -92,7 +92,7 @@ class VoiceClient {
 		  }
     } catch (err) {
       if (err instanceof ClientError) {
-				console.info(guildId + 'encounter this error ' + err.message);
+				console.info(guildId + ' encounter this error ' + err.message);
         followUp(err.message);
       }
       else {

@@ -36,7 +36,7 @@ export default {
 				await interaction.respond(songsList.map(choice => ({ name: choice, value: choice })));
 		} catch (err)  {
 			if (err instanceof ClientError) {
-				console.info(interaction.user.tag + 'encounter this error ' + err.message +' with ' + interaction.commandName + ' command in ' + interaction.guild!.name);
+				console.info(interaction.user.tag + ' encounter this error ' + err.message +' with ' + interaction.commandName + ' command in ' + interaction.guild!.name);
 				interaction.respond([{ name: err.message, value: err.message }]);
 			} else {
 				interaction.respond([{ name: 'error while listing files', value: 'error while listing files' }]);
@@ -65,7 +65,7 @@ export default {
 			}
 		} catch (err) {
 			if (err instanceof ClientError) {
-				console.info(interaction.user.tag + 'encounter this error ' + err.message +' with ' + interaction.commandName + ' command in ' + interaction.guild!.name);
+				console.info(interaction.user.tag + ' encounter this error ' + err.message +' with ' + interaction.commandName + ' command in ' + interaction.guild!.name);
 				interaction.reply(err.message);
 			} else
 				throw err;
