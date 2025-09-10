@@ -1,19 +1,19 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { dbClient } from '../index'
-import { getVoiceConnection } from "@discordjs/voice";
-import ClientError from "../clientError";
+import { dbClient } from '../index';
+import { getVoiceConnection } from '@discordjs/voice';
+import ClientError from '../clientError';
 import fs from 'fs';
 import path from 'path';
-import voiceClient from "../voiceClient";
-import ytdl from 'youtube-dl-exec'
+import voiceClient from '../voiceClient';
+import ytdl from 'youtube-dl-exec';
 
 async function downloadSong(url: string, outputDir: string): Promise<string> {
 	const output = await ytdl(url, {
 		noPlaylist: true,
 		extractAudio: true,
-    audioFormat: 'mp3',
-    output: path.join(outputDir, '%(title)s - %(artist)s.%(ext)s'),
-  });
+		audioFormat: 'mp3',
+		output: path.join(outputDir, '%(title)s - %(artist)s.%(ext)s'),
+	});
 	const stdot = output.toString().match(/\[ExtractAudio\] Destination: (.+\.mp3)/);
 	if (!stdot || !stdot[1]) throw Error();
 	const songName = path.basename(stdot[1]).slice(0, -4);
@@ -43,7 +43,7 @@ export default {
 				.setRequired(false),
 		),
 
-	async execute(interaction: ChatInputCommandInteraction<"cached">) {
+	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
 		const songPath = path.join(process.env.SONG_FOLDER! + interaction.guildId);
 		if (!fs.existsSync(songPath)) {
 			fs.mkdirSync(songPath);
@@ -61,18 +61,20 @@ export default {
 					interaction.options.getBoolean('shuffle') ?? true,
 					voiceClient.play(interaction, songName));
 				interaction.followUp('I am playing ' + songName);
-			} else {
+			}
+			else {
 				dbClient.addSongToQueue(interaction.guildId, songName);
 				interaction.followUp('I added ' + songName + ' to the queue.');
 				const shuf = interaction.options.getBoolean('shuffle');
 				if (shuf != null) dbClient.updateShuffle(interaction.guildId, shuf);
 			}
-		} catch (err) {
+		}
+		catch (err) {
 			if (err instanceof ClientError) {
-				console.info(interaction.user.tag + ' encounter this error ' + err.message +' with ' + interaction.commandName + ' command in ' + interaction.guild!.name);
+				console.info(interaction.user.tag + ' encounter this error ' + err.message + ' with ' + interaction.commandName + ' command in ' + interaction.guild!.name);
 				interaction.followUp(err.message);
-			} else
-				throw err;
+			}
+			else { throw err; }
   	}
 	},
 };

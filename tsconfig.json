@@ -9,6 +9,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "tmp/add.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["dist"]
 }

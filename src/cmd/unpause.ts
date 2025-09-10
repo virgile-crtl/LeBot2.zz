@@ -7,16 +7,17 @@ export default {
 		.setName('unpause')
 		.setDescription('Unpause the current song.'),
 
-	async execute(interaction: ChatInputCommandInteraction<"cached">) {
+	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
 		try {
 			VoiceClient.unpause(interaction.guildId);
 			await interaction.reply('I unpaused the current song.');
-		} catch (err) {
+		}
+		catch (err) {
 			if (err instanceof ClientError) {
 				console.info(err.message);
 				interaction.reply(err.message);
-			} else
-				throw err;
+			}
+			else {throw err;}
 		}
 	},
 };

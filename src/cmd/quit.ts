@@ -7,16 +7,17 @@ export default {
 		.setName('quit')
 		.setDescription('Quits the voice channel you are in.'),
 
-	async execute(interaction: ChatInputCommandInteraction<"cached">) {
+	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
 		try {
 			VoiceClient.stop(interaction.guildId);
 			await interaction.reply('I leave it');
-		} catch (err) {
+		}
+		catch (err) {
 			if (err instanceof ClientError) {
 				console.info(err.message);
 				interaction.reply(err.message);
-			} else
-				throw err;
+			}
+			else {throw err;}
 		}
 	},
 };
