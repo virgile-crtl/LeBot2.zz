@@ -12,7 +12,7 @@ export default class DbClient {
 	}
 
 	public createGuildVoice(guildId: string, shuf:boolean, play: AudioPlayer, chanId: string): void {
-		this.guildsInfos.set(guildId, { shuffle: shuf, stack: [], player: play, randomStack: this.getAllsongs(guildId), channelId: chanId });
+		this.guildsInfos.set(guildId, { shuffle: shuf, stack: [], player: play, randomStack: this.createRandomStack(guildId), channelId: chanId });
 	}
 
 	public getChannnelId(guildId: string) {
