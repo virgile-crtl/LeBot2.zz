@@ -16,13 +16,16 @@ export default class DsClient extends Client {
     const env = process.env.NODE_ENV || "dev";
     const cmdFiles: string[] = fs.readdirSync(process.env.CMD_FOLDER!)
       .filter(file => file.endsWith(env === "dev" ? ".ts" : ".js"));
+    if (cmdFiles.length <= 0)
+      throw new ClientError('None command found');
     for (const file of cmdFiles) {
       const filePath = path.join(process.env.CMD_FOLDER!, file);
       const cmdModule = await import(filePath);
       const cmd: Command = cmdModule.default || cmdModule;
       if (!('data' in cmd) || !('execute' in cmd))
-        throw new ClientError(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+        throw new ClientError('The command at ' + filePath + 'is missing a required \'data" or \'execute\' property.');
       this.commands.set(cmd.data.name, cmd);
+      console.info('Command ' + cmd.data.name + ' is loaded');
     }
   }
 }
