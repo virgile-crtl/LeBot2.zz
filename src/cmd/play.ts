@@ -1,10 +1,9 @@
 import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { dbClient } from '../index';
-import { getVoiceConnection } from '@discordjs/voice';
+import { putSongPlay } from '../utils/tmp';
 import ClientError from '../clientError';
 import fs from 'fs';
+import getAllTracks from '../utils/getAllTracks';
 import path from 'path';
-import voiceClient from '../voiceClient';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -27,8 +26,8 @@ export default {
 	async autocomplete(interaction: AutocompleteInteraction<'cached'>) {
 		try {
 			const focusedValue: string = interaction.options.getFocused();
-			const songsList: string[] = dbClient.getAllsongs(interaction.guildId)
-				.filter(song => song.toLowerCase().includes(focusedValue.toLowerCase()));
+			const songsList: string[] = getAllTracks(interaction.guildId).filter(
+				(song: string) => song.toLowerCase().includes(focusedValue.toLowerCase()));
 			if (songsList.length > 25) {
 				await interaction.respond(songsList.slice(0, 25)
 					.map(choice => ({ name: choice, value: choice })));
@@ -51,24 +50,16 @@ export default {
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
 		try {
-			const Path = path.join(process.env.SONG_FOLDER!, interaction.guildId);
-			if (!fs.existsSync(Path)) { throw new ClientError('there are no songs in this server.'); };
-			if (!fs.existsSync(path.join(Path, interaction.options.getString('song') + '.mp3'))) {
-				throw new ClientError(interaction.options.getString('song') + ' does not exist.');
+			const folder = path.join(process.env.SONG_FOLDER!, interaction.guildId);
+			const song = interaction.options.getString('song')!;
+
+			if (!fs.existsSync(folder)) {
+				throw new ClientError('there are no songs in this server.');
+			};
+			if (!fs.existsSync(path.join(folder, song + '.mp3'))) {
+				throw new ClientError(song + ' does not exist.');
 			}
-			if (!getVoiceConnection(interaction.guildId)) {
-				dbClient.createGuildVoice(interaction.guildId,
-					interaction.options.getBoolean('shuffle') ?? true,
-					voiceClient.play(interaction, interaction.options.getString('song')!), interaction.channelId);
-				return interaction.reply('I am playing ' + interaction.options.getString('song'));
-			}
-			else {
-				dbClient.addSongToQueue(interaction.guildId, interaction.options.getString('song')!);
-				if (interaction.options.getBoolean('shuffle') != null) {
-					dbClient.updateShuffle(interaction.guildId, interaction.options.getBoolean('shuffle')!);
-				}
-				return interaction.reply('I added ' + interaction.options.getString('song') + ' to the queue.');
-			}
+			putSongPlay(interaction, song, folder, interaction.reply.bind(interaction));
 		}
 		catch (err) {
 			if (err instanceof ClientError) {

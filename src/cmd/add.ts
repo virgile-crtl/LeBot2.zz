@@ -1,10 +1,8 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { dbClient } from '../index';
-import { getVoiceConnection } from '@discordjs/voice';
+import { putSongPlay } from '../utils/tmp';
 import ClientError from '../clientError';
 import fs from 'fs';
 import path from 'path';
-import voiceClient from '../voiceClient';
 import ytdl from 'youtube-dl-exec';
 
 async function downloadSong(url: string, outputDir: string): Promise<string> {
@@ -44,29 +42,18 @@ export default {
 		),
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
-		const songPath = path.join(process.env.SONG_FOLDER! + interaction.guildId);
-		if (!fs.existsSync(songPath)) {
-			fs.mkdirSync(songPath);
-		}
-
 		try {
+			const songPath = path.join(process.env.SONG_FOLDER! + interaction.guildId);
+			if (!fs.existsSync(songPath)) {
+				fs.mkdirSync(songPath);
+			}
+
     	interaction.reply('Lancement du téléchargement');
 			const songName = await downloadSong(interaction.options.getString('url')!, songPath);
 			interaction.editReply('✅ Téléchargement terminé !');
 
-			if (!interaction.options.getBoolean('toqueue')) return;
-
-			if (!getVoiceConnection(interaction.guildId)) {
-				dbClient.createGuildVoice(interaction.guildId,
-					interaction.options.getBoolean('shuffle') ?? true,
-					voiceClient.play(interaction, songName), interaction.channelId);
-				interaction.followUp('I am playing ' + songName);
-			}
-			else {
-				dbClient.addSongToQueue(interaction.guildId, songName);
-				interaction.followUp('I added ' + songName + ' to the queue.');
-				const shuf = interaction.options.getBoolean('shuffle');
-				if (shuf != null) dbClient.updateShuffle(interaction.guildId, shuf);
+			if (interaction.options.getBoolean('toqueue')) {
+				putSongPlay(interaction, songName, songPath, interaction.followUp.bind(interaction));
 			}
 		}
 		catch (err) {
