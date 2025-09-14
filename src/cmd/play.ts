@@ -1,8 +1,9 @@
 import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { putSongPlay } from '../utils/tmp';
+import { dbClient } from '../index';
+import addToQueue from '../utils/addToQueue';
 import ClientError from '../clientError';
+import createGuildPlayer from '../utils/createGuildPlayer';
 import fs from 'fs';
-import getAllTracks from '../utils/getAllTracks';
 import path from 'path';
 
 export default {
@@ -26,7 +27,7 @@ export default {
 	async autocomplete(interaction: AutocompleteInteraction<'cached'>) {
 		try {
 			const focusedValue: string = interaction.options.getFocused();
-			const songsList: string[] = getAllTracks(interaction.guildId).filter(
+			const songsList: string[] = dbClient.getAllTracksFromGuildFolder(interaction.guildId).filter(
 				(song: string) => song.toLowerCase().includes(focusedValue.toLowerCase()));
 			if (songsList.length > 25) {
 				await interaction.respond(songsList.slice(0, 25)
@@ -49,24 +50,25 @@ export default {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
-		try {
-			const folder = path.join(process.env.SONG_FOLDER!, interaction.guildId);
-			const song = interaction.options.getString('song')!;
-
-			if (!fs.existsSync(folder)) {
-				throw new ClientError('there are no songs in this server.');
-			};
-			if (!fs.existsSync(path.join(folder, song + '.mp3'))) {
-				throw new ClientError(song + ' does not exist.');
-			}
-			putSongPlay(interaction, song, folder, interaction.reply.bind(interaction));
+		const guildFolder = path.join(process.env.SONG_FOLDER!, interaction.guildId);
+		const trackName = interaction.options.getString('song')!;
+		if (!fs.existsSync(guildFolder)) {
+			throw new ClientError('there are no songs in this server.');
+		};
+		if (!fs.existsSync(path.join(guildFolder, trackName + '.mp3'))) {
+			throw new ClientError(trackName + ' does not exist in this server.');
 		}
-		catch (err) {
-			if (err instanceof ClientError) {
-				console.info(interaction.user.tag + ' encounter this error \'' + err.message + '\' with ' + interaction.commandName + ' command in ' + interaction.guild!.name);
-				interaction.reply(err.message);
-			}
-			else { throw err; }
+		if (!interaction.channel || !interaction.channel.isTextBased()) {
+			throw new ClientError('you need to make the command in a Text channel to play song.');
+		}
+
+		if (!dbClient.guildVoiceExist(interaction.guildId)) {
+			createGuildPlayer(path.join(guildFolder, trackName + '.mp3'), interaction);
+			return interaction.reply('I am playing ' + trackName);
+		}
+		else {
+			addToQueue(trackName, interaction);
+			return interaction.reply('I added ' + trackName + ' to the queue.');
 		}
 	},
 };

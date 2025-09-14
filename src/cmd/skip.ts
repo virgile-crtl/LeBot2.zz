@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { dbClient } from '../index';
+import { getVoiceConnection } from '@discordjs/voice';
 import ClientError from '../clientError';
-import VoiceClient from '../voiceClient';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -9,22 +9,15 @@ export default {
 		.setDescription('skips the current song.'),
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
-		try {
-			if (dbClient.getShuffle(interaction.guildId)) {
-				const songName = VoiceClient.skip(interaction.guildId);
-				await interaction.reply('I skipped the current song and I am playing ' + songName);
-			}
-			else {
-				VoiceClient.stop(interaction.guildId);
-				return interaction.reply('I stopped playing because there are no more songs in the queue.');
-			}
+		if (!getVoiceConnection(interaction.guildId)) {
+			throw new ClientError('I am not in this server.');
 		}
-		catch (err) {
-			if (err instanceof ClientError) {
-				console.info(err.message);
-				interaction.reply(err.message);
-			}
-			else {throw err;}
+		const trackName = dbClient.getGuildVoice(interaction.guildId).skip();
+		if (trackName) {
+			return interaction.reply('I skipped the current song and I am playing ' + trackName);
+		}
+		else {
+			return interaction.reply('I stopped playing because there are no more songs in the queue.');
 		}
 	},
 };

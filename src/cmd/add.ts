@@ -1,21 +1,28 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { putSongPlay } from '../utils/tmp';
+import { dbClient } from '..';
+import addToQueue from '../utils/addToQueue';
 import ClientError from '../clientError';
+import createGuildPlayer from '../utils/createGuildPlayer';
 import fs from 'fs';
 import path from 'path';
 import ytdl from 'youtube-dl-exec';
 
-async function downloadSong(url: string, outputDir: string): Promise<string> {
-	const output = await ytdl(url, {
-		noPlaylist: true,
-		extractAudio: true,
-		audioFormat: 'mp3',
-		output: path.join(outputDir, '%(title)s - %(artist)s.%(ext)s'),
-	});
+async function downloadTrackFromYoutube(url: string, outputDir: string): Promise<string> {
+	let output = undefined;
+	try {
+		output = await ytdl(url, {
+			noPlaylist: true,
+			extractAudio: true,
+			audioFormat: 'mp3',
+			output: path.join(outputDir, '%(title)s - %(artist)s.%(ext)s'),
+		});
+	}
+	catch (err) {
+		throw ClientError.fromError(err, 'Erreur lors du telechargement');
+	}
 	const stdot = output.toString().match(/\[ExtractAudio\] Destination: (.+\.mp3)/);
-	if (!stdot || !stdot[1]) throw Error();
-	const songName = path.basename(stdot[1]).slice(0, -4);
-	return songName;
+	if (!stdot || !stdot[1]) throw new ClientError('Impossible de trouver le nom du morceau');
+	return path.basename(stdot[1]).slice(0, -4);
 }
 
 export default {
@@ -42,26 +49,22 @@ export default {
 		),
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
-		try {
-			const songPath = path.join(process.env.SONG_FOLDER! + interaction.guildId);
-			if (!fs.existsSync(songPath)) {
-				fs.mkdirSync(songPath);
+		const guildFolder = path.join(process.env.SONG_FOLDER! + interaction.guildId);
+		if (!fs.existsSync(guildFolder)) { fs.mkdirSync(guildFolder); }
+
+  	interaction.reply('Lancement du téléchargement');
+		const trackName = await downloadTrackFromYoutube(interaction.options.getString('url')!, guildFolder);
+		interaction.editReply('✅ Téléchargement terminé !');
+
+		if (interaction.options.getBoolean('toqueue')) {
+			if (!dbClient.guildVoiceExist(interaction.guildId)) {
+				createGuildPlayer(path.join(guildFolder, trackName + '.mp3'), interaction);
+				return interaction.followUp('I am playing ' + trackName);
 			}
-
-    	interaction.reply('Lancement du téléchargement');
-			const songName = await downloadSong(interaction.options.getString('url')!, songPath);
-			interaction.editReply('✅ Téléchargement terminé !');
-
-			if (interaction.options.getBoolean('toqueue')) {
-				putSongPlay(interaction, songName, songPath, interaction.followUp.bind(interaction));
+			else {
+				addToQueue(trackName, interaction);
+				return interaction.followUp('I added ' + trackName + ' to the queue.');
 			}
 		}
-		catch (err) {
-			if (err instanceof ClientError) {
-				console.info(interaction.user.tag + ' encounter this error ' + err.message + ' with ' + interaction.commandName + ' command in ' + interaction.guild!.name);
-				interaction.followUp(err.message);
-			}
-			else { throw err; }
-  	}
 	},
 };
