@@ -25,27 +25,15 @@ export default {
 		),
 
 	async autocomplete(interaction: AutocompleteInteraction<'cached'>) {
-		try {
-			const focusedValue: string = interaction.options.getFocused();
-			const songsList: string[] = dbClient.getAllTracksFromGuildFolder(interaction.guildId).filter(
-				(song: string) => song.toLowerCase().includes(focusedValue.toLowerCase()));
-			if (songsList.length > 25) {
-				await interaction.respond(songsList.slice(0, 25)
-					.map(choice => ({ name: choice, value: choice })));
-			}
-			else {
-				await interaction.respond(songsList.map(choice => ({ name: choice, value: choice })));
-			}
+		const focusedValue: string = interaction.options.getFocused();
+		const songsList: string[] = dbClient.getAllTracksFromGuildFolder(interaction.guildId).filter(
+			(song: string) => song.toLowerCase().includes(focusedValue.toLowerCase()));
+		if (songsList.length > 25) {
+			await interaction.respond(songsList.slice(0, 25)
+				.map(choice => ({ name: choice, value: choice })));
 		}
-		catch (err) {
-			if (err instanceof ClientError) {
-				console.info(interaction.user.tag + ' encounter this error ' + err.message + ' with ' + interaction.commandName + ' command in ' + interaction.guild!.name);
-				interaction.respond([{ name: err.message, value: err.message }]);
-			}
-			else {
-				interaction.respond([{ name: 'error while listing files', value: 'error while listing files' }]);
-				console.error(err);
-			}
+		else {
+			await interaction.respond(songsList.map(choice => ({ name: choice, value: choice })));
 		}
 	},
 

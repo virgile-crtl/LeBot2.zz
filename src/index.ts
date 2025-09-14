@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.prod' });
-import { Events, GatewayIntentBits, Interaction } from 'discord.js';
+import { Events, GatewayIntentBits } from 'discord.js';
+import checkEnv from './utils/checkEnv';
+import ClientError from './clientError';
 import DbClient from './dbClient';
 import DsClient from './dsClient';
-import ClientError from './clientError';
-import checkEnv from './utils/checkEnv';
 
 checkEnv();
 
@@ -23,27 +23,40 @@ client.once(Events.ClientReady, async c => {
 });
 
 client.on(Events.InteractionCreate, async interaction => {
-	try {
-		if (!interaction.isChatInputCommand() && !interaction.isAutocomplete()) return;
-		const command = (interaction.client as DsClient).commands.get(interaction.commandName);
-		if (!command) {
-			throw new ClientError('command not found: ' + interaction.commandName);
-		}
-		if (!interaction.guildId) {
-			throw new ClientError('This command can only be used in a server.');
-		}
+	if (!interaction.isChatInputCommand() && !interaction.isAutocomplete()) return;
+	const command = (interaction.client as DsClient).commands.get(interaction.commandName);
+	if (!command) {
+		throw new ClientError('command not found: ' + interaction.commandName);
+	}
+	if (!interaction.guildId) {
+		throw new ClientError('This command can only be used in a server.');
+	}
 
-		if (interaction.isChatInputCommand()) {
+	if (interaction.isChatInputCommand()) {
+		try {
 			await command.execute(interaction);
 			console.info(interaction.user.tag + ' used the ' + interaction.commandName + ' command in ' + interaction.guild!.name);
 		}
-		else {
-			if (!command.autocomplete) throw new ClientError('The command ' + interaction.commandName + ' does not support autocomplete.');
-			await command.autocomplete(interaction);
+		catch (err) {
+			if (err instanceof ClientError) {
+				if (interaction.replied || interaction.deferred) {
+					await interaction.followUp(err.message.split(/[\n]/)[0]);
+				}
+				else { await interaction.reply(err.message.split(/[\n]/)[0]); }
+			}
+			throw err;
 		}
 	}
-	catch (err) {
-		manageRespond(interaction, err);
+	else {
+		if (!command.autocomplete) throw new ClientError('The command ' + interaction.commandName + ' does not support autocomplete.');
+		try {
+			await command.autocomplete(interaction);
+		}
+		catch (err) {
+			if (err instanceof ClientError) {
+				interaction.respond([{ name: err.message.split(/[\n]/)[0], value: err.message.split(/[\n]/)[0] }]);
+			}
+		}
 	}
 });
 
@@ -52,33 +65,3 @@ client.on('error', console.error);
 client.on('warn', console.warn);
 
 client.login(process.env.BOT_TOKEN);
-
-async function manageRespond(interaction: Interaction, err: unknown) {
-	if (err instanceof ClientError) {
-		if (interaction.isChatInputCommand()) {
-			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp(err.message);
-			}
-			else { await interaction.reply(err.message); }
-		}
-		else if (interaction.isAutocomplete()) {
-			interaction.respond([{ name: err.message, value: err.message }]);
-		}
-	}
-	else {
-		console.error(err);
-		if (interaction.isChatInputCommand()) {
-			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp('There was an error while executing this command!');
-			}
-			else {
-				await interaction.reply('There was an error while executing this command!');
-			}
-		}
-		else if (interaction.isAutocomplete()) {
-			interaction.respond([{
-				name: 'The command ' + interaction.commandName + ' does not support autocomplete.',
-				value: 'The command ' + interaction.commandName + ' does not support autocomplete.' }]);
-		}
-	}
-}
