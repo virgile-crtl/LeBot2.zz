@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
-import { dbClient } from '../index';
+import { dbClient, langClient } from '../index';
 import ClientError from '../clientError';
 import GuildPlayer from '../guildPlayer';
 import DsClient from '../dsClient';
@@ -8,7 +8,7 @@ export default function createGuildPlayer(track_name: string,
 	interaction: ChatInputCommandInteraction<'cached'>): void {
 	if (!interaction.member || !(interaction.member instanceof GuildMember)
 		|| !interaction.member.voice.channelId) {
-		throw new ClientError('you need to be in a voice channel to play song.');
+		throw new ClientError(langClient.t('needVoiceChannel'));
 	}
 	const is_rand = interaction.options.getBoolean('rand') ?? true;
 	const guildPlayer = new GuildPlayer(interaction.guildId, is_rand,

@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
+import { langClient } from '..';
 import addToQueue from '../utils/addToQueue';
 import ClientError from '../clientError';
 import createGuildPlayer from '../utils/createGuildPlayer';
@@ -18,7 +19,7 @@ async function downloadTrackFromYoutube(url: string, outputDir: string): Promise
 		});
 	}
 	catch (err) {
-		throw ClientError.fromError(err, 'Erreur lors du telechargement');
+		throw ClientError.fromError(err, langClient.t('downloadError'));
 	}
 	const stdot = output.toString().match(/\[ExtractAudio\] Destination: (.+\.mp3)/);
 	if (!stdot || !stdot[1]) throw new ClientError('Impossible de trouver le nom du morceau');
@@ -52,19 +53,19 @@ export default {
 		const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER! + interaction.guildId);
 		if (!fs.existsSync(guild_folder)) { fs.mkdirSync(guild_folder); }
 
-  	interaction.reply('Lancement du téléchargement');
+  	interaction.reply(langClient.t('startDownload'));
 		const track_name: string = await downloadTrackFromYoutube(interaction.options.getString('url')!, guild_folder);
-		interaction.editReply('✅ Téléchargement terminé !');
+		interaction.editReply(langClient.t('downloadCompleted'));
 
 		const to_queue = interaction.options.getBoolean('to_queue') ?? true;
 		if (to_queue) {
 			if (!getVoiceConnection(interaction.guildId)) {
 				createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
-				await interaction.followUp('I am playing ' + track_name);
+				await interaction.followUp(langClient.t('play', { trackName: track_name }));
 			}
 			else {
 				addToQueue(track_name, interaction);
-				await interaction.followUp('I added ' + track_name + ' to the queue.');
+				await interaction.followUp(langClient.t('trackAdd', { trackName: track_name }));
 			}
 		}
 	},

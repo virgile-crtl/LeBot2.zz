@@ -1,6 +1,6 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
 import { Channel, TextChannel } from 'discord.js';
-import { dbClient } from '.';
+import { dbClient, langClient } from './index';
 import ClientError from './clientError';
 import DsClient from './dsClient';
 import path from 'path';
@@ -27,7 +27,7 @@ export default class GuildPlayer {
 			this._player.on(AudioPlayerStatus.Idle, () => this.playerIdle(dsClient));
 		}
 		catch (err) {
-			throw ClientError.fromError(err, 'Error lors de la connection au serveur');
+			throw ClientError.fromError(err, langClient.t('connectError'));
 		}
 	}
 
@@ -36,27 +36,27 @@ export default class GuildPlayer {
 			this._player.play(createAudioResource(track_path));
 		}
 		catch (err) {
-			throw ClientError.fromError(err, 'Error lors de la lecture du son');
+			throw ClientError.fromError(err, langClient.t('playError'));
 		}
 	}
 
 	public unpause(): void {
 		if (this._player.state.status === AudioPlayerStatus.Playing) {
-			throw new ClientError('I am already playing');
+			throw new ClientError(langClient.t('alreadyPlay'));
 		}
 		this._player.unpause();
 	}
 
 	public pause(): void {
 		if (this._player.state.status === AudioPlayerStatus.Paused) {
-			throw new ClientError('I am already paused');
+			throw new ClientError(langClient.t('alreadyPause'));
 		}
 		this._player.pause();
 	}
 
 	public stop(): void {
 		const connection: VoiceConnection | undefined = getVoiceConnection(this._guild_id);
-		if (!connection) throw new ClientError('I am not in this server.');
+		if (!connection) throw new ClientError(langClient.t('notInServer'));
 		connection.destroy();
 	}
 
@@ -95,12 +95,12 @@ export default class GuildPlayer {
 			const channel: Channel | null = await dsClient.channels.fetch(this._channel_id);
 			if (await dsClient.checkIfSomeoneIsHere(this._guild_id)) {
 			  const track_name: string | undefined = this.skip();
-				if (track_name) { await (channel as TextChannel).send('I am playing ' + track_name); }
-				else { await (channel as TextChannel).send('I stopped playing because there are no more songs in the queue.'); }
+				if (track_name) { await (channel as TextChannel).send(langClient.t('play', { trackName: track_name })); }
+				else { await (channel as TextChannel).send(langClient.t('stopNoTracks')); }
 		  }
 			else {
 				this.stop();
-				await (channel as TextChannel).send('I stopped playing because nobody was here');
+				await (channel as TextChannel).send(langClient.t('stopNoUsers'));
 			}
 		}
 		catch (err) {
@@ -108,7 +108,7 @@ export default class GuildPlayer {
 			if (err instanceof ClientError) {
 				(channel as TextChannel).send(err.message.split(/[\n]/)[0]);
 			}
-			else { (channel as TextChannel).send('unknow error'); }
+			else { (channel as TextChannel).send(langClient.t('uknError')); }
 			console.error(err);
 		}
 	}

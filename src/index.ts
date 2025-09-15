@@ -2,6 +2,8 @@ import dotenv from 'dotenv';
 dotenv.config({ path: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.prod' });
 import { Command } from './types/command';
 import { Events, GatewayIntentBits } from 'discord.js';
+import { initI18n } from './i18next';
+import { i18n } from 'i18next';
 import checkEnv from './utils/checkEnv';
 import ClientError from './clientError';
 import DbClient from './dbClient';
@@ -11,11 +13,14 @@ checkEnv();
 
 const dsClient: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
 export const dbClient: DbClient = new DbClient();
+export let langClient: i18n;
 
-dsClient.once(Events.ClientReady, async c => {
+dsClient.once(Events.ClientReady, async client => {
 	try {
+		langClient = await initI18n('fr');
+		if (!langClient) { throw Error('Unable to load languages'); };
 		await dsClient.init();
-		console.info('Ready! Logged in as ' + c.user.tag);
+		console.info(langClient.t('logged', { name: client.user.tag }));
 	}
 	catch (err) {
 		console.error(err);
@@ -29,7 +34,8 @@ dsClient.on(Events.InteractionCreate, async interaction => {
 
 	try {
 		await command.execute(interaction);
-		console.info(interaction.user.tag + ' used the ' + interaction.commandName + ' command in ' + interaction.guild!.name);
+		console.info(langClient.t('usedCmd', { tag: interaction.user.tag,
+			commandName: interaction.commandName, name: interaction.guild!.name }));
 	}
 	catch (err) {
 		if (err instanceof ClientError) {
@@ -39,9 +45,9 @@ dsClient.on(Events.InteractionCreate, async interaction => {
 			else { await interaction.reply(err.message.split(/[\n]/)[0]); }
 		}
 		else if (interaction.replied || interaction.deferred) {
-			await interaction.followUp('Unknow error');
+			await interaction.followUp(langClient.t('uknError'));
 		}
-		else { await interaction.reply('Unknow error'); }
+		else { await interaction.reply(langClient.t('uknError')); }
 		throw err;
 	}
 });
@@ -50,7 +56,7 @@ dsClient.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isAutocomplete()) return;
 	const command: Command = dsClient.getCommand(interaction.commandName);
 
-	if (!command.autocomplete) throw new ClientError('The command ' + interaction.commandName + ' does not support autocomplete.');
+	if (!command.autocomplete) throw new ClientError(langClient.t('noAutocomplete', { commandName: interaction.commandName }));
 	try {
 		await command.autocomplete(interaction);
 	}
@@ -58,7 +64,7 @@ dsClient.on(Events.InteractionCreate, async interaction => {
 		if (err instanceof ClientError) {
 			interaction.respond([{ name: err.message.split(/[\n]/)[0], value: err.message.split(/[\n]/)[0] }]);
 		}
-		else {interaction.respond([{ name: 'Unknow Error', value: 'Unknow Error' }]);}
+		else {interaction.respond([{ name: langClient.t('uknError'), value: langClient.t('uknError') }]);}
 		throw err;
 	}
 });

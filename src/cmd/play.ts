@@ -1,5 +1,5 @@
 import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { dbClient } from '../index';
+import { dbClient, langClient } from '../index';
 import { getVoiceConnection } from '@discordjs/voice';
 import addToQueue from '../utils/addToQueue';
 import ClientError from '../clientError';
@@ -43,22 +43,22 @@ export default {
 		const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER!, interaction.guildId);
 		const track_name: string = interaction.options.getString('track')!;
 		if (!fs.existsSync(guild_folder)) {
-			throw new ClientError('there are no songs in this server.');
+			throw new ClientError(langClient.t('noTracksInServer'));
 		};
 		if (!fs.existsSync(path.join(guild_folder, track_name + '.mp3'))) {
-			throw new ClientError(track_name + ' does not exist in this server.');
+			throw new ClientError(langClient.t('trackNotFound', { trackName: track_name }));
 		}
 		if (!interaction.channel || !interaction.channel.isTextBased()) {
-			throw new ClientError('you need to make the command in a Text channel to play song.');
+			throw new ClientError(langClient.t('commandInTextChannel'));
 		}
 
 		if (!getVoiceConnection(interaction.guildId)) {
 			createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
-			await interaction.reply('I am playing ' + track_name);
+			await interaction.reply(langClient.t('play', { trackName: track_name }));
 		}
 		else {
 			addToQueue(track_name, interaction);
-			await interaction.reply('I added ' + track_name + ' to the queue.');
+			await interaction.reply(langClient.t('trackAdd', { trackName: track_name }));
 		}
 	},
 };

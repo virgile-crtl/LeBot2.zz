@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { dbClient } from '../index';
+import { dbClient, langClient } from '../index';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -9,6 +9,6 @@ export default {
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
 		dbClient.getGuildPlayer(interaction.guildId).stop();
 		dbClient.deleteGuildPlayer(interaction.guildId);
-		await interaction.reply('I leave it.');
+		await interaction.reply(langClient.t('leavingChannel'));
 	},
 };

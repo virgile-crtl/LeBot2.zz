@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { dbClient } from '..';
+import { dbClient, langClient } from '..';
 import { getVoiceConnection } from '@discordjs/voice';
 import ClientError from '../clientError';
 
@@ -10,9 +10,9 @@ export default {
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
 		if (!getVoiceConnection(interaction.guildId)) {
-			throw new ClientError('I am not playing musique in this server.');
+			throw new ClientError(langClient.t('notPlayMusic'));
 		}
 		dbClient.getGuildPlayer(interaction.guildId).pause();
-		await interaction.reply('I paused the current song.');
+		await interaction.reply(langClient.t('pausedTrack'));
 	},
 };

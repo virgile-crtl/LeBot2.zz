@@ -5,7 +5,8 @@ function getEnvVars(): Array<{ name: string, is_folder?: boolean }> {
 	if (process.env.NODE_ENV === 'prod') {
 		return [
 			{ name: 'BOT_TOKEN' },
-			{ name: 'GUILD_ID' },
+			{ name: 'CLIENT_ID' },
+			{ name: 'TRANSLATION_FOLDER', is_folder: true },
 			{ name: 'CMDS_FOLDER', is_folder: true },
 			{ name: 'PLAYLISTS_FOLDER', is_folder: true },
 		];
@@ -15,6 +16,7 @@ function getEnvVars(): Array<{ name: string, is_folder?: boolean }> {
 			{ name: 'BOT_TOKEN' },
 			{ name: 'CLIENT_ID' },
 			{ name: 'GUILD_ID' },
+			{ name: 'TRANSLATION_FOLDER', is_folder: true },
 			{ name: 'CMDS_FOLDER', is_folder: true },
 			{ name: 'PLAYLISTS_FOLDER', is_folder: true },
 		];
@@ -27,11 +29,11 @@ export default function checkEnv(): void {
 	for (const envVar of envVars) {
 		const value = process.env[envVar.name];
 		if (!value) {
-			console.error('La variable d\'environnement ' + envVar.name + ' n\'est pas définie');
+			console.error('The environment variable ' + envVar.name + ' is not defined');
 			process.exit(1);
 		}
 		else if (envVar.is_folder && !fs.existsSync(path.resolve(value)) && !fs.statSync(path.resolve(value)).isDirectory()) {
-			console.error('Le dossier spécifié par ' + envVar.name + ' n\'existe pas ou n\'est pas un dossier : ' + path.resolve(value));
+			console.error('The folder specified by ' + envVar.name + ' does not exist or is not a directory: ' + path.resolve(value));
 			process.exit(1);
 		}
 	};
