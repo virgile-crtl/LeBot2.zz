@@ -10,6 +10,9 @@ export default function createGuildPlayer(track_name: string,
 		|| !interaction.member.voice.channelId) {
 		throw new ClientError(langClient.t('needVoiceChannel'));
 	}
+	if (!interaction.channel || !interaction.channel.isTextBased()) {
+		throw new ClientError(langClient.t('commandInTextChannel'));
+	}
 	const is_rand = interaction.options.getBoolean('rand') ?? true;
 	const guildPlayer = new GuildPlayer(interaction.guildId, is_rand,
 	  interaction.channelId, (interaction.client as DsClient), {

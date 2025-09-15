@@ -1,5 +1,5 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
-import { Channel, TextChannel } from 'discord.js';
+import { Channel, GuildTextBasedChannel, TextChannel } from 'discord.js';
 import { dbClient, langClient } from './index';
 import ClientError from './clientError';
 import DsClient from './dsClient';
@@ -75,6 +75,13 @@ export default class GuildPlayer {
 
 	public addToStack(track_name: string): void {
 		this._stack.push(track_name);
+	}
+
+	public updateChannelId(channel_id: string, channel: GuildTextBasedChannel | null): void {
+		if (!channel || !channel.isTextBased()) {
+			throw new ClientError(langClient.t('commandInTextChannel'));
+		}
+		this._channel_id = channel_id;
 	}
 
 	private getNextTrack(): string {

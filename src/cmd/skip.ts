@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { dbClient, langClient } from '../index';
 import { getVoiceConnection } from '@discordjs/voice';
 import ClientError from '../clientError';
+import GuildPlayer from '../guildPlayer';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -12,8 +13,10 @@ export default {
 		if (!getVoiceConnection(interaction.guildId)) {
 			throw new ClientError(langClient.t('notInServer'));
 		}
-		const track_name: string | undefined = dbClient.getGuildPlayer(interaction.guildId).skip();
+		const player: GuildPlayer = dbClient.getGuildPlayer(interaction.guildId);
+		const track_name: string | undefined = player.skip();
 		if (track_name) {
+			player.updateChannelId(interaction.channelId, interaction.channel);
 			await interaction.reply(langClient.t('skipTrack', { trackName: track_name }));
 		}
 		else {

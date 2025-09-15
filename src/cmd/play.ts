@@ -48,9 +48,6 @@ export default {
 		if (!fs.existsSync(path.join(guild_folder, track_name + '.mp3'))) {
 			throw new ClientError(langClient.t('trackNotFound', { trackName: track_name }));
 		}
-		if (!interaction.channel || !interaction.channel.isTextBased()) {
-			throw new ClientError(langClient.t('commandInTextChannel'));
-		}
 
 		if (!getVoiceConnection(interaction.guildId)) {
 			createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
