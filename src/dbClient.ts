@@ -1,46 +1,52 @@
 import ClientError from './clientError';
-import GuildVoice from './guildVoice';
+import GuildPlayer from './guildPlayer';
 import fs from 'fs';
 import path from 'path';
 
 export default class DbClient {
-	private guildsVoices: Map<string, GuildVoice>;
+	private _guildsPlayers: Map<string, GuildPlayer>;
 
 	constructor() {
-		this.guildsVoices = new Map();
+		this._guildsPlayers = new Map();
 	}
 
-	public saveGuildVoice(guildId: string, guildVoice: GuildVoice): void {
-		if (this.guildsVoices.has(guildId)) { this.deleteGuildVoice(guildId); }
-		this.guildsVoices.set(guildId, guildVoice);
+	public saveGuildPlayer(guild_id: string, guildPlayer: GuildPlayer): void {
+		if (this._guildsPlayers.has(guild_id)) { this.deleteGuildPlayer(guild_id); }
+		this._guildsPlayers.set(guild_id, guildPlayer);
 	}
 
-	public guildVoiceExist(guildId: string) {
-		return this.guildsVoices.has(guildId);
-	}
-
-	public getGuildVoice(guildId: string): GuildVoice {
-		if (!this.guildsVoices.has(guildId)) {
+	public getGuildPlayer(guild_id: string): GuildPlayer {
+		if (!this._guildsPlayers.has(guild_id)) {
 			throw new ClientError('I didn\'t find your Musique session');
 		}
-		return this.guildsVoices.get(guildId)!;
+		return this._guildsPlayers.get(guild_id)!;
 	}
 
-	public deleteGuildVoice(guildId: string) {
-		this.guildsVoices.delete(guildId);
+	public deleteGuildPlayer(guild_id: string): void {
+		this._guildsPlayers.delete(guild_id);
 	}
 
-	public getAllTracksFromGuildFolder(guildId: string): string[] {
-		const fp: string = path.join(process.env.SONG_FOLDER!, guildId);
-		if (!fs.existsSync(fp)) {
+	public getAllTracksFromGuildFolder(guild_id: string): string[] {
+		const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER!, guild_id);
+		if (!fs.existsSync(guild_folder)) {
 			throw new ClientError('there are no songs in this server.');
 		}
-		const songsList: string[] = fs.readdirSync(fp)
+		const tracks_list: string[] = fs.readdirSync(guild_folder)
 			.filter(file => file.endsWith('.mp3'))
 			.map(choice => choice.substring(0, choice.length - 4));
-		if (songsList.length <= 0) {
+		if (tracks_list.length <= 0) {
 			throw new ClientError('there are no songs in this server.');
 		}
-		return songsList;
+		return tracks_list;
+	}
+
+	public createShuffleStack(guild_id: string): string[] {
+		const tracks_list = this.getAllTracksFromGuildFolder(guild_id);
+
+		for (let i = tracks_list.length - 1; i > 0; i -= 1) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[tracks_list[i], tracks_list[j]] = [tracks_list[j], tracks_list[i]];
+		}
+		return tracks_list;
 	}
 }

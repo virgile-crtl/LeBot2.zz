@@ -6,13 +6,13 @@ import ClientError from '../clientError';
 export default {
 	data: new SlashCommandBuilder()
 		.setName('pause')
-		.setDescription('Pause the current song.'),
+		.setDescription('Pause the current track.'),
 
-	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
+	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
 		if (!getVoiceConnection(interaction.guildId)) {
 			throw new ClientError('I am not playing musique in this server.');
 		}
-		dbClient.getGuildVoice(interaction.guildId).pause();
+		dbClient.getGuildPlayer(interaction.guildId).pause();
 		await interaction.reply('I paused the current song.');
 	},
 };

@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { dbClient } from '..';
+import { getVoiceConnection } from '@discordjs/voice';
 import addToQueue from '../utils/addToQueue';
 import ClientError from '../clientError';
 import createGuildPlayer from '../utils/createGuildPlayer';
@@ -28,42 +28,43 @@ async function downloadTrackFromYoutube(url: string, outputDir: string): Promise
 export default {
 	data: new SlashCommandBuilder()
 		.setName('add')
-		.setDescription('Adds a song to the bot.')
+		.setDescription('Adds a track to the bot.')
 		.addStringOption(option =>
 			option
 				.setName('url')
-				.setDescription('The url of the song you want to add.')
+				.setDescription('The url of the track you want to add.')
 				.setRequired(true),
 		)
 		.addBooleanOption(option =>
 			option
-				.setName('toqueue')
-				.setDescription('Whether or not you want to add the song to the queue.')
+				.setName('rand')
+				.setDescription('Whether or not you want to play a random track after your queue.')
 				.setRequired(false),
 		)
 		.addBooleanOption(option =>
 			option
-				.setName('shuffle')
-				.setDescription('Whether or not you want to play a random song.')
+				.setName('to_queue')
+				.setDescription('Whether or not you want to add the track to the queue.')
 				.setRequired(false),
 		),
 
-	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
-		const guildFolder = path.join(process.env.SONG_FOLDER! + interaction.guildId);
-		if (!fs.existsSync(guildFolder)) { fs.mkdirSync(guildFolder); }
+	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
+		const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER! + interaction.guildId);
+		if (!fs.existsSync(guild_folder)) { fs.mkdirSync(guild_folder); }
 
   	interaction.reply('Lancement du téléchargement');
-		const trackName = await downloadTrackFromYoutube(interaction.options.getString('url')!, guildFolder);
+		const track_name: string = await downloadTrackFromYoutube(interaction.options.getString('url')!, guild_folder);
 		interaction.editReply('✅ Téléchargement terminé !');
 
-		if (interaction.options.getBoolean('toqueue')) {
-			if (!dbClient.guildVoiceExist(interaction.guildId)) {
-				createGuildPlayer(path.join(guildFolder, trackName + '.mp3'), interaction);
-				return interaction.followUp('I am playing ' + trackName);
+		const to_queue = interaction.options.getBoolean('to_queue') ?? true;
+		if (to_queue) {
+			if (!getVoiceConnection(interaction.guildId)) {
+				createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
+				await interaction.followUp('I am playing ' + track_name);
 			}
 			else {
-				addToQueue(trackName, interaction);
-				return interaction.followUp('I added ' + trackName + ' to the queue.');
+				addToQueue(track_name, interaction);
+				await interaction.followUp('I added ' + track_name + ' to the queue.');
 			}
 		}
 	},

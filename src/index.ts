@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.prod' });
+import { Command } from './types/command';
 import { Events, GatewayIntentBits } from 'discord.js';
 import checkEnv from './utils/checkEnv';
 import ClientError from './clientError';
@@ -8,12 +9,12 @@ import DsClient from './dsClient';
 
 checkEnv();
 
-const client: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
+const dsClient: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
 export const dbClient: DbClient = new DbClient();
 
-client.once(Events.ClientReady, async c => {
+dsClient.once(Events.ClientReady, async c => {
 	try {
-		await client.init();
+		await dsClient.init();
 		console.info('Ready! Logged in as ' + c.user.tag);
 	}
 	catch (err) {
@@ -22,46 +23,48 @@ client.once(Events.ClientReady, async c => {
 	}
 });
 
-client.on(Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand() && !interaction.isAutocomplete()) return;
-	const command = (interaction.client as DsClient).commands.get(interaction.commandName);
-	if (!command) {
-		throw new ClientError('command not found: ' + interaction.commandName);
-	}
-	if (!interaction.guildId) {
-		throw new ClientError('This command can only be used in a server.');
-	}
+dsClient.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+	const command: Command = dsClient.getCommand(interaction.commandName);
 
-	if (interaction.isChatInputCommand()) {
-		try {
-			await command.execute(interaction);
-			console.info(interaction.user.tag + ' used the ' + interaction.commandName + ' command in ' + interaction.guild!.name);
-		}
-		catch (err) {
-			if (err instanceof ClientError) {
-				if (interaction.replied || interaction.deferred) {
-					await interaction.followUp(err.message.split(/[\n]/)[0]);
-				}
-				else { await interaction.reply(err.message.split(/[\n]/)[0]); }
-			}
-			throw err;
-		}
+	try {
+		await command.execute(interaction);
+		console.info(interaction.user.tag + ' used the ' + interaction.commandName + ' command in ' + interaction.guild!.name);
 	}
-	else {
-		if (!command.autocomplete) throw new ClientError('The command ' + interaction.commandName + ' does not support autocomplete.');
-		try {
-			await command.autocomplete(interaction);
-		}
-		catch (err) {
-			if (err instanceof ClientError) {
-				interaction.respond([{ name: err.message.split(/[\n]/)[0], value: err.message.split(/[\n]/)[0] }]);
+	catch (err) {
+		if (err instanceof ClientError) {
+			if (interaction.replied || interaction.deferred) {
+				await interaction.followUp(err.message.split(/[\n]/)[0]);
 			}
+			else { await interaction.reply(err.message.split(/[\n]/)[0]); }
 		}
+		else if (interaction.replied || interaction.deferred) {
+			await interaction.followUp('Unknow error');
+		}
+		else { await interaction.reply('Unknow error'); }
+		throw err;
 	}
 });
 
-client.on('error', console.error);
+dsClient.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isAutocomplete()) return;
+	const command: Command = dsClient.getCommand(interaction.commandName);
 
-client.on('warn', console.warn);
+	if (!command.autocomplete) throw new ClientError('The command ' + interaction.commandName + ' does not support autocomplete.');
+	try {
+		await command.autocomplete(interaction);
+	}
+	catch (err) {
+		if (err instanceof ClientError) {
+			interaction.respond([{ name: err.message.split(/[\n]/)[0], value: err.message.split(/[\n]/)[0] }]);
+		}
+		else {interaction.respond([{ name: 'Unknow Error', value: 'Unknow Error' }]);}
+		throw err;
+	}
+});
 
-client.login(process.env.BOT_TOKEN);
+dsClient.on('error', console.error);
+
+dsClient.on('warn', console.warn);
+
+dsClient.login(process.env.BOT_TOKEN);

@@ -1,58 +1,74 @@
-import { Client, ClientOptions, Collection, REST, Routes } from 'discord.js';
+import { Channel, Client, ClientOptions, Collection, REST, Routes } from 'discord.js';
 import { Command } from './types/command';
+import { getVoiceConnection, VoiceConnection } from '@discordjs/voice';
 import ClientError from './clientError';
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 
 export default class DsClient extends Client {
-	commands: Collection<string, Command>;
+	private _commands: Collection<string, Command>;
 
 	constructor(options: ClientOptions) {
 		super(options);
-		this.commands = new Collection<string, Command>();
-
+		this._commands = new Collection<string, Command>();
 	}
 
-	async init() {
-		const envType = process.env.NODE_ENV || 'dev';
-		const cmds: Command[] = await this.loadCommands(envType);
+ 	public getCommand(command_name: string): Command {
+		if (!this._commands.has(command_name)) {
+			throw new ClientError('command not found: ' + command_name);
+		}
+		return this._commands.get(command_name)!;
+	}
+
+	public async init(): Promise<void> {
+		const env: string = process.env.NODE_ENV || 'dev';
+		const cmds: Command[] = await this.loadCommands(env);
 
 		for (const cmd of cmds) {
 			if (!('data' in cmd) || !('execute' in cmd)) {
 				throw new ClientError(' command missing a required \'data\' or \'execute\' property.');
 			}
-			this.commands.set(cmd.data.name, cmd);
+			this._commands.set(cmd.data.name, cmd);
 			console.info('Command ' + cmd.data.name + ' is loaded');
 		}
 
-		const deploy: boolean = envType === 'dev' ? await this.askDeploy() : true;
-		if (deploy) { await this.deployCommands(cmds, envType); }
+		const deploy: boolean = env === 'dev' ? await this.askForDeploy() : true;
+		if (deploy) { await this.deployCommands(cmds, env); }
 	}
 
-	private getCommandsList(envType: string): string[] {
-		const cmdFiles: string[] = fs.readdirSync(process.env.CMD_FOLDER!)
-			.filter(file => file.endsWith(envType === 'dev' ? '.ts' : '.js'));
-		if (cmdFiles.length <= 0) {
+	public async checkIfSomeoneIsHere(guild_id: string): Promise<boolean> {
+		const connection: VoiceConnection | undefined = getVoiceConnection(guild_id);
+
+		if (!connection) throw new ClientError('I am not in this server.');
+		const channel: Channel | null = connection.joinConfig.channelId ? await this.channels.fetch(connection.joinConfig.channelId) : null;
+		if (channel?.isVoiceBased() && channel.members.size > 1) { return true; }
+		return false;
+	}
+
+	private getCommandsList(env: string): string[] {
+		const cmd_files: string[] = fs.readdirSync(process.env.CMDS_FOLDER!)
+			.filter(file => file.endsWith(env === 'dev' ? '.ts' : '.js'));
+		if (cmd_files.length <= 0) {
 			throw new ClientError('None command found');
 		}
-		return cmdFiles;
+		return cmd_files;
 	}
 
-	private async loadCommands(envType: string): Promise<Command[]> {
+	private async loadCommands(env: string): Promise<Command[]> {
 		const cmds: Command[] = [];
 
-		for (const file of this.getCommandsList(envType)) {
-			const cmdModule = await import(path.join(process.env.CMD_FOLDER!, file));
+		for (const file of this.getCommandsList(env)) {
+			const cmdModule: any = await import(path.join(process.env.CMDS_FOLDER!, file));
 			const cmd: Command = cmdModule.default || cmdModule;
 			cmds.push(cmd);
 		}
 		return cmds;
 	}
 
-	private async deployCommands(cmds: Command[], envType: string) {
+	private async deployCommands(cmds: Command[], envType: string): Promise<void> {
 		try {
-			const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN!);
+			const rest: REST = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN!);
 			if (envType === 'dev') {
 				await rest.put(Routes.applicationGuildCommands(
           process.env.CLIENT_ID!, process.env.GUILD_ID!), { body: [] });
@@ -73,13 +89,13 @@ export default class DsClient extends Client {
 		}
 	}
 
-	private askDeploy(): Promise<boolean> {
-		const rl = readline.createInterface({
+	private async askForDeploy(): Promise<boolean> {
+		const input: readline.Interface = readline.createInterface({
 			input: process.stdin, output: process.stdout });
 
 		return new Promise((resolve) => {
-			rl.question('Do you want to deploy the orders? (y/n): ', (answer) => {
-				rl.close();
+			input.question('Do you want to deploy the orders? (y/n): ', (answer) => {
+				input.close();
 				resolve(answer.trim().toLowerCase()[0] === 'y');
 			});
 		});

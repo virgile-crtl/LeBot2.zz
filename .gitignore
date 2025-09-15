@@ -1,5 +1,5 @@
 node_modules/
 .env*
-song/
+playlists/
 package-lock.json
 dist/
