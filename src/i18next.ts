@@ -11,6 +11,9 @@ export async function initI18n(defaultLang = 'en') {
 	    backend: {
 	      loadPath: path.join(process.env.TRANSLATION_FOLDER!, '{{lng}}/translation.json'),
 	    },
+			interpolation: {
+    		escapeValue: false,
+  		},
 	  });
 	return i18next;
 }
