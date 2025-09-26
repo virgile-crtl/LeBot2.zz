@@ -74,6 +74,7 @@ export default class GuildPlayer {
 	}
 
 	public addToStack(track_name: string): void {
+		this._random_stack.filter(track => track != track_name);
 		this._stack.push(track_name);
 	}
 

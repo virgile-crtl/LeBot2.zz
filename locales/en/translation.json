@@ -44,6 +44,8 @@
   "notPlay": "❌ I am not playing music in this server",
 
   "downloadError": "⚠️ Error during download",
+  "nameError": "❌ Unable to find the track name 🎵.",
+  "paramError": "⚠️ You must specify a URL 🌐 or attach a track 🎵 to add to the playlist 📃.",
 
   "connectError": "⚠️ Error connecting to the server",
   "playError": "⚠️ Error while playing the audio",

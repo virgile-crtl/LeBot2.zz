@@ -1,12 +1,23 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { Attachment, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
 import { langClient } from '..';
 import addToQueue from '../utils/addToQueue';
 import ClientError from '../clientError';
 import createGuildPlayer from '../utils/createGuildPlayer';
 import fs from 'fs';
+import https from 'https';
+import i18next from 'i18next';
 import path from 'path';
-import ytdl from 'youtube-dl-exec';
+import ytdl, { Payload } from 'youtube-dl-exec';
+
+async function getTrackName(url: string) {
+	const info: Payload | string = await ytdl(url, {
+		noPlaylist: true,
+	  dumpSingleJson: true,
+	});
+	if (typeof info === 'string') return;
+	console.log(info.title);
+}
 
 async function downloadTrackFromYoutube(url: string, outputDir: string): Promise<string> {
 	let output = undefined;
@@ -22,8 +33,17 @@ async function downloadTrackFromYoutube(url: string, outputDir: string): Promise
 		throw ClientError.fromError(err, langClient.t('downloadError'));
 	}
 	const stdot = output.toString().match(/\[ExtractAudio\] Destination: (.+\.mp3)/);
-	if (!stdot || !stdot[1]) throw new ClientError('Impossible de trouver le nom du morceau');
+	if (!stdot || !stdot[1]) throw new ClientError(i18next.t('nameError'));
 	return path.basename(stdot[1]).slice(0, -4);
+}
+
+function downloadTrackFromAttachement(url: string, track_path: string) {
+	return new Promise<void>((resolve, reject) => {
+  	const f = fs.createWriteStream(track_path);
+  	https.get(url, r => {
+      	r.pipe(f).on('finish', () => f.close(() => resolve()));
+  	  }).on('error', reject);
+	});
 }
 
 export default {
@@ -34,7 +54,13 @@ export default {
 			option
 				.setName('url')
 				.setDescription('The url of the track you want to add.')
-				.setRequired(true),
+				.setRequired(false),
+		)
+		.addAttachmentOption(option =>
+  		option
+				.setName('track')
+      	.setDescription('Add your own track')
+      	.setRequired(false),
 		)
 		.addBooleanOption(option =>
 			option
@@ -53,12 +79,28 @@ export default {
 		const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER! + interaction.guildId);
 		if (!fs.existsSync(guild_folder)) { fs.mkdirSync(guild_folder); }
 
-  	interaction.reply(langClient.t('startDownload'));
-		const track_name: string = await downloadTrackFromYoutube(interaction.options.getString('url')!, guild_folder);
-		interaction.editReply(langClient.t('downloadCompleted'));
+		const url: string | null = interaction.options.getString('url');
+		const attachment: Attachment | null = interaction.options.getAttachment('track');
+		let track_name: string;
+
+		if (url) {
+  		interaction.reply(langClient.t('startDownload'));
+			await getTrackName(url);
+			track_name = await downloadTrackFromYoutube(url, guild_folder);
+			interaction.editReply(langClient.t('downloadCompleted'));
+		}
+		else if (attachment) {
+  		interaction.reply(langClient.t('startDownload'));
+			track_name = attachment.name.slice(0, -4);
+			await downloadTrackFromAttachement(attachment.url, path.join(guild_folder, track_name + '.mp3'));
+			interaction.editReply(langClient.t('downloadCompleted'));
+			console.log(track_name);
+		}
+		else { throw new ClientError(i18next.t('paramError')); }
 
 		const to_queue = interaction.options.getBoolean('to_queue') ?? true;
-		if (to_queue) {
+		if (to_queue && (interaction.member && (interaction.member instanceof GuildMember)
+		&& interaction.member.voice.channelId)) {
 			if (!getVoiceConnection(interaction.guildId)) {
 				createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
 				await interaction.followUp(langClient.t('play', { trackName: track_name }));
@@ -70,3 +112,4 @@ export default {
 		}
 	},
 };
+
