@@ -1,24 +1,18 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.prod' });
+dotenv.config({ path: process.env.NODE_ENV === 'prod' ? '.env.prod' : '.env.dev' });
+
 import { Command } from './types/command';
 import { Events, GatewayIntentBits } from 'discord.js';
-import { initI18n } from './i18next';
-import { i18n } from 'i18next';
 import checkEnv from './utils/checkEnv';
 import ClientError from './clientError';
-import DbClient from './dbClient';
 import DsClient from './dsClient';
+import langClient from './i18next';
 
 checkEnv();
-
 const dsClient: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
-export const dbClient: DbClient = new DbClient();
-export let langClient: i18n;
 
 dsClient.once(Events.ClientReady, async client => {
 	try {
-		langClient = await initI18n('fr');
-		if (!langClient) { throw Error('Unable to load languages'); };
 		await dsClient.init();
 		console.info(langClient.t('logged', { name: client.user.tag }));
 	}

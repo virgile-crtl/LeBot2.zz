@@ -1,7 +1,7 @@
 import { Channel, Client, ClientOptions, Collection, REST, Routes } from 'discord.js';
 import { Command } from './types/command';
 import { getVoiceConnection, VoiceConnection } from '@discordjs/voice';
-import { langClient } from '.';
+import langClient from './i18next';
 import ClientError from './clientError';
 import fs from 'fs';
 import path from 'path';

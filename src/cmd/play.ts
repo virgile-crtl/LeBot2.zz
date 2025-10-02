@@ -1,11 +1,11 @@
 import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { dbClient, langClient } from '../index';
 import { getVoiceConnection } from '@discordjs/voice';
-import addToQueue from '../utils/addToQueue';
 import ClientError from '../clientError';
-import createGuildPlayer from '../utils/createGuildPlayer';
 import fs from 'fs';
+import getAllTracksFromGuildFolder from '../utils/getAllTracksFromGuildFolder';
+import langClient from '../i18next';
 import path from 'path';
+import PlayerService from '../playerService';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -27,7 +27,7 @@ export default {
 
 	async autocomplete(interaction: AutocompleteInteraction<'cached'>): Promise<void> {
 		const search_value: string = interaction.options.getFocused();
-		const filter_tracks_list: string[] = dbClient.getAllTracksFromGuildFolder(interaction.guildId).filter(
+		const filter_tracks_list: string[] = getAllTracksFromGuildFolder(interaction.guildId).filter(
 			(track: string) => track.toLowerCase().includes(search_value.toLowerCase()));
 
 		if (filter_tracks_list.length > 25) {
@@ -50,11 +50,11 @@ export default {
 		}
 
 		if (!getVoiceConnection(interaction.guildId)) {
-			createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
+			PlayerService.getInstance().createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
 			await interaction.reply(langClient.t('play', { trackName: track_name }));
 		}
 		else {
-			addToQueue(track_name, interaction);
+			PlayerService.getInstance().updatePlayer(track_name, interaction);
 			await interaction.reply(langClient.t('trackAdd', { trackName: track_name }));
 		}
 	},

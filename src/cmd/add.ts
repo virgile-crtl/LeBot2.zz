@@ -1,13 +1,12 @@
 import { Attachment, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
-import { langClient } from '..';
-import addToQueue from '../utils/addToQueue';
 import ClientError from '../clientError';
-import createGuildPlayer from '../utils/createGuildPlayer';
 import fs from 'fs';
 import https from 'https';
 import i18next from 'i18next';
+import langClient from '../i18next';
 import path from 'path';
+import PlayerService from '../playerService';
 import ytdl, { Payload } from 'youtube-dl-exec';
 
 async function getTrackName(url: string) {
@@ -102,11 +101,11 @@ export default {
 		if (to_queue && (interaction.member && (interaction.member instanceof GuildMember)
 		&& interaction.member.voice.channelId)) {
 			if (!getVoiceConnection(interaction.guildId)) {
-				createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
+				PlayerService.getInstance().createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
 				await interaction.followUp(langClient.t('play', { trackName: track_name }));
 			}
 			else {
-				addToQueue(track_name, interaction);
+				PlayerService.getInstance().updatePlayer(track_name, interaction);
 				await interaction.followUp(langClient.t('trackAdd', { trackName: track_name }));
 			}
 		}

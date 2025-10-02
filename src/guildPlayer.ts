@@ -1,9 +1,11 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
 import { Channel, GuildTextBasedChannel, TextChannel } from 'discord.js';
-import { dbClient, langClient } from './index';
 import ClientError from './clientError';
+import createShuffleStack from './utils/createShuffleStack';
 import DsClient from './dsClient';
+import langClient from './i18next';
 import path from 'path';
+
 
 export default class GuildPlayer {
 	private _guild_id: string;
@@ -19,7 +21,7 @@ export default class GuildPlayer {
 		this._is_rand = is_rand;
 		this._channel_id = channel_id;
 		this._stack = [];
-		this._random_stack = dbClient.createShuffleStack(guild_id);
+		this._random_stack = createShuffleStack(guild_id);
 		try {
 			this._player = createAudioPlayer();
 			const connection: VoiceConnection = joinVoiceChannel(voiceOption);
@@ -93,7 +95,7 @@ export default class GuildPlayer {
 			return path.join(process.env.PLAYLISTS_FOLDER!, this._guild_id, this._random_stack.shift()! + '.mp3');
 		}
 		else {
-			this._random_stack = dbClient.createShuffleStack(this._guild_id);
+			this._random_stack = createShuffleStack(this._guild_id);
 			return path.join(process.env.PLAYLISTS_FOLDER!, this._guild_id, this._random_stack.shift()! + '.mp3');
 		}
 	}
