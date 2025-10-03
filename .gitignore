@@ -5,3 +5,4 @@ dist/
 coverage/
 test-results/
 .vscode/
+junit.xml

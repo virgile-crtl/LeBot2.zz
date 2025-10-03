@@ -14,7 +14,6 @@ export  default {
     [
       "jest-junit",
       {
-        outputDirectory: "./test-results/",  // ⬅️ Dossier créé automatiquement
         outputName: "junit.xml"
       }
     ]
