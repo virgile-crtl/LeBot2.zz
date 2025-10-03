@@ -1,9 +1,10 @@
-import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { AutocompleteInteraction, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
+import { t } from '../i18next';
 import ClientError from '../clientError';
+import DsClient from '../dsClient';
 import fs from 'fs';
 import getAllTracksFromGuildFolder from '../utils/getAllTracksFromGuildFolder';
-import { t } from '../i18next';
 import path from 'path';
 import PlayerService from '../playerService';
 
@@ -48,13 +49,27 @@ export default {
 		if (!fs.existsSync(path.join(guild_folder, track_name + '.mp3'))) {
 			throw new ClientError(t('trackNotFound', { trackName: track_name }));
 		}
+		if (!interaction.member || !(interaction.member instanceof GuildMember)
+					|| !interaction.member.voice.channelId) {
+			throw new ClientError(t('needVoiceChannel'));
+		}
+		if (!interaction.channel || !interaction.channel.isTextBased()) {
+			throw new ClientError(t('commandInTextChannel'));
+		}
 
 		if (!getVoiceConnection(interaction.guildId)) {
-			PlayerService.getInstance().createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
+			PlayerService.getInstance().createGuildPlayer(interaction.guildId, path.join(guild_folder, track_name + '.mp3'),
+				interaction.options.getBoolean('rand') ?? true, interaction.channelId, (interaction.client as DsClient), {
+					channelId: interaction.member.voice.channelId,
+		    	guildId: interaction.guildId,
+		    	adapterCreator: interaction.guild.voiceAdapterCreator,
+				},
+			);
 			await interaction.reply(t('play', { trackName: track_name }));
 		}
 		else {
-			PlayerService.getInstance().updatePlayer(track_name, interaction);
+			PlayerService.getInstance().updatePlayer(track_name, interaction.guildId,
+				interaction.channelId, interaction.options.getBoolean('rand'));
 			await interaction.reply(t('trackAdd', { trackName: track_name }));
 		}
 	},

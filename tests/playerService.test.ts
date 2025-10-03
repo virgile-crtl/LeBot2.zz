@@ -10,4 +10,8 @@ describe('DbClient', () => {
     const instance2 = PlayerService.getInstance();
     expect(instance1).toBe(instance2);
   });
+
+  test('', () => {
+  });
+
 });

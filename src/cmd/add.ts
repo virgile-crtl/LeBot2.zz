@@ -1,10 +1,11 @@
 import { Attachment, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
+import { t } from '../i18next';
 import ClientError from '../clientError';
+import DsClient from '../dsClient';
 import fs from 'fs';
 import https from 'https';
 import i18next from 'i18next';
-import { t } from '../i18next';
 import path from 'path';
 import PlayerService from '../playerService';
 import ytdl, { Payload } from 'youtube-dl-exec';
@@ -97,15 +98,25 @@ export default {
 		}
 		else { throw new ClientError(i18next.t('paramError')); }
 
+		if (!interaction.channel || !interaction.channel.isTextBased()) {
+			throw new ClientError(t('commandInTextChannel'));
+		}
 		const to_queue = interaction.options.getBoolean('to_queue') ?? true;
 		if (to_queue && (interaction.member && (interaction.member instanceof GuildMember)
 		&& interaction.member.voice.channelId)) {
 			if (!getVoiceConnection(interaction.guildId)) {
-				PlayerService.getInstance().createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
+				PlayerService.getInstance().createGuildPlayer(interaction.guildId, path.join(guild_folder, track_name + '.mp3'),
+					interaction.options.getBoolean('rand') ?? true, interaction.channelId, (interaction.client as DsClient), {
+						channelId: interaction.member.voice.channelId,
+						guildId: interaction.guildId,
+						adapterCreator: interaction.guild.voiceAdapterCreator,
+					},
+				);
 				await interaction.followUp(t('play', { trackName: track_name }));
 			}
 			else {
-				PlayerService.getInstance().updatePlayer(track_name, interaction);
+				PlayerService.getInstance().updatePlayer(track_name, interaction.guildId,
+					interaction.channelId, interaction.options.getBoolean('rand'));
 				await interaction.followUp(t('trackAdd', { trackName: track_name }));
 			}
 		}

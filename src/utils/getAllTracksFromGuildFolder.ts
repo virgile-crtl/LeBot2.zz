@@ -1,6 +1,6 @@
+import { t } from '../i18next';
 import ClientError from '../clientError';
 import fs from 'fs';
-import { t } from '../i18next';
 import path from 'path';
 
 export default function getAllTracksFromGuildFolder(guild_id: string): string[] {

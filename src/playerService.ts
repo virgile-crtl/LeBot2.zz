@@ -1,8 +1,8 @@
-import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
+import { CreateVoiceConnectionOptions, JoinVoiceChannelOptions } from '@discordjs/voice';
+import { t } from './i18next';
 import ClientError from './clientError';
 import GuildPlayer from './guildPlayer';
 import DsClient from './dsClient';
-import { t } from './i18next';
 
 export default class PlayerService {
 	private static _instance: PlayerService;
@@ -19,31 +19,18 @@ export default class PlayerService {
 		return PlayerService._instance;
 	}
 
-	public createGuildPlayer(track_name: string,
-		interaction: ChatInputCommandInteraction<'cached'>): void {
-		if (!interaction.member || !(interaction.member instanceof GuildMember)
-			|| !interaction.member.voice.channelId) {
-			throw new ClientError(t('needVoiceChannel'));
-		}
-		if (!interaction.channel || !interaction.channel.isTextBased()) {
-			throw new ClientError(t('commandInTextChannel'));
-		}
-		const is_rand = interaction.options.getBoolean('rand') ?? true;
-		const guildPlayer = new GuildPlayer(interaction.guildId, is_rand,
-		  interaction.channelId, (interaction.client as DsClient), {
-		    channelId: interaction.member.voice.channelId,
-		    guildId: interaction.guildId,
-		    adapterCreator: interaction.guild.voiceAdapterCreator });
+	public createGuildPlayer(guild_id: string, track_name: string, is_rand: boolean,
+		channel_id: string, dsClient: DsClient, voiceOption: CreateVoiceConnectionOptions & JoinVoiceChannelOptions): void {
+		const guildPlayer = new GuildPlayer(guild_id, is_rand, channel_id, dsClient, voiceOption);
 		guildPlayer.play(track_name);
-		this.saveGuildPlayer(interaction.guildId, guildPlayer);
+		this.saveGuildPlayer(guild_id, guildPlayer);
 	}
 
-	public updatePlayer(track_name: string,
-		interaction: ChatInputCommandInteraction<'cached'>): void {
-		const guildPlayer = this.getGuildPlayer(interaction.guildId);
+	public updatePlayer(track_name: string, guild_id: string,
+		channel_id: string, is_rand: boolean | null): void {
+		const guildPlayer = this.getGuildPlayer(guild_id);
 		guildPlayer.addToStack(track_name);
-		guildPlayer.updateChannelId(interaction.channelId, interaction.channel);
-		const is_rand = interaction.options.getBoolean('rand');
+		guildPlayer.updateChannelId(channel_id);
 		if (is_rand != null) guildPlayer.setRandom(is_rand);
 	}
 

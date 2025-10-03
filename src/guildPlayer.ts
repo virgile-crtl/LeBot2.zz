@@ -1,9 +1,9 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
-import { Channel, GuildTextBasedChannel, TextChannel } from 'discord.js';
+import { Channel, TextChannel } from 'discord.js';
+import { t } from './i18next';
 import ClientError from './clientError';
 import createShuffleStack from './utils/createShuffleStack';
 import DsClient from './dsClient';
-import { t } from './i18next';
 import path from 'path';
 
 
@@ -80,10 +80,7 @@ export default class GuildPlayer {
 		this._stack.push(track_name);
 	}
 
-	public updateChannelId(channel_id: string, channel: GuildTextBasedChannel | null): void {
-		if (!channel || !channel.isTextBased()) {
-			throw new ClientError(t('commandInTextChannel'));
-		}
+	public updateChannelId(channel_id: string): void {
 		this._channel_id = channel_id;
 	}
 
