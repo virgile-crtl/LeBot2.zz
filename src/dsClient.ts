@@ -12,7 +12,8 @@ export default class DsClient extends Client {
 
 	constructor(options: ClientOptions) {
 		super(options);
-		this._commands = new Collection<string, Command>();}
+		this._commands = new Collection<string, Command>();
+	}
 
  	public getCommand(command_name: string): Command {
 		if (!this._commands.has(command_name)) {
