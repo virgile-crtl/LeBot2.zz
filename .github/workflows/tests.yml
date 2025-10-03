@@ -4,6 +4,7 @@ on: push
 
 jobs:
   unit-tests:
+    name: "Run Unit Tests and Coverage"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -13,12 +14,28 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-versrion: '22'
+          node-version: '22'
           cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run Tests
-        run: npm test
+        run: npm run test:ci
 
+      - name: Upload test results
+        if: always()  # Même si les tests échouent
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            coverage/
+            test-results/
+
+      - name: Publish Test Report
+        if: always()
+        uses: actions/junit-report@v1  # ⬅️ Action officielle (maintenue par GitHub)
+        with:
+          report_paths: "test-results/junit.xml"
+          check_name: "Unit Test Results"

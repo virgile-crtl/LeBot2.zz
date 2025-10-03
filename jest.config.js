@@ -9,4 +9,14 @@ export  default {
   transform: {
     ...tsJestTransformCfg,
   },
+  reporters: [
+    "default",
+    [
+      "jest-junit",
+      {
+        outputDirectory: "./test-results/",  // ⬅️ Dossier créé automatiquement
+        outputName: "junit.xml"
+      }
+    ]
+  ],
 };
