@@ -35,7 +35,7 @@ jobs:
 
       - name: Publish Test Report
         if: always()
-        uses: actions/junit-report@v1  # ⬅️ Action officielle (maintenue par GitHub)
+        uses: mikepenz/action-junit-report@v4  # ⬅️ Action officielle (maintenue par GitHub)
         with:
           report_paths: "test-results/junit.xml"
           check_name: "Unit Test Results"
