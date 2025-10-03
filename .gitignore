@@ -1,5 +1,8 @@
 node_modules/
-.env
-song/
-package-lock.json
+.env*
+playlists/
 dist/
+coverage/
+test-results/
+.vscode/
+junit.xml

@@ -1,0 +1,55 @@
+{
+  "cmdLoaded": "✅ Command {{commandName}} is loaded",
+  "cmdsRemoved": "✅ Successfully removed commands",
+  "deployPrompt": "⚡ Do you want to deploy the commands? (y/n):",
+  "deploySuccess": "✅ Successful deployment: {{count}} commands recorded",
+  "logged": "✅ Ready! Logged in as {{name }}",
+
+  "play": "▶️ I am playing {{trackName}}",
+
+  "trackAdd": "➕ Added {{trackName}} to the queue",
+
+  "skipTrack": "⏭️ Skipped the current track and now playing {{trackName}}",
+
+  "startDownload": "⬇️ Starting download",
+  "downloadCompleted": "✅ Download completed!",
+
+  "alreadyPlay": "▶️ I am already playing",
+  "resumedTrack": "▶️ Resumed the current track",
+
+  "pausedTrack": "⏸️ Paused the current track",
+  "alreadyPause": "⏸️ I am already paused",
+
+  "stopNoTracks": "👋 Leaving the voice channel because there are no more tracks in the queue",
+  "stopNoUsers": "👋 Leaving the voice channel because nobody was here",
+  "leavingChannel": "👋 Leaving the voice channel",
+
+  "usedCmd": "{{tag}} used the {{commandName}} command in the server {{name}}",
+
+
+
+  "noCmdsFound": "❌ No commands found",
+  "cmdMissingProperty": "⚠️ Command is missing a required 'data' or 'execute' property",
+  "deployError": "⚠️ Error during deployment",
+
+  "cmdNotFound": "❌ Command not found: {{commandName}}",
+  "noAutocomplete": "❌ The command {{commandName}} does not support autocomplete.",
+  "commandInTextChannel": "❌ You need to use this command in a text channel to play a track",
+
+  "notInServer": "❌ I am not in this server",
+  "noMusicSession": "❌ I didn't find your music session",
+
+  "needVoiceChannel": "❌ You need to be in a voice channel to play a track",
+  "noTracksInServer": "❌ There are no tracks in this server",
+  "notPlay": "❌ I am not playing music in this server",
+
+  "downloadError": "⚠️ Error during download",
+  "nameError": "❌ Unable to find the track name 🎵.",
+  "paramError": "⚠️ You must specify a URL 🌐 or attach a track 🎵 to add to the playlist 📃.",
+
+  "connectError": "⚠️ Error connecting to the server",
+  "playError": "⚠️ Error while playing the audio",
+  "trackNotFound": "❌ {{trackName}} does not exist in this server",
+
+  "uknError": "❌ Unknown error"
+}

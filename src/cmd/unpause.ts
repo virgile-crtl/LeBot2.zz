@@ -1,20 +1,22 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
-import { dbClient } from '../index';
-import GuildVoice from '../types/guildVoice';
+import ClientError from '../clientError';
+import GuildPlayer from '../guildPlayer';
+import { t } from '../i18next';
+import PlayerService from '../playerService';
 
 export default {
 	data: new SlashCommandBuilder()
 		.setName('unpause')
-		.setDescription('Unpauses the current song.'),
+		.setDescription('Unpause the current track.'),
 
-	async execute(interaction: ChatInputCommandInteraction) {
-		if (!interaction.guildId)
-			return interaction.reply('This command can only be used in a server.');
-		const guildVoice: GuildVoice | undefined = dbClient.getGuildVoice(interaction.guildId)
-		if (!getVoiceConnection(interaction.guildId) || !guildVoice)
-			return interaction.reply('I am not playing musique in this server.');
-		guildVoice.player.unpause();
-		await interaction.reply('I unpaused the current song.');
+	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
+		if (!getVoiceConnection(interaction.guildId)) {
+			throw new ClientError(t('notPlay'));
+		}
+		const player: GuildPlayer = PlayerService.getInstance().getGuildPlayer(interaction.guildId);
+		player.unpause();
+		player.updateChannelId(interaction.channelId, interaction.channel);
+		await interaction.reply(t('resumedTrack'));
 	},
 };

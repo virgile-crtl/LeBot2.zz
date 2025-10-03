@@ -1,52 +1,71 @@
-import "dotenv/config"
-import { Client, Events, GatewayIntentBits } from 'discord.js';
-import DsClient  from './dsClient';
-import DbClient from './dbClient';
+import dotenv from 'dotenv';
+dotenv.config({ path: process.env.NODE_ENV === 'prod' ? '.env.prod' : '.env.dev' });
 
+import { Command } from './types/command';
+import { Events, GatewayIntentBits } from 'discord.js';
+import checkEnv from './utils/checkEnv';
+import ClientError from './clientError';
+import DsClient from './dsClient';
+import { initI18n, t } from './i18next';
 
-const client: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
-// const client = new Client({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
-export const dbClient: DbClient = new DbClient();
+checkEnv();
+const dsClient: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
 
-client.once(Events.ClientReady, async c => {
-	await client.init();
-	console.log(`Ready! Logged in as ${c.user.tag}`);
-});
-
-client.on(Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand() && !interaction.isAutocomplete()) return;
-
-	const command = (interaction.client as DsClient).commands.get(interaction.commandName);
-	if (!command) return console.error('command not found: ' + interaction.commandName);
-
-
-	if (interaction.isChatInputCommand()) {
-		try {
-			await command.execute(interaction);
-		} catch (error) {
-			console.error(error);
-			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-			}
-			else {
-				await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-			}
-		}
-	} else if (interaction.isAutocomplete()) {
-		try {
-			if (!command.autocomplete) throw new Error('The command ${interaction.commandName} does not support autocomplete.');
-			await command.autocomplete(interaction);
-		} catch (error) {
-			console.error(error);
-		}
+dsClient.once(Events.ClientReady, async client => {
+	try {
+		await initI18n();
+		await dsClient.init();
+		console.info(t('logged', { name: client.user.tag }));
 	}
-
-	if (interaction.guild) console.log(`[INFO] ${interaction.user.tag} used the ${interaction.commandName} command in ${interaction.guild.name}`);
-	else console.log(`[INFO] ${interaction.user.tag} used the ${interaction.commandName} command in a DM`);
+	catch (err) {
+		console.error(err);
+		process.exit(1);
+	}
 });
 
-client.on('error', console.error);
+dsClient.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+	const command: Command = dsClient.getCommand(interaction.commandName);
 
-client.on('warn', console.warn);
+	try {
+		await command.execute(interaction);
+		console.info(t('usedCmd', { tag: interaction.user.tag,
+			commandName: interaction.commandName, name: interaction.guild!.name }));
+	}
+	catch (err) {
+		if (err instanceof ClientError) {
+			if (interaction.replied || interaction.deferred) {
+				await interaction.followUp(err.message.split(/[\n]/)[0]);
+			}
+			else { await interaction.reply(err.message.split(/[\n]/)[0]); }
+		}
+		else if (interaction.replied || interaction.deferred) {
+			await interaction.followUp(t('uknError'));
+		}
+		else { await interaction.reply(t('uknError')); }
+		throw err;
+	}
+});
 
-client.login(process.env.BOT_TOKEN);
+dsClient.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isAutocomplete()) return;
+	const command: Command = dsClient.getCommand(interaction.commandName);
+
+	if (!command.autocomplete) throw new ClientError(t('noAutocomplete', { commandName: interaction.commandName }));
+	try {
+		await command.autocomplete(interaction);
+	}
+	catch (err) {
+		if (err instanceof ClientError) {
+			interaction.respond([{ name: err.message.split(/[\n]/)[0], value: err.message.split(/[\n]/)[0] }]);
+		}
+		else {interaction.respond([{ name: t('uknError'), value: t('uknError') }]);}
+		throw err;
+	}
+});
+
+dsClient.on('error', console.error);
+
+dsClient.on('warn', console.warn);
+
+dsClient.login(process.env.BOT_TOKEN);
