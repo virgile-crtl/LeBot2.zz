@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import langClient from '../i18next';
+import { t } from '../i18next';
 import PlayerService from '../playerService';
 
 
@@ -12,6 +12,6 @@ export default {
 		const playerService: PlayerService = PlayerService.getInstance();
 		playerService.getGuildPlayer(interaction.guildId).stop();
 		playerService.deleteGuildPlayer(interaction.guildId);
-		await interaction.reply(langClient.t('leavingChannel'));
+		await interaction.reply(t('leavingChannel'));
 	},
 };

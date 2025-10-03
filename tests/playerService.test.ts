@@ -1,5 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env.dev' });
 import PlayerService from '../src/playerService';
 
 describe('DbClient', () => {

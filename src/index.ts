@@ -6,15 +6,16 @@ import { Events, GatewayIntentBits } from 'discord.js';
 import checkEnv from './utils/checkEnv';
 import ClientError from './clientError';
 import DsClient from './dsClient';
-import langClient from './i18next';
+import { initI18n, t } from './i18next';
 
 checkEnv();
 const dsClient: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
 
 dsClient.once(Events.ClientReady, async client => {
 	try {
+		await initI18n();
 		await dsClient.init();
-		console.info(langClient.t('logged', { name: client.user.tag }));
+		console.info(t('logged', { name: client.user.tag }));
 	}
 	catch (err) {
 		console.error(err);
@@ -28,7 +29,7 @@ dsClient.on(Events.InteractionCreate, async interaction => {
 
 	try {
 		await command.execute(interaction);
-		console.info(langClient.t('usedCmd', { tag: interaction.user.tag,
+		console.info(t('usedCmd', { tag: interaction.user.tag,
 			commandName: interaction.commandName, name: interaction.guild!.name }));
 	}
 	catch (err) {
@@ -39,9 +40,9 @@ dsClient.on(Events.InteractionCreate, async interaction => {
 			else { await interaction.reply(err.message.split(/[\n]/)[0]); }
 		}
 		else if (interaction.replied || interaction.deferred) {
-			await interaction.followUp(langClient.t('uknError'));
+			await interaction.followUp(t('uknError'));
 		}
-		else { await interaction.reply(langClient.t('uknError')); }
+		else { await interaction.reply(t('uknError')); }
 		throw err;
 	}
 });
@@ -50,7 +51,7 @@ dsClient.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isAutocomplete()) return;
 	const command: Command = dsClient.getCommand(interaction.commandName);
 
-	if (!command.autocomplete) throw new ClientError(langClient.t('noAutocomplete', { commandName: interaction.commandName }));
+	if (!command.autocomplete) throw new ClientError(t('noAutocomplete', { commandName: interaction.commandName }));
 	try {
 		await command.autocomplete(interaction);
 	}
@@ -58,7 +59,7 @@ dsClient.on(Events.InteractionCreate, async interaction => {
 		if (err instanceof ClientError) {
 			interaction.respond([{ name: err.message.split(/[\n]/)[0], value: err.message.split(/[\n]/)[0] }]);
 		}
-		else {interaction.respond([{ name: langClient.t('uknError'), value: langClient.t('uknError') }]);}
+		else {interaction.respond([{ name: t('uknError'), value: t('uknError') }]);}
 		throw err;
 	}
 });

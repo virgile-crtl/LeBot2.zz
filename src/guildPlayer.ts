@@ -3,7 +3,7 @@ import { Channel, GuildTextBasedChannel, TextChannel } from 'discord.js';
 import ClientError from './clientError';
 import createShuffleStack from './utils/createShuffleStack';
 import DsClient from './dsClient';
-import langClient from './i18next';
+import { t } from './i18next';
 import path from 'path';
 
 
@@ -29,7 +29,7 @@ export default class GuildPlayer {
 			this._player.on(AudioPlayerStatus.Idle, () => this.playerIdle(dsClient));
 		}
 		catch (err) {
-			throw ClientError.fromError(err, langClient.t('connectError'));
+			throw ClientError.fromError(err, t('connectError'));
 		}
 	}
 
@@ -38,27 +38,27 @@ export default class GuildPlayer {
 			this._player.play(createAudioResource(track_path));
 		}
 		catch (err) {
-			throw ClientError.fromError(err, langClient.t('playError'));
+			throw ClientError.fromError(err, t('playError'));
 		}
 	}
 
 	public unpause(): void {
 		if (this._player.state.status === AudioPlayerStatus.Playing) {
-			throw new ClientError(langClient.t('alreadyPlay'));
+			throw new ClientError(t('alreadyPlay'));
 		}
 		this._player.unpause();
 	}
 
 	public pause(): void {
 		if (this._player.state.status === AudioPlayerStatus.Paused) {
-			throw new ClientError(langClient.t('alreadyPause'));
+			throw new ClientError(t('alreadyPause'));
 		}
 		this._player.pause();
 	}
 
 	public stop(): void {
 		const connection: VoiceConnection | undefined = getVoiceConnection(this._guild_id);
-		if (!connection) throw new ClientError(langClient.t('notInServer'));
+		if (!connection) throw new ClientError(t('notInServer'));
 		connection.destroy();
 	}
 
@@ -82,7 +82,7 @@ export default class GuildPlayer {
 
 	public updateChannelId(channel_id: string, channel: GuildTextBasedChannel | null): void {
 		if (!channel || !channel.isTextBased()) {
-			throw new ClientError(langClient.t('commandInTextChannel'));
+			throw new ClientError(t('commandInTextChannel'));
 		}
 		this._channel_id = channel_id;
 	}
@@ -105,12 +105,12 @@ export default class GuildPlayer {
 			const channel: Channel | null = await dsClient.channels.fetch(this._channel_id);
 			if (await dsClient.checkIfSomeoneIsHere(this._guild_id)) {
 			  const track_name: string | undefined = this.skip();
-				if (track_name) { await (channel as TextChannel).send(langClient.t('play', { trackName: track_name })); }
-				else { await (channel as TextChannel).send(langClient.t('stopNoTracks')); }
+				if (track_name) { await (channel as TextChannel).send(t('play', { trackName: track_name })); }
+				else { await (channel as TextChannel).send(t('stopNoTracks')); }
 		  }
 			else {
 				this.stop();
-				await (channel as TextChannel).send(langClient.t('stopNoUsers'));
+				await (channel as TextChannel).send(t('stopNoUsers'));
 			}
 		}
 		catch (err) {
@@ -118,7 +118,7 @@ export default class GuildPlayer {
 			if (err instanceof ClientError) {
 				(channel as TextChannel).send(err.message.split(/[\n]/)[0]);
 			}
-			else { (channel as TextChannel).send(langClient.t('uknError')); }
+			else { (channel as TextChannel).send(t('uknError')); }
 			console.error(err);
 		}
 	}

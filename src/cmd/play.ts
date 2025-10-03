@@ -3,7 +3,7 @@ import { getVoiceConnection } from '@discordjs/voice';
 import ClientError from '../clientError';
 import fs from 'fs';
 import getAllTracksFromGuildFolder from '../utils/getAllTracksFromGuildFolder';
-import langClient from '../i18next';
+import { t } from '../i18next';
 import path from 'path';
 import PlayerService from '../playerService';
 
@@ -43,19 +43,19 @@ export default {
 		const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER!, interaction.guildId);
 		const track_name: string = interaction.options.getString('track')!;
 		if (!fs.existsSync(guild_folder)) {
-			throw new ClientError(langClient.t('noTracksInServer'));
+			throw new ClientError(t('noTracksInServer'));
 		};
 		if (!fs.existsSync(path.join(guild_folder, track_name + '.mp3'))) {
-			throw new ClientError(langClient.t('trackNotFound', { trackName: track_name }));
+			throw new ClientError(t('trackNotFound', { trackName: track_name }));
 		}
 
 		if (!getVoiceConnection(interaction.guildId)) {
 			PlayerService.getInstance().createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
-			await interaction.reply(langClient.t('play', { trackName: track_name }));
+			await interaction.reply(t('play', { trackName: track_name }));
 		}
 		else {
 			PlayerService.getInstance().updatePlayer(track_name, interaction);
-			await interaction.reply(langClient.t('trackAdd', { trackName: track_name }));
+			await interaction.reply(t('trackAdd', { trackName: track_name }));
 		}
 	},
 };

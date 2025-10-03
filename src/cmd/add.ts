@@ -4,7 +4,7 @@ import ClientError from '../clientError';
 import fs from 'fs';
 import https from 'https';
 import i18next from 'i18next';
-import langClient from '../i18next';
+import { t } from '../i18next';
 import path from 'path';
 import PlayerService from '../playerService';
 import ytdl, { Payload } from 'youtube-dl-exec';
@@ -29,7 +29,7 @@ async function downloadTrackFromYoutube(url: string, outputDir: string): Promise
 		});
 	}
 	catch (err) {
-		throw ClientError.fromError(err, langClient.t('downloadError'));
+		throw ClientError.fromError(err, t('downloadError'));
 	}
 	const stdot = output.toString().match(/\[ExtractAudio\] Destination: (.+\.mp3)/);
 	if (!stdot || !stdot[1]) throw new ClientError(i18next.t('nameError'));
@@ -83,16 +83,16 @@ export default {
 		let track_name: string;
 
 		if (url) {
-  		interaction.reply(langClient.t('startDownload'));
+  		interaction.reply(t('startDownload'));
 			await getTrackName(url);
 			track_name = await downloadTrackFromYoutube(url, guild_folder);
-			interaction.editReply(langClient.t('downloadCompleted'));
+			interaction.editReply(t('downloadCompleted'));
 		}
 		else if (attachment) {
-  		interaction.reply(langClient.t('startDownload'));
+  		interaction.reply(t('startDownload'));
 			track_name = attachment.name.slice(0, -4);
 			await downloadTrackFromAttachement(attachment.url, path.join(guild_folder, track_name + '.mp3'));
-			interaction.editReply(langClient.t('downloadCompleted'));
+			interaction.editReply(t('downloadCompleted'));
 			console.log(track_name);
 		}
 		else { throw new ClientError(i18next.t('paramError')); }
@@ -102,11 +102,11 @@ export default {
 		&& interaction.member.voice.channelId)) {
 			if (!getVoiceConnection(interaction.guildId)) {
 				PlayerService.getInstance().createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
-				await interaction.followUp(langClient.t('play', { trackName: track_name }));
+				await interaction.followUp(t('play', { trackName: track_name }));
 			}
 			else {
 				PlayerService.getInstance().updatePlayer(track_name, interaction);
-				await interaction.followUp(langClient.t('trackAdd', { trackName: track_name }));
+				await interaction.followUp(t('trackAdd', { trackName: track_name }));
 			}
 		}
 	},

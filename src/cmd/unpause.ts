@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
 import ClientError from '../clientError';
 import GuildPlayer from '../guildPlayer';
-import langClient from '../i18next';
+import { t } from '../i18next';
 import PlayerService from '../playerService';
 
 export default {
@@ -12,11 +12,11 @@ export default {
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
 		if (!getVoiceConnection(interaction.guildId)) {
-			throw new ClientError(langClient.t('notPlay'));
+			throw new ClientError(t('notPlay'));
 		}
 		const player: GuildPlayer = PlayerService.getInstance().getGuildPlayer(interaction.guildId);
 		player.unpause();
 		player.updateChannelId(interaction.channelId, interaction.channel);
-		await interaction.reply(langClient.t('resumedTrack'));
+		await interaction.reply(t('resumedTrack'));
 	},
 };

@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
 import ClientError from '../clientError';
 import GuildPlayer from '../guildPlayer';
-import langClient from '../i18next';
+import { t } from '../i18next';
 import PlayerService from '../playerService';
 
 export default {
@@ -12,11 +12,11 @@ export default {
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
 		if (!getVoiceConnection(interaction.guildId)) {
-			throw new ClientError(langClient.t('notPlayMusic'));
+			throw new ClientError(t('notPlayMusic'));
 		}
 		const player: GuildPlayer = PlayerService.getInstance().getGuildPlayer(interaction.guildId);
 		player.pause();
 		player.updateChannelId(interaction.channelId, interaction.channel);
-		await interaction.reply(langClient.t('pausedTrack'));
+		await interaction.reply(t('pausedTrack'));
 	},
 };

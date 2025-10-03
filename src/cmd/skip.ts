@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
 import ClientError from '../clientError';
 import GuildPlayer from '../guildPlayer';
-import langClient from '../i18next';
+import { t } from '../i18next';
 import PlayerService from '../playerService';
 
 export default {
@@ -12,18 +12,18 @@ export default {
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
 		if (!getVoiceConnection(interaction.guildId)) {
-			throw new ClientError(langClient.t('notInServer'));
+			throw new ClientError(t('notInServer'));
 		}
 		const playerService: PlayerService = PlayerService.getInstance();
 		const player: GuildPlayer = playerService.getGuildPlayer(interaction.guildId);
 		const track_name: string | undefined = player.skip();
 		if (track_name) {
 			player.updateChannelId(interaction.channelId, interaction.channel);
-			await interaction.reply(langClient.t('skipTrack', { trackName: track_name }));
+			await interaction.reply(t('skipTrack', { trackName: track_name }));
 		}
 		else {
 			playerService.deleteGuildPlayer(interaction.guildId);
-			await interaction.reply(langClient.t('stopNoTracks'));
+			await interaction.reply(t('stopNoTracks'));
 		}
 	},
 };

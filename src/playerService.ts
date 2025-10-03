@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
 import ClientError from './clientError';
 import GuildPlayer from './guildPlayer';
 import DsClient from './dsClient';
-import langClient from './i18next';
+import { t } from './i18next';
 
 export default class PlayerService {
 	private static _instance: PlayerService;
@@ -23,10 +23,10 @@ export default class PlayerService {
 		interaction: ChatInputCommandInteraction<'cached'>): void {
 		if (!interaction.member || !(interaction.member instanceof GuildMember)
 			|| !interaction.member.voice.channelId) {
-			throw new ClientError(langClient.t('needVoiceChannel'));
+			throw new ClientError(t('needVoiceChannel'));
 		}
 		if (!interaction.channel || !interaction.channel.isTextBased()) {
-			throw new ClientError(langClient.t('commandInTextChannel'));
+			throw new ClientError(t('commandInTextChannel'));
 		}
 		const is_rand = interaction.options.getBoolean('rand') ?? true;
 		const guildPlayer = new GuildPlayer(interaction.guildId, is_rand,
@@ -54,7 +54,7 @@ export default class PlayerService {
 
 	public getGuildPlayer(guild_id: string): GuildPlayer {
 		if (!this._guildsPlayers.has(guild_id)) {
-			throw new ClientError(langClient.t('noMusicSession'));
+			throw new ClientError(t('noMusicSession'));
 		}
 		return this._guildsPlayers.get(guild_id)!;
 	}
