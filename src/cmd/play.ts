@@ -1,12 +1,13 @@
 import { AutocompleteInteraction, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
-import { t } from '../i18next';
+import { t } from '../i18n';
 import ClientError from '../clientError';
 import DsClient from '../dsClient';
 import fs from 'fs';
 import getAllTracksFromGuildFolder from '../utils/getAllTracksFromGuildFolder';
 import path from 'path';
 import PlayerService from '../playerService';
+import GuildPlayer from '../guildPlayer';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -58,13 +59,15 @@ export default {
 		}
 
 		if (!getVoiceConnection(interaction.guildId)) {
-			PlayerService.getInstance().createGuildPlayer(interaction.guildId, path.join(guild_folder, track_name + '.mp3'),
-				interaction.options.getBoolean('rand') ?? true, interaction.channelId, (interaction.client as DsClient), {
+			const guildPlayer = new GuildPlayer(interaction.guildId, interaction.options.getBoolean('rand') ?? true,
+				interaction.channelId, (interaction.client as DsClient), {
 					channelId: interaction.member.voice.channelId,
 		    	guildId: interaction.guildId,
 		    	adapterCreator: interaction.guild.voiceAdapterCreator,
 				},
 			);
+			guildPlayer.play(path.join(guild_folder, track_name + '.mp3'));
+			PlayerService.getInstance().saveGuildPlayer(interaction.guildId, guildPlayer);
 			await interaction.reply(t('play', { trackName: track_name }));
 		}
 		else {

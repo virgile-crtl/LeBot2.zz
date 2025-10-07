@@ -1,6 +1,6 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
 import { Channel, TextChannel } from 'discord.js';
-import { t } from './i18next';
+import { t } from './i18n';
 import ClientError from './clientError';
 import createShuffleStack from './utils/createShuffleStack';
 import DsClient from './dsClient';

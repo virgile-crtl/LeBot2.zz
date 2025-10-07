@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { t } from '../i18next';
+import { t } from '../i18n';
 import PlayerService from '../playerService';
 
 

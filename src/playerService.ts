@@ -1,8 +1,6 @@
-import { CreateVoiceConnectionOptions, JoinVoiceChannelOptions } from '@discordjs/voice';
-import { t } from './i18next';
+import { t } from './i18n';
 import ClientError from './clientError';
 import GuildPlayer from './guildPlayer';
-import DsClient from './dsClient';
 
 export default class PlayerService {
 	private static _instance: PlayerService;
@@ -17,13 +15,6 @@ export default class PlayerService {
 	    PlayerService._instance = new PlayerService();
 	  }
 		return PlayerService._instance;
-	}
-
-	public createGuildPlayer(guild_id: string, track_name: string, is_rand: boolean,
-		channel_id: string, dsClient: DsClient, voiceOption: CreateVoiceConnectionOptions & JoinVoiceChannelOptions): void {
-		const guildPlayer = new GuildPlayer(guild_id, is_rand, channel_id, dsClient, voiceOption);
-		guildPlayer.play(track_name);
-		this.saveGuildPlayer(guild_id, guildPlayer);
 	}
 
 	public updatePlayer(track_name: string, guild_id: string,

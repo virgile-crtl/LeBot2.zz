@@ -6,8 +6,14 @@ export default class ClientError extends Error {
 	}
 
 	static fromError(err: any, new_message?: string): ClientError {
-		const myErr: ClientError = new ClientError(new_message + '\n' + err.message);
-		myErr.err = err;
-		return myErr;
+  	const messagePart = err?.message ?? String(err ?? 'Unknown error');
+		if (!new_message) {
+			const newErr = new ClientError(messagePart);
+			newErr.err = err;
+  		return newErr;
+		}
+  	const newErr = new ClientError(new_message + '\n' + messagePart);
+  	newErr.err = err;
+  	return newErr;
 	}
 }

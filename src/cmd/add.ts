@@ -1,6 +1,6 @@
 import { Attachment, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
-import { t } from '../i18next';
+import { t } from '../i18n';
 import ClientError from '../clientError';
 import DsClient from '../dsClient';
 import fs from 'fs';
@@ -9,6 +9,7 @@ import i18next from 'i18next';
 import path from 'path';
 import PlayerService from '../playerService';
 import ytdl, { Payload } from 'youtube-dl-exec';
+import GuildPlayer from '../guildPlayer';
 
 async function getTrackName(url: string) {
 	const info: Payload | string = await ytdl(url, {
@@ -105,13 +106,15 @@ export default {
 		if (to_queue && (interaction.member && (interaction.member instanceof GuildMember)
 		&& interaction.member.voice.channelId)) {
 			if (!getVoiceConnection(interaction.guildId)) {
-				PlayerService.getInstance().createGuildPlayer(interaction.guildId, path.join(guild_folder, track_name + '.mp3'),
-					interaction.options.getBoolean('rand') ?? true, interaction.channelId, (interaction.client as DsClient), {
+				const guildPlayer = new GuildPlayer(interaction.guildId, interaction.options.getBoolean('rand') ?? true,
+					interaction.channelId, (interaction.client as DsClient), {
 						channelId: interaction.member.voice.channelId,
 						guildId: interaction.guildId,
 						adapterCreator: interaction.guild.voiceAdapterCreator,
 					},
 				);
+				guildPlayer.play(path.join(guild_folder, track_name + '.mp3'));
+				PlayerService.getInstance().saveGuildPlayer(interaction.guildId, guildPlayer);
 				await interaction.followUp(t('play', { trackName: track_name }));
 			}
 			else {

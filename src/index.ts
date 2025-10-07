@@ -6,7 +6,7 @@ import { Events, GatewayIntentBits } from 'discord.js';
 import checkEnv from './utils/checkEnv';
 import ClientError from './clientError';
 import DsClient from './dsClient';
-import { initI18n, t } from './i18next';
+import { initI18n, t } from './i18n';
 
 checkEnv();
 const dsClient: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });

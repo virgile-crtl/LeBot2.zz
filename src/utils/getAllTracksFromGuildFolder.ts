@@ -1,4 +1,4 @@
-import { t } from '../i18next';
+import { t } from '../i18n';
 import ClientError from '../clientError';
 import fs from 'fs';
 import path from 'path';

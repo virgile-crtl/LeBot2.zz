@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
-import { t } from '../i18next';
+import { t } from '../i18n';
 import ClientError from '../clientError';
 import GuildPlayer from '../guildPlayer';
 import PlayerService from '../playerService';
