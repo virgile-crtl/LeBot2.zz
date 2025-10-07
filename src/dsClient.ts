@@ -34,8 +34,7 @@ export default class DsClient extends Client {
 			console.info(t('init.cmdLoaded', { commandName: cmd.data.name }));
 		}
 
-		const deploy: boolean = env === 'dev' ? await this.askForDeploy() : true;
-		if (deploy) { await this.deployCommands(cmds, env); }
+		if (process.argv.includes('--deploy') || env === 'prod') { await this.deployCommands(cmds, env); }
 	}
 
 	public async checkIfSomeoneIsHere(guild_id: string): Promise<boolean> {

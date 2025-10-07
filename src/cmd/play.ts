@@ -11,7 +11,7 @@ import GuildPlayer from '../guildPlayer';
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName('music.play')
+		.setName('play')
 		.setDescription('Plays a track in the voice channel you are in.')
 		.addStringOption(option =>
 			option
