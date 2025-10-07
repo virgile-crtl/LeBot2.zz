@@ -29,7 +29,7 @@ export default class GuildPlayer {
 			this._player.on(AudioPlayerStatus.Idle, () => this.playerIdle(dsClient));
 		}
 		catch (err) {
-			throw ClientError.fromError(err, t('connectError'));
+			throw ClientError.fromError(err, t('errors.music.connectError'));
 		}
 	}
 
@@ -38,27 +38,27 @@ export default class GuildPlayer {
 			this._player.play(createAudioResource(track_path));
 		}
 		catch (err) {
-			throw ClientError.fromError(err, t('playError'));
+			throw ClientError.fromError(err, t('errors.music.playError'));
 		}
 	}
 
 	public unpause(): void {
 		if (this._player.state.status === AudioPlayerStatus.Playing) {
-			throw new ClientError(t('alreadyPlay'));
+			throw new ClientError(t('music.alreadyPlay'));
 		}
 		this._player.unpause();
 	}
 
 	public pause(): void {
 		if (this._player.state.status === AudioPlayerStatus.Paused) {
-			throw new ClientError(t('alreadyPause'));
+			throw new ClientError(t('music.alreadyPause'));
 		}
 		this._player.pause();
 	}
 
 	public stop(): void {
 		const connection: VoiceConnection | undefined = getVoiceConnection(this._guild_id);
-		if (!connection) throw new ClientError(t('notInServer'));
+		if (!connection) throw new ClientError(t('errors.music.notInServer'));
 		connection.destroy();
 	}
 
@@ -102,12 +102,12 @@ export default class GuildPlayer {
 			const channel: Channel | null = await dsClient.channels.fetch(this._channel_id);
 			if (await dsClient.checkIfSomeoneIsHere(this._guild_id)) {
 			  const track_name: string | undefined = this.skip();
-				if (track_name) { await (channel as TextChannel).send(t('play', { trackName: track_name })); }
-				else { await (channel as TextChannel).send(t('stopNoTracks')); }
+				if (track_name) { await (channel as TextChannel).send(t('music.play', { trackName: track_name })); }
+				else { await (channel as TextChannel).send(t('music.stopNoTracks')); }
 		  }
 			else {
 				this.stop();
-				await (channel as TextChannel).send(t('stopNoUsers'));
+				await (channel as TextChannel).send(t('music.stopNoUsers'));
 			}
 		}
 		catch (err) {
@@ -115,7 +115,7 @@ export default class GuildPlayer {
 			if (err instanceof ClientError) {
 				(channel as TextChannel).send(err.message.split(/[\n]/)[0]);
 			}
-			else { (channel as TextChannel).send(t('uknError')); }
+			else { (channel as TextChannel).send(t('errors.uknError')); }
 			console.error(err);
 		}
 	}

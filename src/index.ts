@@ -15,7 +15,7 @@ dsClient.once(Events.ClientReady, async client => {
 	try {
 		await initI18n();
 		await dsClient.init();
-		console.info(t('logged', { name: client.user.tag }));
+		console.info(t('init.logged', { name: client.user.tag }));
 	}
 	catch (err) {
 		console.error(err);
@@ -40,9 +40,9 @@ dsClient.on(Events.InteractionCreate, async interaction => {
 			else { await interaction.reply(err.message.split(/[\n]/)[0]); }
 		}
 		else if (interaction.replied || interaction.deferred) {
-			await interaction.followUp(t('uknError'));
+			await interaction.followUp(t('errors.uknError'));
 		}
-		else { await interaction.reply(t('uknError')); }
+		else { await interaction.reply(t('errors.uknError')); }
 		throw err;
 	}
 });
@@ -51,7 +51,7 @@ dsClient.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isAutocomplete()) return;
 	const command: Command = dsClient.getCommand(interaction.commandName);
 
-	if (!command.autocomplete) throw new ClientError(t('noAutocomplete', { commandName: interaction.commandName }));
+	if (!command.autocomplete) throw new ClientError(t('errors.cmd.noAutocomplete', { commandName: interaction.commandName }));
 	try {
 		await command.autocomplete(interaction);
 	}
@@ -59,7 +59,7 @@ dsClient.on(Events.InteractionCreate, async interaction => {
 		if (err instanceof ClientError) {
 			interaction.respond([{ name: err.message.split(/[\n]/)[0], value: err.message.split(/[\n]/)[0] }]);
 		}
-		else {interaction.respond([{ name: t('uknError'), value: t('uknError') }]);}
+		else {interaction.respond([{ name: t('errors.uknError'), value: t('errors.uknError') }]);}
 		throw err;
 	}
 });

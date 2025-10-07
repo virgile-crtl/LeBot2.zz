@@ -12,6 +12,6 @@ export default {
 		const playerService: PlayerService = PlayerService.getInstance();
 		playerService.getGuildPlayer(interaction.guildId).stop();
 		playerService.deleteGuildPlayer(interaction.guildId);
-		await interaction.reply(t('leavingChannel'));
+		await interaction.reply(t('music.leavingChannel'));
 	},
 };

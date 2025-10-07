@@ -12,15 +12,15 @@ export default {
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
 		if (!getVoiceConnection(interaction.guildId)) {
-			throw new ClientError(t('notPlayMusic'));
+			throw new ClientError(t('errors.music.notPlayMusic'));
 		}
 		if (!interaction.channel || !interaction.channel.isTextBased()) {
-			throw new ClientError(t('commandInTextChannel'));
+			throw new ClientError(t('errors.cmd.commandInTextChannel'));
 		}
 
 		const player: GuildPlayer = PlayerService.getInstance().getGuildPlayer(interaction.guildId);
 		player.pause();
 		player.updateChannelId(interaction.channelId);
-		await interaction.reply(t('pausedTrack'));
+		await interaction.reply(t('music.pausedTrack'));
 	},
 };

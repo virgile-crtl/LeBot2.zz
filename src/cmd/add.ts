@@ -31,10 +31,10 @@ async function downloadTrackFromYoutube(url: string, outputDir: string): Promise
 		});
 	}
 	catch (err) {
-		throw ClientError.fromError(err, t('downloadError'));
+		throw ClientError.fromError(err, t('errors.music.downloadError'));
 	}
 	const stdot = output.toString().match(/\[ExtractAudio\] Destination: (.+\.mp3)/);
-	if (!stdot || !stdot[1]) throw new ClientError(i18next.t('nameError'));
+	if (!stdot || !stdot[1]) throw new ClientError(i18next.t('errors.music.paramError'));
 	return path.basename(stdot[1]).slice(0, -4);
 }
 
@@ -85,22 +85,22 @@ export default {
 		let track_name: string;
 
 		if (url) {
-  		interaction.reply(t('startDownload'));
+  		interaction.reply(t('music.startDownload'));
 			await getTrackName(url);
 			track_name = await downloadTrackFromYoutube(url, guild_folder);
-			interaction.editReply(t('downloadCompleted'));
+			interaction.editReply(t('music.downloadCompleted'));
 		}
 		else if (attachment) {
-  		interaction.reply(t('startDownload'));
+  		interaction.reply(t('music.startDownload'));
 			track_name = attachment.name.slice(0, -4);
 			await downloadTrackFromAttachement(attachment.url, path.join(guild_folder, track_name + '.mp3'));
-			interaction.editReply(t('downloadCompleted'));
+			interaction.editReply(t('music.downloadCompleted'));
 			console.log(track_name);
 		}
 		else { throw new ClientError(i18next.t('paramError')); }
 
 		if (!interaction.channel || !interaction.channel.isTextBased()) {
-			throw new ClientError(t('commandInTextChannel'));
+			throw new ClientError(t('errors.cmd.commandInTextChannel'));
 		}
 		const to_queue = interaction.options.getBoolean('to_queue') ?? true;
 		if (to_queue && (interaction.member && (interaction.member instanceof GuildMember)
@@ -115,12 +115,12 @@ export default {
 				);
 				guildPlayer.play(path.join(guild_folder, track_name + '.mp3'));
 				PlayerService.getInstance().saveGuildPlayer(interaction.guildId, guildPlayer);
-				await interaction.followUp(t('play', { trackName: track_name }));
+				await interaction.followUp(t('music.play', { trackName: track_name }));
 			}
 			else {
 				PlayerService.getInstance().updatePlayer(track_name, interaction.guildId,
 					interaction.channelId, interaction.options.getBoolean('rand'));
-				await interaction.followUp(t('trackAdd', { trackName: track_name }));
+				await interaction.followUp(t('music.trackAdd', { trackName: track_name }));
 			}
 		}
 	},

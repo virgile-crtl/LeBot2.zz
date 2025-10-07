@@ -40,7 +40,7 @@ describe('GuildPlayer Errors', () => {
       throw new Error('Test error');
     });
 
-    expect(() => new GuildPlayer('guild1', true, 'channel1', {} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions)).toThrow('connectError\nTest error');
+    expect(() => new GuildPlayer('guild1', true, 'channel1', {} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions)).toThrow('errors.music.connectError\nTest error');
     expect(createAudioPlayer).toHaveBeenCalledTimes(1);
     expect(createAudioPlayer).toHaveBeenCalledWith();
     expect(joinVoiceChannel).not.toHaveBeenCalled();
@@ -51,7 +51,7 @@ describe('GuildPlayer Errors', () => {
       throw new Error('Test error');
     });
 
-    expect(() => new GuildPlayer('guild1', true, 'channel1', {} as DsClient, voiceOption)).toThrow('connectError\nTest error');
+    expect(() => new GuildPlayer('guild1', true, 'channel1', {} as DsClient, voiceOption)).toThrow('errors.music.connectError\nTest error');
     expect(createAudioPlayer).toHaveBeenCalledTimes(1);
     expect(createAudioPlayer).toHaveBeenCalledWith();
     expect(joinVoiceChannel).toHaveBeenCalledTimes(1);
@@ -63,7 +63,7 @@ describe('GuildPlayer Errors', () => {
       throw new Error('Test error');
     });
 
-    expect(() => new GuildPlayer('guild1', true, 'channel1', {} as DsClient, voiceOption)).toThrow('connectError\nTest error');
+    expect(() => new GuildPlayer('guild1', true, 'channel1', {} as DsClient, voiceOption)).toThrow('errors.music.connectError\nTest error');
     expect(createAudioPlayer).toHaveBeenCalledTimes(1);
     expect(createAudioPlayer).toHaveBeenCalledWith();
     expect(joinVoiceChannel).toHaveBeenCalledTimes(1);
@@ -77,7 +77,7 @@ describe('GuildPlayer Errors', () => {
       throw new Error('Test error');
     });
 
-    expect(() => new GuildPlayer('guild1', true, 'channel1', {} as DsClient, voiceOption)).toThrow('connectError\nTest error');
+    expect(() => new GuildPlayer('guild1', true, 'channel1', {} as DsClient, voiceOption)).toThrow('errors.music.connectError\nTest error');
     expect(createAudioPlayer).toHaveBeenCalledTimes(1);
     expect(createAudioPlayer).toHaveBeenCalledWith();
     expect(joinVoiceChannel).toHaveBeenCalledTimes(1);
@@ -94,7 +94,7 @@ describe('GuildPlayer Errors', () => {
     });
     const track_name = path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3');
 
-    expect(() => player.play(track_name)).toThrow('playError\nTest error');
+    expect(() => player.play(track_name)).toThrow('errors.music.playError\nTest error');
     expect(createAudioResource).toHaveBeenCalledTimes(1);
     expect(createAudioResource).toHaveBeenCalledWith(track_name);
   });
@@ -105,7 +105,7 @@ describe('GuildPlayer Errors', () => {
     });
     const track_name = path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3');
 
-    expect(() => player.play(track_name)).toThrow('playError\nTest error');
+    expect(() => player.play(track_name)).toThrow('errors.music.playError\nTest error');
     expect(createAudioResource).toHaveBeenCalledTimes(1);
     expect(createAudioResource).toHaveBeenCalledWith(track_name);
     expect(mockPlayer.play).toHaveBeenCalledTimes(1);
@@ -115,7 +115,7 @@ describe('GuildPlayer Errors', () => {
   test('Unpause method with already playing', () => {
     (mockPlayer.state as any) = { status: AudioPlayerStatus.Playing };
 
-    expect(() => player.unpause()).toThrow('alreadyPlay');
+    expect(() => player.unpause()).toThrow('music.alreadyPlay');
     expect(mockPlayer.unpause).not.toHaveBeenCalled();
   });
 });

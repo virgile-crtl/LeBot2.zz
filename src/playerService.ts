@@ -32,7 +32,7 @@ export default class PlayerService {
 
 	public getGuildPlayer(guild_id: string): GuildPlayer {
 		if (!this._guildsPlayers.has(guild_id)) {
-			throw new ClientError(t('noMusicSession'));
+			throw new ClientError(t('errors.music.noMusicSession'));
 		}
 		return this._guildsPlayers.get(guild_id)!;
 	}

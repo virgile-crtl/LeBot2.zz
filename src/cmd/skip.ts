@@ -12,10 +12,10 @@ export default {
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
 		if (!getVoiceConnection(interaction.guildId)) {
-			throw new ClientError(t('notInServer'));
+			throw new ClientError(t('errors.music.notInServer'));
 		}
 		if (!interaction.channel || !interaction.channel.isTextBased()) {
-			throw new ClientError(t('commandInTextChannel'));
+			throw new ClientError(t('errors.cmd.commandInTextChannel'));
 		}
 
 		const playerService: PlayerService = PlayerService.getInstance();
@@ -23,14 +23,14 @@ export default {
 		const track_name: string | undefined = player.skip();
 		if (track_name) {
 			if (!interaction.channel || !interaction.channel.isTextBased()) {
-				throw new ClientError(t('commandInTextChannel'));
+				throw new ClientError(t('errors.cmd.commandInTextChannel'));
 			}
 			player.updateChannelId(interaction.channelId);
-			await interaction.reply(t('skipTrack', { trackName: track_name }));
+			await interaction.reply(t('music.skipTrack', { trackName: track_name }));
 		}
 		else {
 			playerService.deleteGuildPlayer(interaction.guildId);
-			await interaction.reply(t('stopNoTracks'));
+			await interaction.reply(t('music.stopNoTracks'));
 		}
 	},
 };
