@@ -2,6 +2,8 @@ import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, creat
 import DsClient from "../src/dsClient";
 import GuildPlayer from "../src/guildPlayer";
 import path from "path";
+import { TextChannel } from "discord.js";
+import ClientError from "../src/clientError";
 
 jest.mock('../src/utils/createShuffleStack', () => jest.fn(() => ['track2.mp3', 'track1.mp3', 'track3.mp3']));
 
@@ -9,7 +11,12 @@ describe('GuildPlayer Errors', () => {
   const guild_id: string = 'guild1';
   const is_rand: boolean = true;
   const channel_id: string = 'channel1';
-  const dsClient = {} as DsClient;
+  const dsClient: jest.Mocked<DsClient> ={
+    channels: {
+      fetch: jest.fn(async (id: string) => {return mockChannel;}),
+    },
+    checkIfSomeoneIsHere: jest.fn(),
+  } as any as jest.Mocked<DsClient>;
   const voiceOption = {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions;
   let player: GuildPlayer;
   const mockPlayer: jest.Mocked<AudioPlayer> = {
@@ -18,12 +25,14 @@ describe('GuildPlayer Errors', () => {
     pause: jest.fn(),
     unpause: jest.fn(),
     state: { status: 'idle' }
-  } as any;
-
+  } as any as jest.Mocked<AudioPlayer>;
   const mockConnection: jest.Mocked<VoiceConnection> = {
     subscribe: jest.fn(),
     destroy: jest.fn(),
-  } as any;
+  } as any as jest.Mocked<VoiceConnection>;
+  const mockChannel: jest.Mocked<TextChannel> = {
+    send: jest.fn(),
+  } as any as jest.Mocked<TextChannel>;
 
   beforeAll(() => {
     (createAudioPlayer as jest.Mock).mockReturnValue(mockPlayer);
@@ -162,4 +171,38 @@ describe('GuildPlayer Errors', () => {
     expect(() => player.stop()).toThrow('errors.music.stopError\nTest error');
     expect(mockConnection.destroy).toHaveBeenCalledTimes(1);
   });
+
+  test('PlayerIdle catch error', async () => {
+    const spy = jest.spyOn(console, "error").mockImplementation(() => {});
+    (dsClient.checkIfSomeoneIsHere as jest.Mock).mockImplementationOnce(() => {
+      throw new Error('Test error');
+    });
+
+    await player['playerIdle'](dsClient);
+    expect(dsClient.channels.fetch).toHaveBeenCalledWith(channel_id);
+    expect(dsClient.channels.fetch).toHaveBeenCalledTimes(2);
+    expect(dsClient.checkIfSomeoneIsHere).toHaveBeenCalledTimes(1);
+    expect(dsClient.checkIfSomeoneIsHere).toHaveBeenCalledWith(guild_id);
+    expect(mockChannel.send).toHaveBeenCalledTimes(1);
+    expect(mockChannel.send).toHaveBeenCalledWith('errors.uknError');
+    expect(console.error).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
+  })
+
+  test('PlayerIdle catch error', async () => {
+    const spy = jest.spyOn(console, "error").mockImplementation(() => {});
+    (dsClient.checkIfSomeoneIsHere as jest.Mock).mockImplementationOnce(() => {
+      throw new ClientError('Test error');
+    });
+
+    await player['playerIdle'](dsClient);
+    expect(dsClient.channels.fetch).toHaveBeenCalledWith(channel_id);
+    expect(dsClient.channels.fetch).toHaveBeenCalledTimes(2);
+    expect(dsClient.checkIfSomeoneIsHere).toHaveBeenCalledTimes(1);
+    expect(dsClient.checkIfSomeoneIsHere).toHaveBeenCalledWith(guild_id);
+    expect(mockChannel.send).toHaveBeenCalledTimes(1);
+    expect(mockChannel.send).toHaveBeenCalledWith('Test error');
+    expect(console.error).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
+  })
 });

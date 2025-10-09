@@ -91,7 +91,8 @@ export default class GuildPlayer {
 	}
 
 	public addToStack(track_name: string): void {
-		this._random_stack.filter(track => track != track_name);
+		const index = this._random_stack.indexOf(track_name);
+		if (index > -1) { this._random_stack.splice(index, 1); }
 		this._stack.push(track_name);
 	}
 
