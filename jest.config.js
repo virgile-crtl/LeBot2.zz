@@ -9,7 +9,7 @@ export  default {
   transform: {
     ...tsJestTransformCfg,
   },
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
   testMatch: ['**/tests/**/*.test.ts'],
   collectCoverageFrom: ['src/**/*.ts'],
   reporters: [
