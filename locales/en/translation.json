@@ -53,6 +53,9 @@
 
       "connectError": "⚠️ Error connecting to the server",
       "playError": "⚠️ Error while playing the audio",
+      "pauseError": "⚠️ I couldn't pause the music",
+      "unpauseError": "⚠️ I couldn't resume the music",
+      "stopError": "⚠️ I couldn't stop the connection",
       "trackNotFound": "❌ {{trackName}} does not exist in this server"
     }
   }

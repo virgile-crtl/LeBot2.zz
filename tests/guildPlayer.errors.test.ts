@@ -1,4 +1,4 @@
-import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from "@discordjs/voice";
+import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from "@discordjs/voice";
 import DsClient from "../src/dsClient";
 import GuildPlayer from "../src/guildPlayer";
 import path from "path";
@@ -22,6 +22,7 @@ describe('GuildPlayer Errors', () => {
 
   const mockConnection: jest.Mocked<VoiceConnection> = {
     subscribe: jest.fn(),
+    destroy: jest.fn(),
   } as any;
 
   beforeAll(() => {
@@ -113,9 +114,52 @@ describe('GuildPlayer Errors', () => {
   });
 
   test('Unpause method with already playing', () => {
-    (mockPlayer.state as any) = { status: AudioPlayerStatus.Playing };
+    (player as any)._player.state.status = "playing";
 
     expect(() => player.unpause()).toThrow('music.alreadyPlay');
     expect(mockPlayer.unpause).not.toHaveBeenCalled();
+  });
+
+  test('Unpause method with player.unpause error', () => {
+    (player as any)._player.state.status = "paused";
+    mockPlayer.unpause.mockImplementationOnce(() => {
+      throw new Error('Test error');
+    });
+
+    expect(() => player.unpause()).toThrow('errors.music.unpauseError\nTest error');
+    expect(mockPlayer.unpause).toHaveBeenCalledTimes(1);
+  });
+
+  test('Pause method with already paused', () => {
+    (player as any)._player.state.status = "paused";
+
+    expect(() => player.pause()).toThrow('music.alreadyPause');
+    expect(mockPlayer.pause).not.toHaveBeenCalled();
+  });
+
+  test('Pause method with player.pause error', () => {
+    (player as any)._player.state.status = "playing";
+    mockPlayer.pause.mockImplementationOnce(() => {
+      throw new Error('Test error');
+    });
+
+    expect(() => player.pause()).toThrow('errors.music.pauseError\nTest error');
+    expect(mockPlayer.pause).toHaveBeenCalledTimes(1);
+  });
+
+  test('Stop method with no connection', () => {
+    (getVoiceConnection as jest.Mock).mockReturnValueOnce(undefined);
+
+    expect(() => player.stop()).toThrow('errors.music.notInServer');
+  });
+
+  test('Stop method with connection.destroy error', () => {
+    (getVoiceConnection as jest.Mock).mockReturnValueOnce(mockConnection);
+    mockConnection.destroy.mockImplementationOnce(() => {
+      throw new Error('Test error');
+    });
+
+    expect(() => player.stop()).toThrow('errors.music.stopError\nTest error');
+    expect(mockConnection.destroy).toHaveBeenCalledTimes(1);
   });
 });

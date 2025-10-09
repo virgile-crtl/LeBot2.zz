@@ -79,6 +79,8 @@ describe('GuildPlayer', () => {
     (getVoiceConnection as jest.Mock).mockReturnValue(mockConnection);
 
     player.stop();
+    expect(getVoiceConnection).toHaveBeenCalledTimes(1);
+    expect(getVoiceConnection).toHaveBeenCalledWith(guild_id);
     expect(mockConnection.destroy).toHaveBeenCalledTimes(1);
   });
 });

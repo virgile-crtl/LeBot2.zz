@@ -20,8 +20,8 @@ jest.mock('@discordjs/voice', () => ({
   createAudioResource: jest.fn(),
   AudioPlayerStatus: {
     Idle: 'idle',
-    // Playing: 'playing',
-    // Paused: 'paused',
+    Playing: 'playing',
+    Paused: 'paused',
   },
   getVoiceConnection: jest.fn(),
   // VoiceConnectionStatus: {

@@ -46,20 +46,35 @@ export default class GuildPlayer {
 		if (this._player.state.status === AudioPlayerStatus.Playing) {
 			throw new ClientError(t('music.alreadyPlay'));
 		}
-		this._player.unpause();
+		try {
+			this._player.unpause();
+		}
+		catch (err) {
+			throw ClientError.fromError(err, t('errors.music.unpauseError'));
+		}
 	}
 
 	public pause(): void {
 		if (this._player.state.status === AudioPlayerStatus.Paused) {
 			throw new ClientError(t('music.alreadyPause'));
 		}
-		this._player.pause();
+		try {
+			this._player.pause();
+		}
+		catch (err) {
+			throw ClientError.fromError(err, t('errors.music.pauseError'));
+		}
 	}
 
 	public stop(): void {
 		const connection: VoiceConnection | undefined = getVoiceConnection(this._guild_id);
 		if (!connection) throw new ClientError(t('errors.music.notInServer'));
-		connection.destroy();
+		try {
+			connection.destroy();
+		}
+		catch (err) {
+			throw ClientError.fromError(err, t('errors.music.stopError'));
+		}
 	}
 
 	public skip(): string | undefined {

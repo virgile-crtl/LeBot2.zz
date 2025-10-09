@@ -52,6 +52,9 @@
 
       "connectError": "⚠️ Erreur de connexion au serveur",
       "playError": "⚠️ Erreur lors de la lecture du morceau",
+      "pauseError": "⚠️ Je n'ai pas pu mettre la musique en pause",
+      "unpauseError": "⚠️ Je n'ai pas pu reprendre la musique",
+      "stopError": "⚠️ Je n'ai pas pu arrêter la connexion",
       "trackNotFound": "❌ {{trackName}} n'existe pas sur ce serveur"
     }
   }
