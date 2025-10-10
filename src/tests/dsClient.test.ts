@@ -1,6 +1,5 @@
 import { Collection, GatewayIntentBits } from 'discord.js';
 import { Command } from '../types/command';
-
 import DsClient from '../dsClient';
 import fs from 'fs';
 import path from 'path';
@@ -10,12 +9,51 @@ describe('DsClient', () => {
 
 	beforeAll(() => {
 		fs.mkdirSync(process.env.CMDS_FOLDER!, { recursive: true });
-		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile1.ts'), '');
-		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile2.ts'), '');
-		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile3.ts'), '');
-		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile1.js'), '');
-		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile2.js'), '');
-		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile3.js'), '');
+		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile1.ts'), `
+			import { SlashCommandBuilder } from "discord.js";
+  		export default {
+    		data: new SlashCommandBuilder().setName("fileonets").setDescription("fileonets"),
+    		async execute() {}
+  		};`,
+		);
+		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile2.ts'), `
+			import { SlashCommandBuilder } from "discord.js";
+  		export default {
+    		data: new SlashCommandBuilder().setName("filetwots").setDescription("filetwots"),
+    		async execute() {}
+  		};`,
+		);
+		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile3.ts'), `
+			import { SlashCommandBuilder } from "discord.js";
+  		export default {
+    		data: new SlashCommandBuilder().setName("filethreets").setDescription("filethreets"),
+    		async execute() {}
+  		};`,
+		);
+		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile1.js'), `
+			const { SlashCommandBuilder } = require('discord.js');
+
+			module.exports = {
+				data: new SlashCommandBuilder().setName("fileonejs").setDescription("fileonejs"),
+				async execute() {}
+			};`,
+		);
+		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile2.js'), `
+			const { SlashCommandBuilder } = require('discord.js');
+
+			module.exports = {
+  			data: new SlashCommandBuilder().setName('filetwojs').setDescription('filetwojs'),
+  			async execute() {},
+			};`,
+		);
+		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile3.js'), `
+			const { SlashCommandBuilder } = require('discord.js');
+
+			module.exports = {
+				data: new SlashCommandBuilder().setName('filethreejs').setDescription('filethreejs'),
+				async execute() {},
+			};`,
+		);
 	});
 
 	afterAll(() => {
@@ -36,11 +74,29 @@ describe('DsClient', () => {
 		expect((dsClient as any).getCommandsList('prod')).toEqual(['testFile1.js', 'testFile2.js', 'testFile3.js']);
 	});
 
-	// test('loadCommands', async () => {
-	// 	const res: Command[] = await (dsClient as any).loadCommands('dev');
+	test('loadCommands in Dev mode', async () => {
+		const res: Command[] = await (dsClient as any).loadCommands('dev');
 
-	// 	expect(res).toBe(true);
-	// });
+		expect(res).toHaveLength(3);
+		expect(res[0]).toHaveProperty('data');
+		expect(res[0]).toHaveProperty('execute');
+		expect(res[1]).toHaveProperty('data');
+		expect(res[1]).toHaveProperty('execute');
+		expect(res[2]).toHaveProperty('data');
+		expect(res[2]).toHaveProperty('execute');
+	});
+
+	test('loadCommands in Prod mode', async () => {
+		const res: Command[] = await (dsClient as any).loadCommands('prod');
+
+		expect(res).toHaveLength(3);
+		expect(res[0]).toHaveProperty('data');
+		expect(res[0]).toHaveProperty('execute');
+		expect(res[1]).toHaveProperty('data');
+		expect(res[1]).toHaveProperty('execute');
+		expect(res[2]).toHaveProperty('data');
+		expect(res[2]).toHaveProperty('execute');
+	});
 
 
 	// test('GetCommand', () => {
