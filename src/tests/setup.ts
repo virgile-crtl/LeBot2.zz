@@ -1,6 +1,8 @@
 import path from 'path';
 
-process.env.PLAYLISTS_FOLDER = path.join(__dirname, 'fixtures', 'playlists');
+process.env.TEST_FOLDER = path.join(__dirname, 'fixtures');
+process.env.PLAYLISTS_FOLDER = path.join(process.env.TEST_FOLDER, 'playlists');
+process.env.CMDS_FOLDER = path.join(process.env.TEST_FOLDER, 'cmd');
 process.env.NODE_ENV = 'node';
 
 jest.mock('@discordjs/voice', () => ({
