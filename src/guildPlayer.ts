@@ -29,7 +29,7 @@ export default class GuildPlayer {
 			this._player.on(AudioPlayerStatus.Idle, () => this.playerIdle(dsClient));
 		}
 		catch (err) {
-			throw ClientError.fromError(err, t('errors.music.connectError'));
+			throw new ClientError(t('errors.music.connectError'), err);
 		}
 	}
 
@@ -38,7 +38,7 @@ export default class GuildPlayer {
 			this._player.play(createAudioResource(track_path));
 		}
 		catch (err) {
-			throw ClientError.fromError(err, t('errors.music.playError'));
+			throw new ClientError(t('errors.music.playError'), err);
 		}
 	}
 
@@ -50,7 +50,7 @@ export default class GuildPlayer {
 			this._player.unpause();
 		}
 		catch (err) {
-			throw ClientError.fromError(err, t('errors.music.unpauseError'));
+			throw new ClientError(t('errors.music.unpauseError'), err);
 		}
 	}
 
@@ -62,7 +62,7 @@ export default class GuildPlayer {
 			this._player.pause();
 		}
 		catch (err) {
-			throw ClientError.fromError(err, t('errors.music.pauseError'));
+			throw new ClientError(t('errors.music.pauseError'), err);
 		}
 	}
 
@@ -73,7 +73,7 @@ export default class GuildPlayer {
 			connection.destroy();
 		}
 		catch (err) {
-			throw ClientError.fromError(err, t('errors.music.stopError'));
+			throw new ClientError(t('errors.music.stopError'), err);
 		}
 	}
 

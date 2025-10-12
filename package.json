@@ -10,8 +10,8 @@
     "start": "NODE_ENV=prod node dist/index.js",
     "dev": "NODE_ENV=dev ts-node --files src/index.ts",
     "lint": "eslint 'src/**/*.ts'",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
+    "test": "jest --runInBand",
+    "test:coverage": "jest --coverage --runInBand",
     "test:ci": "jest --ci --runInBand --coverage"
   },
   "dependencies": {

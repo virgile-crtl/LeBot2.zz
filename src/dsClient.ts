@@ -22,7 +22,7 @@ export default class DsClient extends Client {
 	}
 
 	public async init(): Promise<void> {
-		const env: string = process.env.NODE_ENV || 'dev';
+		const env: string = process.env.NODE_ENV === 'prod' ? 'prod' : 'dev';
 		const cmds: Command[] = await this.loadCommands(env);
 
 		for (const cmd of cmds) {
@@ -83,7 +83,7 @@ export default class DsClient extends Client {
 			console.info(t('init.deploySuccess', { count: cmds.length }));
 		}
 		catch (err) {
-			throw ClientError.fromError(err, t('errors.init.deployError'));
+			throw new ClientError(t('errors.init.deployError'), err);
 		}
 	}
 }

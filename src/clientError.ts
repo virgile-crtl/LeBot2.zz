@@ -1,19 +1,18 @@
 export default class ClientError extends Error {
 	err: any;
 
-	constructor(message?: string) {
-		super(message);
-	}
-
-	static fromError(err: any, new_message?: string): ClientError {
-  	const messagePart = err?.message ?? String(err ?? 'Unknown error');
-		if (!new_message) {
-			const newErr = new ClientError(messagePart);
-			newErr.err = err;
-  		return newErr;
+	constructor(message?: string, err?: any) {
+  	const old_message = err?.message ?? String(err ?? 'Unknown error');
+		if (message && err) {
+			super(message + '\n' + old_message);
+			this.err = err;
 		}
-  	const newErr = new ClientError(new_message + '\n' + messagePart);
-  	newErr.err = err;
-  	return newErr;
+		else if (message && !err) {
+  		super(message);
+		}
+		else {
+			super(old_message);
+			if (err) this.err = err;
+		}
 	}
 }

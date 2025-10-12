@@ -17,6 +17,10 @@ jest.mock('discord.js', () => ({
 describe('DsClient', () => {
 	const dsClient: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
 	const spyConsole = jest.spyOn(console, 'info').mockImplementation(() => {return;});
+	const restMock: REST = {
+		setToken: jest.fn().mockReturnThis(),
+		put: jest.fn(),
+	} as unknown as REST;
 
 
 	beforeAll(() => {
@@ -68,6 +72,7 @@ describe('DsClient', () => {
 				async execute() {},
 			};`,
 		);
+		(REST as any as jest.Mock).mockReturnValue(restMock);
 	});
 
 	beforeEach(() => {
@@ -118,11 +123,6 @@ describe('DsClient', () => {
 
 	test('Deploy Commands in Dev mode', async () => {
 		const cmds: Command[] = await (dsClient as any).loadCommands('dev');
-		const restMock: REST = {
-			setToken: jest.fn().mockReturnThis(),
-			put: jest.fn(),
-		} as unknown as REST;
-		(REST as any as jest.Mock).mockReturnValue(restMock);
 
 		await (dsClient as any).deployCommands(cmds, 'dev');
 		expect(REST).toHaveBeenCalledTimes(1);
@@ -141,11 +141,6 @@ describe('DsClient', () => {
 
 	test('Deploy Commands in Prod mode', async () => {
 		const cmds: Command[] = await (dsClient as any).loadCommands('dev');
-		const restMock: REST = {
-			setToken: jest.fn().mockReturnThis(),
-			put: jest.fn(),
-		} as unknown as REST;
-		(REST as any as jest.Mock).mockReturnValue(restMock);
 
 		await (dsClient as any).deployCommands(cmds, 'prod');
 		expect(REST).toHaveBeenCalledTimes(1);
@@ -191,7 +186,6 @@ describe('DsClient', () => {
 		const loadSpy = jest.spyOn(dsClient as any, 'loadCommands');
 		const deploySpy = jest.spyOn(dsClient as any, 'deployCommands');
 		const spySet = jest.spyOn((dsClient as any)._commands, 'set');
-		process.env.NODE_ENV = 'dev';
 
 		await dsClient.init();
 		expect((dsClient as any)._commands.size).toBe(3);

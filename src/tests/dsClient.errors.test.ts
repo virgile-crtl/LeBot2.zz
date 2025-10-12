@@ -39,34 +39,31 @@ describe('DsClient', () => {
 	});
 
 	test('Init with missing command property', async () => {
-		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile1.js'), `
-			const { SlashCommandBuilder } = require('discord.js');
-
-			module.exports = {
-				data: new SlashCommandBuilder().setName("fileonejs").setDescription("fileonejs"),
+		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile1.ts'), `
+			import { SlashCommandBuilder } from "discord.js";
+			export default {
+				data: new SlashCommandBuilder().setName("fileonets").setDescription("fileonets"),
 				async execute() {}
 			};`,
 		);
-		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile2.js'), `
-			const { SlashCommandBuilder } = require('discord.js');
-
-			module.exports = {
-				data: new SlashCommandBuilder().setName('filetwojs').setDescription('filetwojs'),
+		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile2.ts'), `
+			import { SlashCommandBuilder } from "discord.js";
+			export default {
+				data: new SlashCommandBuilder().setName("filetwots").setDescription("filetwots"),
 				async execute() {},
 				async autocomplete() {}
 			};`,
 		);
-		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile3.js'), `
-			const { SlashCommandBuilder } = require('discord.js');
-
-			module.exports = {
-				data: new SlashCommandBuilder().setName('filethreejs').setDescription('filethreejs'),
-				async execute() {},
+		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile3.ts'), `
+			import { SlashCommandBuilder } from "discord.js";
+			export default {
+				data: new SlashCommandBuilder().setName("filethreets").setDescription("filethreets"),
+				async execute() {}
 			};`,
 		);
-		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile4.js'), 'module.exports = {};');
+		fs.writeFileSync(path.join(process.env.CMDS_FOLDER!, 'testFile4.ts'), 'export default {};');
 		await expect(() => dsClient.init()).rejects.toThrow('errors.init.cmdMissingProperty');
-		fs.rmSync(path.join(process.env.CMDS_FOLDER!, 'testFile4.js'));
+		fs.rmSync(path.join(process.env.CMDS_FOLDER!, 'testFile4.ts'));
 	});
 
 	test('GetCommand not found', () => {

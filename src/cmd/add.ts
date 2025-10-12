@@ -31,7 +31,7 @@ async function downloadTrackFromYoutube(url: string, outputDir: string): Promise
 		});
 	}
 	catch (err) {
-		throw ClientError.fromError(err, t('errors.music.downloadError'));
+		throw new ClientError(t('errors.music.downloadError'), err);
 	}
 	const stdot = output.toString().match(/\[ExtractAudio\] Destination: (.+\.mp3)/);
 	if (!stdot || !stdot[1]) throw new ClientError(i18next.t('errors.music.paramError'));
