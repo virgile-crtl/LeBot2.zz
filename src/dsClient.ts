@@ -5,7 +5,6 @@ import { t } from './i18n';
 import ClientError from './clientError';
 import fs from 'fs';
 import path from 'path';
-import readline from 'readline';
 
 export default class DsClient extends Client {
 	private _commands: Collection<string, Command>;
@@ -56,6 +55,7 @@ export default class DsClient extends Client {
 	private async loadCommands(env: string): Promise<Command[]> {
 		const cmds: Command[] = [];
 
+
 		for (const file of this.getCommandsList(env)) {
 			const cmdModule: any = await import(path.join(process.env.CMDS_FOLDER!, file));
 			const cmd: Command = cmdModule.default || cmdModule;
@@ -85,17 +85,5 @@ export default class DsClient extends Client {
 		catch (err) {
 			throw ClientError.fromError(err, t('errors.init.deployError'));
 		}
-	}
-
-	private async askForDeploy(): Promise<boolean> {
-		const input: readline.Interface = readline.createInterface({
-			input: process.stdin, output: process.stdout });
-
-		return new Promise((resolve) => {
-			input.question(t('init.deployPrompt'), (answer) => {
-				input.close();
-				resolve(answer.trim().toLowerCase()[0] === 'y');
-			});
-		});
 	}
 }

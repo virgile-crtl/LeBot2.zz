@@ -3,7 +3,10 @@ import path from 'path';
 process.env.TEST_FOLDER = path.join(__dirname, 'fixtures');
 process.env.PLAYLISTS_FOLDER = path.join(process.env.TEST_FOLDER, 'playlists');
 process.env.CMDS_FOLDER = path.join(process.env.TEST_FOLDER, 'cmd');
-process.env.NODE_ENV = 'node';
+process.env.NODE_ENV = 'prod';
+process.env.BOT_TOKEN = 'testtoken';
+process.env.CLIENT_ID = 'testclientid';
+process.env.GUILD_ID = 'testguildid';
 
 jest.mock('@discordjs/voice', () => ({
 	createAudioPlayer: jest.fn(() => ({

@@ -11,6 +11,7 @@ export  default {
   },
   setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
   testMatch: ['**/tests/**/*.test.ts'],
+  coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/src/tests/fixtures/'],
   collectCoverageFrom: ['src/**/*.ts'],
   reporters: [
     "default",
