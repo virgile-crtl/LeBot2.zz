@@ -7,6 +7,7 @@ process.env.BOT_TOKEN = 'testtoken';
 process.env.CLIENT_ID = 'testclientid';
 process.env.GUILD_ID = 'testguildid';
 
+
 jest.mock('@discordjs/voice', () => ({
 	createAudioPlayer: jest.fn(() => ({
 		on: jest.fn(),
