@@ -1,9 +1,9 @@
 import { Channel, Client, ClientOptions, Collection, REST, Routes } from 'discord.js';
 import { Command } from './types/command';
 import { getVoiceConnection, VoiceConnection } from '@discordjs/voice';
-import { t } from './i18n';
 import ClientError from './clientError';
 import fs from 'fs';
+import i18next from 'i18next';
 import path from 'path';
 
 export default class DsClient extends Client {
@@ -16,7 +16,7 @@ export default class DsClient extends Client {
 
  	public getCommand(command_name: string): Command {
 		if (!this._commands.has(command_name)) {
-			throw new ClientError(t('errors.cmd.cmdNotFound', { commandName: command_name }));
+			throw new ClientError(i18next.t('errors.cmd.cmdNotFound', { commandName: command_name }));
 		}
 		return this._commands.get(command_name)!;
 	}
@@ -27,10 +27,10 @@ export default class DsClient extends Client {
 
 		for (const cmd of cmds) {
 			if (!('data' in cmd) || !('execute' in cmd)) {
-				throw new ClientError(t('errors.init.cmdMissingProperty'));
+				throw new ClientError(i18next.t('errors.init.cmdMissingProperty'));
 			}
 			this._commands.set(cmd.data.name, cmd);
-			console.info(t('init.cmdLoaded', { commandName: cmd.data.name }));
+			console.info(i18next.t('init.cmdLoaded', { commandName: cmd.data.name }));
 		}
 
 		if (process.argv.includes('--deploy') || env === 'prod') { await this.deployCommands(cmds, env); }
@@ -39,7 +39,7 @@ export default class DsClient extends Client {
 	public async checkIfSomeoneIsHere(guild_id: string): Promise<boolean> {
 		const connection: VoiceConnection | undefined = getVoiceConnection(guild_id);
 
-		if (!connection) throw new ClientError(t('errors.music.notInServer'));
+		if (!connection) throw new ClientError(i18next.t('errors.music.notInServer'));
 		const channel: Channel | null = connection.joinConfig.channelId ? await this.channels.fetch(connection.joinConfig.channelId) : null;
 		if (channel?.isVoiceBased() && channel.members.size > 1) { return true; }
 		return false;
@@ -48,7 +48,7 @@ export default class DsClient extends Client {
 	private getCommandsList(env: string): string[] {
 		const cmd_files: string[] = fs.readdirSync(process.env.CMDS_FOLDER!)
 			.filter(file => file.endsWith(env === 'dev' ? '.ts' : '.js'));
-		if (cmd_files.length <= 0) { throw new ClientError(t('errors.init.noCmdsFound')); }
+		if (cmd_files.length <= 0) { throw new ClientError(i18next.t('errors.init.noCmdsFound')); }
 		return cmd_files;
 	}
 
@@ -70,20 +70,20 @@ export default class DsClient extends Client {
 			if (envType === 'dev') {
 				await rest.put(Routes.applicationGuildCommands(
           process.env.CLIENT_ID!, process.env.GUILD_ID!), { body: [] });
-				console.info(t('init.cmdsRemoved'));
+				console.info(i18next.t('init.cmdsRemoved'));
 				await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID!,
           process.env.GUILD_ID!), { body: cmds.map(cmd => cmd.data.toJSON()) });
 			}
 			else {
 				await rest.put(Routes.applicationCommands(process.env.CLIENT_ID!), { body: [] });
-				console.info(t('init.cmdsRemoved'));
+				console.info(i18next.t('init.cmdsRemoved'));
 				await rest.put(Routes.applicationCommands(
           process.env.CLIENT_ID!), { body: cmds.map(cmd => cmd.data.toJSON()) });
 			}
-			console.info(t('init.deploySuccess', { count: cmds.length }));
+			console.info(i18next.t('init.deploySuccess', { count: cmds.length }));
 		}
 		catch (err) {
-			throw new ClientError(t('errors.init.deployError'), err);
+			throw new ClientError(i18next.t('errors.init.deployError'), err);
 		}
 	}
 }

@@ -1,15 +1,14 @@
 import { Attachment, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
-import { t } from '../i18n';
 import ClientError from '../clientError';
 import DsClient from '../dsClient';
 import fs from 'fs';
+import GuildPlayer from '../guildPlayer';
 import https from 'https';
 import i18next from 'i18next';
 import path from 'path';
 import PlayerService from '../playerService';
 import ytdl, { Payload } from 'youtube-dl-exec';
-import GuildPlayer from '../guildPlayer';
 
 async function getTrackName(url: string) {
 	const info: Payload | string = await ytdl(url, {
@@ -31,7 +30,7 @@ async function downloadTrackFromYoutube(url: string, outputDir: string): Promise
 		});
 	}
 	catch (err) {
-		throw new ClientError(t('errors.music.downloadError'), err);
+		throw new ClientError(i18next.t('errors.music.downloadError'), err);
 	}
 	const stdot = output.toString().match(/\[ExtractAudio\] Destination: (.+\.mp3)/);
 	if (!stdot || !stdot[1]) throw new ClientError(i18next.t('errors.music.paramError'));
@@ -85,22 +84,22 @@ export default {
 		let track_name: string;
 
 		if (url) {
-  		interaction.reply(t('music.startDownload'));
+  		interaction.reply(i18next.t('music.startDownload'));
 			await getTrackName(url);
 			track_name = await downloadTrackFromYoutube(url, guild_folder);
-			interaction.editReply(t('music.downloadCompleted'));
+			interaction.editReply(i18next.t('music.downloadCompleted'));
 		}
 		else if (attachment) {
-  		interaction.reply(t('music.startDownload'));
+  		interaction.reply(i18next.t('music.startDownload'));
 			track_name = attachment.name.slice(0, -4);
 			await downloadTrackFromAttachement(attachment.url, path.join(guild_folder, track_name + '.mp3'));
-			interaction.editReply(t('music.downloadCompleted'));
+			interaction.editReply(i18next.t('music.downloadCompleted'));
 			console.log(track_name);
 		}
 		else { throw new ClientError(i18next.t('paramError')); }
 
 		if (!interaction.channel || !interaction.channel.isTextBased()) {
-			throw new ClientError(t('errors.cmd.commandInTextChannel'));
+			throw new ClientError(i18next.t('errors.cmd.commandInTextChannel'));
 		}
 		const to_queue = interaction.options.getBoolean('to_queue') ?? true;
 		if (to_queue && (interaction.member && (interaction.member instanceof GuildMember)
@@ -115,12 +114,12 @@ export default {
 				);
 				guildPlayer.play(path.join(guild_folder, track_name + '.mp3'));
 				PlayerService.getInstance().saveGuildPlayer(interaction.guildId, guildPlayer);
-				await interaction.followUp(t('music.play', { trackName: track_name }));
+				await interaction.followUp(i18next.t('music.play', { trackName: track_name }));
 			}
 			else {
 				PlayerService.getInstance().updatePlayer(track_name, interaction.guildId,
 					interaction.channelId, interaction.options.getBoolean('rand'));
-				await interaction.followUp(t('music.trackAdd', { trackName: track_name }));
+				await interaction.followUp(i18next.t('music.trackAdd', { trackName: track_name }));
 			}
 		}
 	},

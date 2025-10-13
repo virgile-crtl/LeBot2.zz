@@ -1,9 +1,9 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
 import { Channel, TextChannel } from 'discord.js';
-import { t } from './i18n';
 import ClientError from './clientError';
 import createShuffleStack from './utils/createShuffleStack';
 import DsClient from './dsClient';
+import i18next from 'i18next';
 import path from 'path';
 
 
@@ -29,7 +29,7 @@ export default class GuildPlayer {
 			this._player.on(AudioPlayerStatus.Idle, () => this.playerIdle(dsClient));
 		}
 		catch (err) {
-			throw new ClientError(t('errors.music.connectError'), err);
+			throw new ClientError(i18next.t('errors.music.connectError'), err);
 		}
 	}
 
@@ -38,42 +38,42 @@ export default class GuildPlayer {
 			this._player.play(createAudioResource(track_path));
 		}
 		catch (err) {
-			throw new ClientError(t('errors.music.playError'), err);
+			throw new ClientError(i18next.t('errors.music.playError'), err);
 		}
 	}
 
 	public unpause(): void {
 		if (this._player.state.status === AudioPlayerStatus.Playing) {
-			throw new ClientError(t('music.alreadyPlay'));
+			throw new ClientError(i18next.t('music.alreadyPlay'));
 		}
 		try {
 			this._player.unpause();
 		}
 		catch (err) {
-			throw new ClientError(t('errors.music.unpauseError'), err);
+			throw new ClientError(i18next.t('errors.music.unpauseError'), err);
 		}
 	}
 
 	public pause(): void {
 		if (this._player.state.status === AudioPlayerStatus.Paused) {
-			throw new ClientError(t('music.alreadyPause'));
+			throw new ClientError(i18next.t('music.alreadyPause'));
 		}
 		try {
 			this._player.pause();
 		}
 		catch (err) {
-			throw new ClientError(t('errors.music.pauseError'), err);
+			throw new ClientError(i18next.t('errors.music.pauseError'), err);
 		}
 	}
 
 	public stop(): void {
 		const connection: VoiceConnection | undefined = getVoiceConnection(this._guild_id);
-		if (!connection) throw new ClientError(t('errors.music.notInServer'));
+		if (!connection) throw new ClientError(i18next.t('errors.music.notInServer'));
 		try {
 			connection.destroy();
 		}
 		catch (err) {
-			throw new ClientError(t('errors.music.stopError'), err);
+			throw new ClientError(i18next.t('errors.music.stopError'), err);
 		}
 	}
 
@@ -118,12 +118,12 @@ export default class GuildPlayer {
 			const channel: Channel | null = await dsClient.channels.fetch(this._channel_id);
 			if (await dsClient.checkIfSomeoneIsHere(this._guild_id)) {
 			  const track_name: string | undefined = this.skip();
-				if (track_name) { await (channel as TextChannel).send(t('music.play', { trackName: track_name })); }
-				else { await (channel as TextChannel).send(t('music.stopNoTracks')); }
+				if (track_name) { await (channel as TextChannel).send(i18next.t('music.play', { trackName: track_name })); }
+				else { await (channel as TextChannel).send(i18next.t('music.stopNoTracks')); }
 		  }
 			else {
 				this.stop();
-				await (channel as TextChannel).send(t('music.stopNoUsers'));
+				await (channel as TextChannel).send(i18next.t('music.stopNoUsers'));
 			}
 		}
 		catch (err) {
@@ -131,7 +131,7 @@ export default class GuildPlayer {
 			if (err instanceof ClientError) {
 				(channel as TextChannel).send(err.message.split(/[\n]/)[0]);
 			}
-			else { (channel as TextChannel).send(t('errors.uknError')); }
+			else { (channel as TextChannel).send(i18next.t('errors.uknError')); }
 			console.error(err);
 		}
 	}

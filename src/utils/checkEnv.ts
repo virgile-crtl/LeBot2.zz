@@ -9,6 +9,7 @@ function getEnvVars(): Array<{ name: string, is_folder?: boolean }> {
 			{ name: 'TRANSLATION_FOLDER', is_folder: true },
 			{ name: 'CMDS_FOLDER', is_folder: true },
 			{ name: 'PLAYLISTS_FOLDER', is_folder: true },
+			{ name: 'LANGUAGE' },
 		];
 	}
 	else {
@@ -19,6 +20,7 @@ function getEnvVars(): Array<{ name: string, is_folder?: boolean }> {
 			{ name: 'TRANSLATION_FOLDER', is_folder: true },
 			{ name: 'CMDS_FOLDER', is_folder: true },
 			{ name: 'PLAYLISTS_FOLDER', is_folder: true },
+			{ name: 'LANGUAGE' },
 		];
 	}
 }

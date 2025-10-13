@@ -1,8 +1,8 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
-import { t } from '../i18n';
 import ClientError from '../clientError';
 import GuildPlayer from '../guildPlayer';
+import i18next from 'i18next';
 import PlayerService from '../playerService';
 
 export default {
@@ -12,10 +12,10 @@ export default {
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
 		if (!getVoiceConnection(interaction.guildId)) {
-			throw new ClientError(t('errors.music.notInServer'));
+			throw new ClientError(i18next.t('errors.music.notInServer'));
 		}
 		if (!interaction.channel || !interaction.channel.isTextBased()) {
-			throw new ClientError(t('errors.cmd.commandInTextChannel'));
+			throw new ClientError(i18next.t('errors.cmd.commandInTextChannel'));
 		}
 
 		const playerService: PlayerService = PlayerService.getInstance();
@@ -23,14 +23,14 @@ export default {
 		const track_name: string | undefined = player.skip();
 		if (track_name) {
 			if (!interaction.channel || !interaction.channel.isTextBased()) {
-				throw new ClientError(t('errors.cmd.commandInTextChannel'));
+				throw new ClientError(i18next.t('errors.cmd.commandInTextChannel'));
 			}
 			player.updateChannelId(interaction.channelId);
-			await interaction.reply(t('music.skipTrack', { trackName: track_name }));
+			await interaction.reply(i18next.t('music.skipTrack', { trackName: track_name }));
 		}
 		else {
 			playerService.deleteGuildPlayer(interaction.guildId);
-			await interaction.reply(t('music.stopNoTracks'));
+			await interaction.reply(i18next.t('music.stopNoTracks'));
 		}
 	},
 };

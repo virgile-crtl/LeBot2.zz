@@ -1,6 +1,6 @@
-import { t } from './i18n';
 import ClientError from './clientError';
 import GuildPlayer from './guildPlayer';
+import i18next from 'i18next';
 
 export default class PlayerService {
 	private static _instance: PlayerService;
@@ -32,7 +32,7 @@ export default class PlayerService {
 
 	public getGuildPlayer(guild_id: string): GuildPlayer {
 		if (!this._guildsPlayers.has(guild_id)) {
-			throw new ClientError(t('errors.music.noMusicSession'));
+			throw new ClientError(i18next.t('errors.music.noMusicSession'));
 		}
 		return this._guildsPlayers.get(guild_id)!;
 	}

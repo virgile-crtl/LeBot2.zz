@@ -33,6 +33,7 @@ jest.mock('@discordjs/voice', () => ({
 	// },
 }));
 
-jest.mock('../i18n', () => ({
-	t: jest.fn((key: string) => key),
+jest.mock('i18next', () => ({
+	init: jest.fn(),
+	t: (key: string) => { return key; },
 }));

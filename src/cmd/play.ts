@@ -1,13 +1,13 @@
 import { AutocompleteInteraction, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
-import { t } from '../i18n';
 import ClientError from '../clientError';
 import DsClient from '../dsClient';
 import fs from 'fs';
+import GuildPlayer from '../guildPlayer';
 import getAllTracksFromGuildFolder from '../utils/getAllTracksFromGuildFolder';
+import i18next from 'i18next';
 import path from 'path';
 import PlayerService from '../playerService';
-import GuildPlayer from '../guildPlayer';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -45,17 +45,17 @@ export default {
 		const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER!, interaction.guildId);
 		const track_name: string = interaction.options.getString('track')!;
 		if (!fs.existsSync(guild_folder)) {
-			throw new ClientError(t('errors.music.noTracksInServer'));
+			throw new ClientError(i18next.t('errors.music.noTracksInServer'));
 		};
 		if (!fs.existsSync(path.join(guild_folder, track_name + '.mp3'))) {
-			throw new ClientError(t('errors.music.trackNotFound', { trackName: track_name }));
+			throw new ClientError(i18next.t('errors.music.trackNotFound', { trackName: track_name }));
 		}
 		if (!interaction.member || !(interaction.member instanceof GuildMember)
 					|| !interaction.member.voice.channelId) {
-			throw new ClientError(t('errors.music.needVoiceChannel'));
+			throw new ClientError(i18next.t('errors.music.needVoiceChannel'));
 		}
 		if (!interaction.channel || !interaction.channel.isTextBased()) {
-			throw new ClientError(t('errors.cmd.commandInTextChannel'));
+			throw new ClientError(i18next.t('errors.cmd.commandInTextChannel'));
 		}
 
 		if (!getVoiceConnection(interaction.guildId)) {
@@ -68,12 +68,12 @@ export default {
 			);
 			guildPlayer.play(path.join(guild_folder, track_name + '.mp3'));
 			PlayerService.getInstance().saveGuildPlayer(interaction.guildId, guildPlayer);
-			await interaction.reply(t('music.play', { trackName: track_name }));
+			await interaction.reply(i18next.t('music.play', { trackName: track_name }));
 		}
 		else {
 			PlayerService.getInstance().updatePlayer(track_name, interaction.guildId,
 				interaction.channelId, interaction.options.getBoolean('rand'));
-			await interaction.reply(t('music.trackAdd', { trackName: track_name }));
+			await interaction.reply(i18next.t('music.trackAdd', { trackName: track_name }));
 		}
 	},
 };
