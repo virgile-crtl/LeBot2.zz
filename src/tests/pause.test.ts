@@ -8,12 +8,13 @@ jest.mock('../playerService', () => ({
 
 describe('pauseCommand', () => {
 	const guild_id = 'guild1';
+	const channel_id = 'channel1';
 	const mockReply = jest.fn();
 	const mockChannel = { isTextBased: () => true };
 	const mockInteraction: any = {
 	  guildId: guild_id,
 	  channel: mockChannel,
-	  channelId: 'channel1',
+	  channelId: channel_id,
 	  reply: mockReply,
 	};
 	const mockPlayer = {
@@ -50,7 +51,7 @@ describe('pauseCommand', () => {
 		expect(getVoiceConnection).toHaveBeenCalledWith(guild_id);
 		expect(mockPlayer.pause).toHaveBeenCalledTimes(1);
 		expect(mockPlayer.updateChannelId).toHaveBeenCalledTimes(1);
-		expect(mockPlayer.updateChannelId).toHaveBeenCalledWith('channel1');
+		expect(mockPlayer.updateChannelId).toHaveBeenCalledWith(channel_id);
 		expect(mockReply).toHaveBeenCalledWith('music.pausedTrack');
 	});
 });

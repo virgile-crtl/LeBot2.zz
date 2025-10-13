@@ -20,7 +20,6 @@ describe('quitCommand', () => {
 		deleteGuildPlayer: jest.fn(),
 	};
 
-
 	test('Quit', async () => {
 		(PlayerService.getInstance as jest.Mock).mockReturnValue(mockPlayerService);
 

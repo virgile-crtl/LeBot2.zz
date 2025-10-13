@@ -22,9 +22,6 @@ export default {
 		const player: GuildPlayer = playerService.getGuildPlayer(interaction.guildId);
 		const track_name: string | undefined = player.skip();
 		if (track_name) {
-			if (!interaction.channel || !interaction.channel.isTextBased()) {
-				throw new ClientError(i18next.t('errors.cmd.commandInTextChannel'));
-			}
 			player.updateChannelId(interaction.channelId);
 			await interaction.reply(i18next.t('music.skipTrack', { trackName: track_name }));
 		}
