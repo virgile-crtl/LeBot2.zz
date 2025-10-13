@@ -2,16 +2,8 @@ import { getVoiceConnection } from '@discordjs/voice';
 import PlayerService from '../playerService';
 import pause from '../cmd/pause';
 
-jest.mock('@discordjs/voice', () => ({
-	getVoiceConnection: jest.fn(),
-}));
-
 jest.mock('../playerService', () => ({
 	getInstance: jest.fn(),
-}));
-
-jest.mock('i18next', () => ({
-	t: jest.fn((key) => key),
 }));
 
 describe('pauseCommand', () => {
