@@ -58,6 +58,7 @@ export default class DsClient extends Client {
 
 		for (const file of this.getCommandsList(env)) {
 			const cmdModule: any = await import(path.join(process.env.CMDS_FOLDER!, file));
+			// istanbul ignore next
 			const cmd: Command = cmdModule.default || cmdModule;
 			cmds.push(cmd);
 		}

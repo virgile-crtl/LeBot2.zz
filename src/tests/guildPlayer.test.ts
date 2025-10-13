@@ -47,7 +47,9 @@ describe('GuildPlayer', () => {
 	});
 
 	test('Create instance', () => {
-		expect(new GuildPlayer(guild_id, is_rand, channel_id, dsClient, voiceOption)).toBeInstanceOf(GuildPlayer);
+		const res: GuildPlayer = new GuildPlayer(guild_id, is_rand, channel_id, dsClient, voiceOption);
+
+		expect(res).toBeInstanceOf(GuildPlayer);
 		expect(createShuffleStack).toHaveBeenCalledTimes(1);
 		expect(createShuffleStack).toHaveBeenCalledWith(guild_id);
 		expect(createAudioPlayer).toHaveBeenCalledTimes(1);
@@ -58,6 +60,11 @@ describe('GuildPlayer', () => {
 		expect(mockConnection.subscribe).toHaveBeenCalledWith(mockPlayer);
 		expect(mockPlayer.on).toHaveBeenCalledTimes(1);
 		expect(mockPlayer.on).toHaveBeenCalledWith('idle', expect.any(Function));
+
+		const callback = (mockPlayer.on as jest.Mock).mock.calls[0][1];
+  	const spyIdle = jest.spyOn(res as any, 'playerIdle');
+  	callback();
+  	expect(spyIdle).toHaveBeenCalledWith(dsClient);
 	});
 
 	test('Play method', () => {
