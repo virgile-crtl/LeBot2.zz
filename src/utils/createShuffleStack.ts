@@ -2,7 +2,7 @@ import getAllTracksFromGuildFolder from './getAllTracksFromGuildFolder';
 import path from 'path';
 
 export default function createShuffleStack(guild_id: string): string[] {
-	const tracks_list = getAllTracksFromGuildFolder(guild_id);
+	const tracks_list = [...getAllTracksFromGuildFolder(guild_id)];
 
 	for (let i = tracks_list.length - 1; i > 0; i -= 1) {
 		const j = Math.floor(Math.random() * (i + 1));

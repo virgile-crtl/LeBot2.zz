@@ -38,6 +38,7 @@ describe('GuildPlayer', () => {
 		(createAudioPlayer as jest.Mock).mockReturnValue(mockPlayer);
 		(joinVoiceChannel as jest.Mock).mockReturnValue(mockConnection);
 
+		jest.spyOn(console, 'error').mockImplementation(() => {return;});
 		player = new GuildPlayer(guild_id, is_rand, channel_id, dsClient, voiceOption);
 		jest.clearAllMocks();
 	});
