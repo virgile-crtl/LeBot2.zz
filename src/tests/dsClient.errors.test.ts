@@ -9,7 +9,7 @@ jest.mock('discord.js', () => ({
 	REST: jest.fn().mockImplementation(() => { throw new Error('Test error'); }),
 }));
 
-describe('DsClient', () => {
+describe('DsClient errors', () => {
 	const dsClient: DsClient = new DsClient({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ] });
 
 	beforeAll(() => {

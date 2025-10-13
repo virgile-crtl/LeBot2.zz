@@ -6,7 +6,7 @@ jest.mock('../playerService', () => ({
 	getInstance: jest.fn(),
 }));
 
-describe('pauseCommand', () => {
+describe('unpauseCommand', () => {
 	const guild_id = 'guild1';
 	const channel_id = 'channel1';
 	const mockReply = jest.fn();
