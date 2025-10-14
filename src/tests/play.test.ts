@@ -61,6 +61,10 @@ describe('playCommand', () => {
 		jest.clearAllMocks();
 	});
 
+	afterEach(() => {
+		fs.rmSync(process.env.TEST_FOLDER!, { recursive: true, force: true });
+	});
+
 	test('Play with connection', async () => {
 		fs.mkdirSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id), { recursive: true });
 		fs.writeFileSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3'), 'data');
