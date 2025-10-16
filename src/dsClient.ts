@@ -1,11 +1,10 @@
 import { Channel, Client, ClientOptions, Collection, REST, Routes } from 'discord.js';
 import { Command } from './types/command';
 import { getVoiceConnection, VoiceConnection } from '@discordjs/voice';
-import { t } from './i18next';
 import ClientError from './clientError';
 import fs from 'fs';
+import i18next from 'i18next';
 import path from 'path';
-import readline from 'readline';
 
 export default class DsClient extends Client {
 	private _commands: Collection<string, Command>;
@@ -17,31 +16,30 @@ export default class DsClient extends Client {
 
  	public getCommand(command_name: string): Command {
 		if (!this._commands.has(command_name)) {
-			throw new ClientError(t('cmdNotFound', { commandName: command_name }));
+			throw new ClientError(i18next.t('errors.cmd.cmdNotFound', { commandName: command_name }));
 		}
 		return this._commands.get(command_name)!;
 	}
 
 	public async init(): Promise<void> {
-		const env: string = process.env.NODE_ENV || 'dev';
+		const env: string = process.env.NODE_ENV === 'prod' ? 'prod' : 'dev';
 		const cmds: Command[] = await this.loadCommands(env);
 
 		for (const cmd of cmds) {
 			if (!('data' in cmd) || !('execute' in cmd)) {
-				throw new ClientError(t('cmdMissingProperty'));
+				throw new ClientError(i18next.t('errors.init.cmdMissingProperty'));
 			}
 			this._commands.set(cmd.data.name, cmd);
-			console.info(t('cmdLoaded', { commandName: cmd.data.name }));
+			console.info(i18next.t('init.cmdLoaded', { commandName: cmd.data.name }));
 		}
 
-		const deploy: boolean = env === 'dev' ? await this.askForDeploy() : true;
-		if (deploy) { await this.deployCommands(cmds, env); }
+		if (process.argv.includes('--deploy') || env === 'prod') { await this.deployCommands(cmds, env); }
 	}
 
 	public async checkIfSomeoneIsHere(guild_id: string): Promise<boolean> {
 		const connection: VoiceConnection | undefined = getVoiceConnection(guild_id);
 
-		if (!connection) throw new ClientError(t('notInServer'));
+		if (!connection) throw new ClientError(i18next.t('errors.music.notInServer'));
 		const channel: Channel | null = connection.joinConfig.channelId ? await this.channels.fetch(connection.joinConfig.channelId) : null;
 		if (channel?.isVoiceBased() && channel.members.size > 1) { return true; }
 		return false;
@@ -50,15 +48,17 @@ export default class DsClient extends Client {
 	private getCommandsList(env: string): string[] {
 		const cmd_files: string[] = fs.readdirSync(process.env.CMDS_FOLDER!)
 			.filter(file => file.endsWith(env === 'dev' ? '.ts' : '.js'));
-		if (cmd_files.length <= 0) { throw new ClientError(t('noCmdsFound')); }
+		if (cmd_files.length <= 0) { throw new ClientError(i18next.t('errors.init.noCmdsFound')); }
 		return cmd_files;
 	}
 
 	private async loadCommands(env: string): Promise<Command[]> {
 		const cmds: Command[] = [];
 
+
 		for (const file of this.getCommandsList(env)) {
 			const cmdModule: any = await import(path.join(process.env.CMDS_FOLDER!, file));
+			// istanbul ignore next
 			const cmd: Command = cmdModule.default || cmdModule;
 			cmds.push(cmd);
 		}
@@ -71,32 +71,20 @@ export default class DsClient extends Client {
 			if (envType === 'dev') {
 				await rest.put(Routes.applicationGuildCommands(
           process.env.CLIENT_ID!, process.env.GUILD_ID!), { body: [] });
-				console.info(t('cmdsRemoved'));
+				console.info(i18next.t('init.cmdsRemoved'));
 				await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID!,
           process.env.GUILD_ID!), { body: cmds.map(cmd => cmd.data.toJSON()) });
 			}
 			else {
 				await rest.put(Routes.applicationCommands(process.env.CLIENT_ID!), { body: [] });
-				console.info(t('cmdsRemoved'));
+				console.info(i18next.t('init.cmdsRemoved'));
 				await rest.put(Routes.applicationCommands(
           process.env.CLIENT_ID!), { body: cmds.map(cmd => cmd.data.toJSON()) });
 			}
-			console.info(t('deploySuccess', { count: cmds.length }));
+			console.info(i18next.t('init.deploySuccess', { count: cmds.length }));
 		}
 		catch (err) {
-			throw ClientError.fromError(err, t('deployError'));
+			throw new ClientError(i18next.t('errors.init.deployError'), err);
 		}
-	}
-
-	private async askForDeploy(): Promise<boolean> {
-		const input: readline.Interface = readline.createInterface({
-			input: process.stdin, output: process.stdout });
-
-		return new Promise((resolve) => {
-			input.question(t('deployPrompt'), (answer) => {
-				input.close();
-				resolve(answer.trim().toLowerCase()[0] === 'y');
-			});
-		});
 	}
 }

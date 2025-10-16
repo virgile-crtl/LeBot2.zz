@@ -1,9 +1,9 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
-import { Channel, GuildTextBasedChannel, TextChannel } from 'discord.js';
+import { Channel, TextChannel } from 'discord.js';
 import ClientError from './clientError';
 import createShuffleStack from './utils/createShuffleStack';
 import DsClient from './dsClient';
-import { t } from './i18next';
+import i18next from 'i18next';
 import path from 'path';
 
 
@@ -29,7 +29,7 @@ export default class GuildPlayer {
 			this._player.on(AudioPlayerStatus.Idle, () => this.playerIdle(dsClient));
 		}
 		catch (err) {
-			throw ClientError.fromError(err, t('connectError'));
+			throw new ClientError(i18next.t('errors.music.connectError'), err);
 		}
 	}
 
@@ -38,28 +38,43 @@ export default class GuildPlayer {
 			this._player.play(createAudioResource(track_path));
 		}
 		catch (err) {
-			throw ClientError.fromError(err, t('playError'));
+			throw new ClientError(i18next.t('errors.music.playError'), err);
 		}
 	}
 
 	public unpause(): void {
 		if (this._player.state.status === AudioPlayerStatus.Playing) {
-			throw new ClientError(t('alreadyPlay'));
+			throw new ClientError(i18next.t('music.alreadyPlay'));
 		}
-		this._player.unpause();
+		try {
+			this._player.unpause();
+		}
+		catch (err) {
+			throw new ClientError(i18next.t('errors.music.unpauseError'), err);
+		}
 	}
 
 	public pause(): void {
 		if (this._player.state.status === AudioPlayerStatus.Paused) {
-			throw new ClientError(t('alreadyPause'));
+			throw new ClientError(i18next.t('music.alreadyPause'));
 		}
-		this._player.pause();
+		try {
+			this._player.pause();
+		}
+		catch (err) {
+			throw new ClientError(i18next.t('errors.music.pauseError'), err);
+		}
 	}
 
 	public stop(): void {
 		const connection: VoiceConnection | undefined = getVoiceConnection(this._guild_id);
-		if (!connection) throw new ClientError(t('notInServer'));
-		connection.destroy();
+		if (!connection) throw new ClientError(i18next.t('errors.music.notInServer'));
+		try {
+			connection.destroy();
+		}
+		catch (err) {
+			throw new ClientError(i18next.t('errors.music.stopError'), err);
+		}
 	}
 
 	public skip(): string | undefined {
@@ -76,14 +91,12 @@ export default class GuildPlayer {
 	}
 
 	public addToStack(track_name: string): void {
-		this._random_stack.filter(track => track != track_name);
+		const index = this._random_stack.indexOf(track_name);
+		if (index > -1) { this._random_stack.splice(index, 1); }
 		this._stack.push(track_name);
 	}
 
-	public updateChannelId(channel_id: string, channel: GuildTextBasedChannel | null): void {
-		if (!channel || !channel.isTextBased()) {
-			throw new ClientError(t('commandInTextChannel'));
-		}
+	public updateChannelId(channel_id: string): void {
 		this._channel_id = channel_id;
 	}
 
@@ -105,12 +118,12 @@ export default class GuildPlayer {
 			const channel: Channel | null = await dsClient.channels.fetch(this._channel_id);
 			if (await dsClient.checkIfSomeoneIsHere(this._guild_id)) {
 			  const track_name: string | undefined = this.skip();
-				if (track_name) { await (channel as TextChannel).send(t('play', { trackName: track_name })); }
-				else { await (channel as TextChannel).send(t('stopNoTracks')); }
+				if (track_name) { await (channel as TextChannel).send(i18next.t('music.play', { trackName: track_name })); }
+				else { await (channel as TextChannel).send(i18next.t('music.stopNoTracks')); }
 		  }
 			else {
 				this.stop();
-				await (channel as TextChannel).send(t('stopNoUsers'));
+				await (channel as TextChannel).send(i18next.t('music.stopNoUsers'));
 			}
 		}
 		catch (err) {
@@ -118,7 +131,7 @@ export default class GuildPlayer {
 			if (err instanceof ClientError) {
 				(channel as TextChannel).send(err.message.split(/[\n]/)[0]);
 			}
-			else { (channel as TextChannel).send(t('uknError')); }
+			else { (channel as TextChannel).send(i18next.t('errors.uknError')); }
 			console.error(err);
 		}
 	}

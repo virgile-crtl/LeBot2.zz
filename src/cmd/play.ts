@@ -1,11 +1,10 @@
 import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { getVoiceConnection } from '@discordjs/voice';
 import ClientError from '../clientError';
 import fs from 'fs';
 import getAllTracksFromGuildFolder from '../utils/getAllTracksFromGuildFolder';
-import { t } from '../i18next';
+import i18next from 'i18next';
 import path from 'path';
-import PlayerService from '../playerService';
+import putTrackInPlayer from '../utils/putTrackInPlayer';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -43,19 +42,12 @@ export default {
 		const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER!, interaction.guildId);
 		const track_name: string = interaction.options.getString('track')!;
 		if (!fs.existsSync(guild_folder)) {
-			throw new ClientError(t('noTracksInServer'));
+			throw new ClientError(i18next.t('errors.music.noTracksInServer'));
 		};
 		if (!fs.existsSync(path.join(guild_folder, track_name + '.mp3'))) {
-			throw new ClientError(t('trackNotFound', { trackName: track_name }));
+			throw new ClientError(i18next.t('errors.music.trackNotFound', { trackName: track_name }));
 		}
 
-		if (!getVoiceConnection(interaction.guildId)) {
-			PlayerService.getInstance().createGuildPlayer(path.join(guild_folder, track_name + '.mp3'), interaction);
-			await interaction.reply(t('play', { trackName: track_name }));
-		}
-		else {
-			PlayerService.getInstance().updatePlayer(track_name, interaction);
-			await interaction.reply(t('trackAdd', { trackName: track_name }));
-		}
+		await putTrackInPlayer(interaction, guild_folder, track_name, interaction.reply.bind(interaction));
 	},
 };

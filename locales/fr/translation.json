@@ -1,51 +1,64 @@
 {
-  "cmdLoaded": "✅ La commande {{commandName}} est chargée",
-  "cmdsRemoved": "✅ Commandes supprimées avec succès",
-  "deployPrompt": "⚡ Voulez-vous déployer les commandes ? (y/n) :",
-  "deploySuccess": "✅ Déploiement réussi : {{count}} commandes enregistrées",
-  "logged": "✅ Prêt ! Connecté en tant que {{name}}",
-
-  "play": "▶️ Je joue {{trackName}}",
-
-  "trackAdd": "➕ {{trackName}} a été ajouté à la file d'attente",
-
-  "skipTrack": "⏭️ Passage du morceau actuel et lecture de {{trackName}}",
-
-  "startDownload": "⬇️ Lancement du téléchargement",
-  "downloadCompleted": "✅ Téléchargement terminé !",
-
-  "alreadyPlay": "▶️ Je suis déjà en train de jouer",
-  "resumedTrack": "▶️ Reprise du morceau actuel",
-
-  "pausedTrack": "⏸️ Morceau actuel mis en pause",
-  "alreadyPause": "⏸️ Je suis déjà en pause",
-
-  "stopNoTracks": "👋 Je quitte le canal vocal car il n'y a plus de morceaux dans la file d'attente",
-  "stopNoUsers": "👋 Je quitte le canal vocal car personne n'est présent",
-  "leavingChannel": "👋 Je quitte le canal vocal",
-
   "usedCmd": "{{tag}} a utilisé la commande {{commandName}} sur le serveur {{name}}",
+  "init": {
+    "cmdLoaded": "✅ La commande {{commandName}} est chargée",
+    "cmdsRemoved": "✅ Commandes supprimées avec succès",
+    "deployPrompt": "⚡ Voulez-vous déployer les commandes ? (y/n) :",
+    "deploySuccess": "✅ Déploiement réussi : {{count}} commandes enregistrées",
+    "logged": "✅ Prêt ! Connecté en tant que {{name}}"
+  },
+  "music": {
+    "play": "▶️ Je joue {{trackName}}",
 
-  "noCmdsFound": "❌ Aucune commande trouvée",
-  "cmdMissingProperty": "⚠️ La commande manque d'une propriété requise 'data' ou 'execute'",
-  "deployError": "⚠️ Erreur lors du déploiement",
+    "trackAdd": "➕ {{trackName}} a été ajouté à la file d'attente",
 
-  "cmdNotFound": "❌ Commande introuvable : {{commandName}}",
-  "noAutocomplete": "❌ La commande {{commandName}} ne supporte pas l'autocomplétion",
-  "commandInTextChannel": "❌ Vous devez utiliser cette commande dans un canal texte pour jouer un morceau",
+    "skipTrack": "⏭️ Passage du morceau actuel et lecture de {{trackName}}",
 
-  "notInServer": "❌ Je ne suis pas présent sur ce serveur",
-  "noMusicSession": "❌ Je n'ai pas trouvé votre session musicale",
+    "startDownload": "⬇️ Lancement du téléchargement",
+    "downloadCompleted": "✅ Téléchargement terminé !",
 
-  "needVoiceChannel": "❌ Vous devez être dans un canal vocal pour jouer un morceau",
-  "noTracksInServer": "❌ Il n'y a pas de morceaux sur ce serveur",
-  "notPlay": "❌ Je ne joue pas de musique sur ce serveur",
+    "alreadyPlay": "▶️ Je suis déjà en train de jouer",
+    "resumedTrack": "▶️ Reprise du morceau actuel",
 
-  "downloadError": "⚠️ Erreur lors du téléchargement",
+    "pausedTrack": "⏸️ Morceau actuel mis en pause",
+    "alreadyPause": "⏸️ Je suis déjà en pause",
 
-  "connectError": "⚠️ Erreur de connexion au serveur",
-  "playError": "⚠️ Erreur lors de la lecture du morceau",
-  "trackNotFound": "❌ {{trackName}} n'existe pas sur ce serveur",
+    "stopNoTracks": "👋 Je quitte le canal vocal car il n'y a plus de morceaux dans la file d'attente",
+    "stopNoUsers": "👋 Je quitte le canal vocal car personne n'est présent",
+    "leavingChannel": "👋 Je quitte le canal vocal"
+  },
 
-  "uknError": "❌ Erreur inconnue"
+  "errors": {
+    "uknError": "❌ Erreur inconnue",
+    "init": {
+      "noCmdsFound": "❌ Aucune commande trouvée",
+      "cmdMissingProperty": "⚠️ La commande manque d'une propriété requise 'data' ou 'execute'",
+      "deployError": "⚠️ Erreur lors du déploiement"
+    },
+    "cmd": {
+      "cmdNotFound": "❌ Commande introuvable : {{commandName}}",
+      "noAutocomplete": "❌ La commande {{commandName}} ne supporte pas l'autocomplétion",
+      "commandInTextChannel": "❌ Vous devez utiliser cette commande dans un canal texte pour jouer un morceau"
+    },
+    "music": {
+      "notInServer": "❌ Je ne suis pas présent sur ce serveur",
+      "noMusicSession": "❌ Je n'ai pas trouvé votre session musicale",
+
+      "needVoiceChannel": "❌ Vous devez être dans un canal vocal pour jouer un morceau",
+      "noTracksInServer": "❌ Il n'y a pas de morceaux sur ce serveur",
+      "notPlay": "❌ Je ne joue pas de musique sur ce serveur",
+
+      "downloadError": "⚠️ Erreur lors du téléchargement",
+      "nameError": "❌ Impossible de trouver le nom du morceau 🎵.",
+      "paramError": "⚠️ Vous devez spécifier une URL 🌐 ou joindre un morceau 🎵 à ajouter à la playlist 📃.",
+
+      "connectError": "⚠️ Erreur de connexion au serveur",
+      "playError": "⚠️ Erreur lors de la lecture du morceau",
+      "pauseError": "⚠️ Je n'ai pas pu mettre la musique en pause",
+      "unpauseError": "⚠️ Je n'ai pas pu reprendre la musique",
+      "stopError": "⚠️ Je n'ai pas pu arrêter la connexion",
+      "trackNotFound": "❌ {{trackName}} n'existe pas sur ce serveur"
+    }
+  }
+
 }

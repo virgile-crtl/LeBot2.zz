@@ -28,7 +28,7 @@ jobs:
         run: npm run test:ci
 
       - name: Upload test results
-        if: always()  # Même si les tests échouent
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
@@ -38,7 +38,7 @@ jobs:
 
       - name: Publish Test Report
         if: always()
-        uses: mikepenz/action-junit-report@v4  # ⬅️ Action officielle (maintenue par GitHub)
+        uses: mikepenz/action-junit-report@v4
         with:
           report_paths: "test-results/junit.xml"
           check_name: "Unit Test Results"

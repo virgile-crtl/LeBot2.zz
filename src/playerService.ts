@@ -1,8 +1,6 @@
-import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
 import ClientError from './clientError';
 import GuildPlayer from './guildPlayer';
-import DsClient from './dsClient';
-import { t } from './i18next';
+import i18next from 'i18next';
 
 export default class PlayerService {
 	private static _instance: PlayerService;
@@ -19,31 +17,11 @@ export default class PlayerService {
 		return PlayerService._instance;
 	}
 
-	public createGuildPlayer(track_name: string,
-		interaction: ChatInputCommandInteraction<'cached'>): void {
-		if (!interaction.member || !(interaction.member instanceof GuildMember)
-			|| !interaction.member.voice.channelId) {
-			throw new ClientError(t('needVoiceChannel'));
-		}
-		if (!interaction.channel || !interaction.channel.isTextBased()) {
-			throw new ClientError(t('commandInTextChannel'));
-		}
-		const is_rand = interaction.options.getBoolean('rand') ?? true;
-		const guildPlayer = new GuildPlayer(interaction.guildId, is_rand,
-		  interaction.channelId, (interaction.client as DsClient), {
-		    channelId: interaction.member.voice.channelId,
-		    guildId: interaction.guildId,
-		    adapterCreator: interaction.guild.voiceAdapterCreator });
-		guildPlayer.play(track_name);
-		this.saveGuildPlayer(interaction.guildId, guildPlayer);
-	}
-
-	public updatePlayer(track_name: string,
-		interaction: ChatInputCommandInteraction<'cached'>): void {
-		const guildPlayer = this.getGuildPlayer(interaction.guildId);
+	public updatePlayer(track_name: string, guild_id: string,
+		channel_id: string, is_rand: boolean | null): void {
+		const guildPlayer = this.getGuildPlayer(guild_id);
 		guildPlayer.addToStack(track_name);
-		guildPlayer.updateChannelId(interaction.channelId, interaction.channel);
-		const is_rand = interaction.options.getBoolean('rand');
+		guildPlayer.updateChannelId(channel_id);
 		if (is_rand != null) guildPlayer.setRandom(is_rand);
 	}
 
@@ -54,7 +32,7 @@ export default class PlayerService {
 
 	public getGuildPlayer(guild_id: string): GuildPlayer {
 		if (!this._guildsPlayers.has(guild_id)) {
-			throw new ClientError(t('noMusicSession'));
+			throw new ClientError(i18next.t('errors.music.noMusicSession'));
 		}
 		return this._guildsPlayers.get(guild_id)!;
 	}
