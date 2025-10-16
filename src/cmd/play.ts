@@ -1,4 +1,4 @@
-import { AutocompleteInteraction, ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
+import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import ClientError from '../clientError';
 import fs from 'fs';
 import getAllTracksFromGuildFolder from '../utils/getAllTracksFromGuildFolder';
@@ -46,13 +46,6 @@ export default {
 		};
 		if (!fs.existsSync(path.join(guild_folder, track_name + '.mp3'))) {
 			throw new ClientError(i18next.t('errors.music.trackNotFound', { trackName: track_name }));
-		}
-		if (!interaction.member || !(interaction.member instanceof GuildMember)
-					|| !interaction.member.voice.channelId) {
-			throw new ClientError(i18next.t('errors.music.needVoiceChannel'));
-		}
-		if (!interaction.channel || !interaction.channel.isTextBased()) {
-			throw new ClientError(i18next.t('errors.cmd.commandInTextChannel'));
 		}
 
 		await putTrackInPlayer(interaction, guild_folder, track_name, interaction.reply.bind(interaction));

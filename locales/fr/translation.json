@@ -49,6 +49,8 @@
       "notPlay": "❌ Je ne joue pas de musique sur ce serveur",
 
       "downloadError": "⚠️ Erreur lors du téléchargement",
+      "nameError": "❌ Impossible de trouver le nom du morceau 🎵.",
+      "paramError": "⚠️ Vous devez spécifier une URL 🌐 ou joindre un morceau 🎵 à ajouter à la playlist 📃.",
 
       "connectError": "⚠️ Erreur de connexion au serveur",
       "playError": "⚠️ Erreur lors de la lecture du morceau",

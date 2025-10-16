@@ -5,12 +5,6 @@ import play from '../cmd/play';
 import putTrackInPlayer from '../utils/putTrackInPlayer';
 import path from 'path';
 
-jest.mock('../playerService', () => ({
-	getInstance: jest.fn(),
-}));
-
-jest.mock('../guildPlayer', () => jest.fn());
-
 jest.mock('../utils/getAllTracksFromGuildFolder', () => ({
 	__esModule: true,
 	default: jest.fn(),
@@ -23,51 +17,42 @@ jest.mock('../utils/putTrackInPlayer', () => ({
 
 describe('playCommand', () => {
 	const guild_id = 'guild1';
-	const channel_id = 'channel1';
-	const mockReply = jest.fn();
-	const mockChannel = { isTextBased: () => true };
 	const mockInteraction: any = {
 	  guildId: guild_id,
-	  channel: mockChannel,
-	  channelId: channel_id,
-	  reply: mockReply,
-		client: {} as any,
+		channelId: 'channel1',
+	  channel: { isTextBased: () => true },
+	  reply: jest.fn(),
 		options: {
+			getFocused: jest.fn(() => ''),
 			getString: jest.fn(() => 'track1'),
-			getBoolean: jest.fn(() => null),
-			getFocused: jest.fn(() => 'tra'),
 		},
 		member: {
 			voice: {
 				channelId: 'voiceChannel1',
 			},
 		} as GuildMember,
-		guild: { voiceAdapterCreator: undefined },
 		respond: jest.fn(),
 	};
 
-
 	beforeAll(() => {
 		jest.spyOn(console, 'error').mockImplementation(() => {return;});
-		Object.setPrototypeOf(mockInteraction.member, GuildMember.prototype);
 	});
 
 	beforeEach(() => {
 		jest.clearAllMocks();
 	});
 
-	afterEach(() => {
+	afterAll(() => {
 		fs.rmSync(process.env.TEST_FOLDER!, { recursive: true, force: true });
 	});
 
 	test('Play track', async () => {
-		(putTrackInPlayer as jest.Mock).mockResolvedValue(undefined);
 		fs.mkdirSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id), { recursive: true });
 		fs.writeFileSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3'), 'data');
-		mockInteraction.member = { voice: { channelId: channel_id } };
 		Object.setPrototypeOf(mockInteraction.member, GuildMember.prototype);
 
 		await play.execute(mockInteraction);
+		expect(mockInteraction.options.getString).toHaveBeenCalledTimes(1);
 		expect(putTrackInPlayer).toHaveBeenCalledTimes(1);
 		expect(putTrackInPlayer).toHaveBeenCalledWith(mockInteraction,
 			path.join(process.env.PLAYLISTS_FOLDER!, guild_id),	'track1', expect.any(Function));
