@@ -2,6 +2,7 @@ import downloadTrack from '../utils/downloads';
 import path from 'path';
 import fs from 'fs';
 import https from 'https';
+import ytdl from 'youtube-dl-exec';
 
 jest.mock('fs', () => ({
 	...jest.requireActual('fs'),
@@ -12,43 +13,47 @@ jest.mock('https', () => ({
 	get: jest.fn().mockReturnValue({ on: jest.fn() }),
 }));
 
+jest.mock('youtube-dl-exec');
+
 describe('downloadTrack', () => {
 	const guild_id = 'guild1';
 	const guild_folder = path.join(process.env.PLAYLISTS_FOLDER!, guild_id);
+	const mockWriteStream = {
+  	on: jest.fn().mockReturnThis(),
+  	close: jest.fn((cb: any) => cb && cb()),
+	};
+	const attachment = {
+		name: 'test.mp3',
+		url: 'https://fakeurl/file.mp3',
+	} as any;
+
+	afterEach(() => {
+		jest.clearAllMocks();
+	});
 
 	test('No URL and no attachment', async () => {
 		await expect(downloadTrack('tests', null, null)).rejects.toThrow('errors.music.paramError');
 	});
 
+	test('Error in download', async () => {
+		(ytdl as any as jest.Mock).mockReturnValue('error');
+		await expect(downloadTrack('tests', 'https://youtube.com/fakevideo', null)).rejects.toThrow('errors.music.downloadError');
+	});
+
 	test('download from Attachment', async () => {
-		const attachment = {
-			name: 'test.mp3',
-			url: 'https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_700KB.mp3',
-		} as any;
 		fs.mkdirSync(guild_folder, { recursive: true });
-
-		const mockPipe = jest.fn().mockReturnThis();
-  	const mockOn = jest.fn().mockImplementation((event, callback) => {
-    	if (event === 'finish') callback();
-    	return { on: mockOn };
-  	});
-  	const mockResponse = {
-  	  pipe: jest.fn().mockReturnThis(),
-  	  on: jest.fn().mockImplementation((event, callback) => {
-				if (event === 'finish') callback();
-				return { on: mockOn };
+		const fakeResponse = {
+  	  pipe: jest.fn(() => ({
+  	    on: jest.fn((event: string, cb: any) => {
+  	      if (event === 'finish') cb();
+  	      return mockWriteStream;
+  	    }),
+  	  })),
   	};
-	  const mockWriteStream = {
-  	  on: jest.fn((event, cb) => {
-	      if (event === 'finish') cb();
-      	return mockWriteStream;
-	    }),
-    	close: jest.fn(cb => cb && cb()),
-  	};
-
-  	(https.get as jest.Mock).mockImplementation((url, callback) => {
-    	callback(mockResponse);
-    	return { on: jest.fn() };
+		(fs.createWriteStream as jest.Mock).mockReturnValue(mockWriteStream);
+		(https.get as jest.Mock).mockImplementation((url, callback) => {
+  	  callback(fakeResponse);
+  	  return { on: jest.fn() };
   	});
 
 		expect(await downloadTrack(path.join(process.env.PLAYLISTS_FOLDER!, guild_id), null, attachment)).toBe('test');
@@ -56,5 +61,23 @@ describe('downloadTrack', () => {
 		expect(fs.createWriteStream).toHaveBeenCalledWith(path.join(guild_folder, attachment.name));
 		expect(https.get).toHaveBeenCalledTimes(1);
 		expect(https.get).toHaveBeenCalledWith(attachment.url, expect.any(Function));
+	});
+
+	test('download from Youtube URL', async () => {
+		fs.mkdirSync(guild_folder, { recursive: true });
+		(ytdl as any as jest.Mock).mockReturnValue({ title: 'faketrack' });
+
+		expect(await downloadTrack(path.join(process.env.PLAYLISTS_FOLDER!, guild_id), 'https://youtube.com/fakevideo', null)).toBe('faketrack');
+		expect(ytdl).toHaveBeenCalledTimes(2);
+		expect(ytdl).toHaveBeenNthCalledWith(1, 'https://youtube.com/fakevideo', {
+			noPlaylist: true,
+			dumpSingleJson: true,
+		});
+		expect(ytdl).toHaveBeenNthCalledWith(2, 'https://youtube.com/fakevideo', {
+			noPlaylist: true,
+			extractAudio: true,
+			audioFormat: 'mp3',
+			output: path.join(guild_folder, 'faketrack.mp3'),
+		});
 	});
 });

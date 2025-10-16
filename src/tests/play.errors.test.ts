@@ -13,7 +13,7 @@ describe('playCommand error', () => {
 		},
 	};
 
-	afterAll(() => {
+	beforeEach(() => {
 		fs.rmSync(process.env.TEST_FOLDER!, { recursive: true, force: true });
 	});
 	test('Play without guild folder', async () => {

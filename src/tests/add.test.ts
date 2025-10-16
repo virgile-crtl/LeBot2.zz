@@ -32,6 +32,7 @@ describe('addCommand', () => {
 
 
 	beforeAll(() => {
+		fs.rmSync(process.env.TEST_FOLDER!, { recursive: true, force: true });
 		jest.spyOn(console, 'error').mockImplementation(() => {return;});
 	});
 

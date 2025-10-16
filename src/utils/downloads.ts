@@ -12,7 +12,6 @@ async function getTrackName(url: string): Promise<string> {
 		dumpSingleJson: true,
 	});
 	if (typeof info === 'string') throw new ClientError(i18next.t('errors.music.nameError'));
-	console.log(info.title);
 	return info.title;
 }
 
