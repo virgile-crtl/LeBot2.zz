@@ -1,6 +1,6 @@
 # 🎵 LeBot2.zz
 
-![GitHub License](https://img.shields.io/github/license/virgile-crtl/GameSenseMonitor)
+![GitHub License](https://img.shields.io/github/license/virgile-crtl/LeBot2.zz)
 
 A **Discord bot** built in **TypeScript** that plays music and manages your server — from temporary voice channel creation to automatic role assignment once members accept the rules.
 
