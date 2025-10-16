@@ -1,11 +1,9 @@
-import { getVoiceConnection } from '@discordjs/voice';
 import { GuildMember } from 'discord.js';
 import fs from 'fs';
-import play from '../cmd/play';
-import PlayerService from '../playerService';
-import path from 'path';
-import GuildPlayer from '../guildPlayer';
 import getAllTracksFromGuildFolder from '../utils/getAllTracksFromGuildFolder';
+import play from '../cmd/play';
+import putTrackInPlayer from '../utils/putTrackInPlayer';
+import path from 'path';
 
 jest.mock('../playerService', () => ({
 	getInstance: jest.fn(),
@@ -14,6 +12,11 @@ jest.mock('../playerService', () => ({
 jest.mock('../guildPlayer', () => jest.fn());
 
 jest.mock('../utils/getAllTracksFromGuildFolder', () => ({
+	__esModule: true,
+	default: jest.fn(),
+}));
+
+jest.mock('../utils/putTrackInPlayer', () => ({
 	__esModule: true,
 	default: jest.fn(),
 }));
@@ -42,15 +45,7 @@ describe('playCommand', () => {
 		guild: { voiceAdapterCreator: undefined },
 		respond: jest.fn(),
 	};
-	const mockPlayer = {
-  	play: jest.fn(),
-	};
-	const mockPlayerService = {
-		getGuildPlayer: jest.fn(() => mockPlayer),
-		deleteGuildPlayer: jest.fn(),
-		updatePlayer: jest.fn(),
-		saveGuildPlayer: jest.fn(),
-	};
+
 
 	beforeAll(() => {
 		jest.spyOn(console, 'error').mockImplementation(() => {return;});
@@ -65,79 +60,17 @@ describe('playCommand', () => {
 		fs.rmSync(process.env.TEST_FOLDER!, { recursive: true, force: true });
 	});
 
-	test('Play with connection', async () => {
+	test('Play track', async () => {
+		(putTrackInPlayer as jest.Mock).mockResolvedValue(undefined);
 		fs.mkdirSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id), { recursive: true });
 		fs.writeFileSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3'), 'data');
-		(getVoiceConnection as jest.Mock).mockReturnValue(true);
-		(PlayerService.getInstance as jest.Mock).mockReturnValue(mockPlayerService);
 		mockInteraction.member = { voice: { channelId: channel_id } };
 		Object.setPrototypeOf(mockInteraction.member, GuildMember.prototype);
 
 		await play.execute(mockInteraction);
-		expect(getVoiceConnection).toHaveBeenCalledWith(guild_id);
-		expect(PlayerService.getInstance).toHaveBeenCalledTimes(1);
-		expect(mockPlayerService.updatePlayer).toHaveBeenCalledTimes(1);
-		expect(mockPlayerService.updatePlayer).toHaveBeenCalledWith('track1', guild_id, channel_id, null);
-		expect(mockReply).toHaveBeenCalledTimes(1);
-		expect(mockReply).toHaveBeenCalledWith('music.trackAdd');
-	});
-
-	test('Play without connection and rand set', async () => {
-		fs.mkdirSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id), { recursive: true });
-		fs.writeFileSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3'), 'data');
-		(getVoiceConnection as jest.Mock).mockReturnValue(false);
-		(GuildPlayer as jest.Mock).mockReturnValue(mockPlayer);
-		(mockInteraction.options.getBoolean as jest.Mock).mockReturnValue(false);
-		(PlayerService.getInstance as jest.Mock).mockReturnValue(mockPlayerService);
-		mockInteraction.member = { voice: { channelId: channel_id } };
-		Object.setPrototypeOf(mockInteraction.member, GuildMember.prototype);
-
-		await play.execute(mockInteraction);
-		expect(getVoiceConnection).toHaveBeenCalledWith(guild_id);
-		expect(PlayerService.getInstance).toHaveBeenCalledTimes(1);
-		expect(GuildPlayer).toHaveBeenCalledTimes(1);
-		expect(GuildPlayer).toHaveBeenCalledWith(guild_id, false, channel_id,
-			mockInteraction.client, {
-				channelId: channel_id,
-	    	guildId: guild_id,
-	    	adapterCreator: undefined,
-			});
-		expect(mockInteraction.options.getBoolean).toHaveBeenCalledWith('rand');
-		expect(mockPlayer.play).toHaveBeenCalledTimes(1);
-		expect(mockPlayer.play).toHaveBeenCalledWith(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3'));
-		expect(mockPlayerService.saveGuildPlayer).toHaveBeenCalledTimes(1);
-		expect(mockPlayerService.saveGuildPlayer).toHaveBeenCalledWith(guild_id, mockPlayer);
-		expect(mockReply).toHaveBeenCalledTimes(1);
-		expect(mockReply).toHaveBeenCalledWith('music.play');
-	});
-
-	test('Play without connection and rand not set', async () => {
-		fs.mkdirSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id), { recursive: true });
-		fs.writeFileSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3'), 'data');
-		(GuildPlayer as jest.Mock).mockReturnValue(mockPlayer);
-		(getVoiceConnection as jest.Mock).mockReturnValue(false);
-		(mockInteraction.options.getBoolean as jest.Mock).mockReturnValue(null);
-		(PlayerService.getInstance as jest.Mock).mockReturnValue(mockPlayerService);
-		mockInteraction.member = { voice: { channelId: channel_id } };
-		Object.setPrototypeOf(mockInteraction.member, GuildMember.prototype);
-
-		await play.execute(mockInteraction);
-		expect(getVoiceConnection).toHaveBeenCalledWith(guild_id);
-		expect(PlayerService.getInstance).toHaveBeenCalledTimes(1);
-		expect(GuildPlayer).toHaveBeenCalledTimes(1);
-		expect(GuildPlayer).toHaveBeenCalledWith(guild_id, true, channel_id,
-			mockInteraction.client, {
-				channelId: channel_id,
-	    	guildId: guild_id,
-	    	adapterCreator: undefined,
-			});
-		expect(mockInteraction.options.getBoolean).toHaveBeenCalledWith('rand');
-		expect(mockPlayer.play).toHaveBeenCalledTimes(1);
-		expect(mockPlayer.play).toHaveBeenCalledWith(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3'));
-		expect(mockPlayerService.saveGuildPlayer).toHaveBeenCalledTimes(1);
-		expect(mockPlayerService.saveGuildPlayer).toHaveBeenCalledWith(guild_id, mockPlayer);
-		expect(mockReply).toHaveBeenCalledTimes(1);
-		expect(mockReply).toHaveBeenCalledWith('music.play');
+		expect(putTrackInPlayer).toHaveBeenCalledTimes(1);
+		expect(putTrackInPlayer).toHaveBeenCalledWith(mockInteraction,
+			path.join(process.env.PLAYLISTS_FOLDER!, guild_id),	'track1', expect.any(Function));
 	});
 
 	test('Play autocomplete with < 25', async () => {
