@@ -38,7 +38,6 @@ Before running the bot, make sure you have:
 
 - ✅ **Node.js** (latest LTS recommended)
 - ✅ **FFmpeg** installed and available in your PATH
-- ✅ **yt-dlp** installed globally
 - ✅ A registered bot on the **[Discord Developer Portal](https://discord.com/developers/applications)** with:
   - `BOT_TOKEN`
   - `CLIENT_ID`
@@ -86,6 +85,7 @@ npm run dev
 
 **Production mode:**
 ```bash
+npm run build
 npm run start
 ```
 
