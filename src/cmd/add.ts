@@ -36,7 +36,7 @@ export default {
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
 		const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER!, interaction.guildId);
-		if (!fs.existsSync(guild_folder)) { fs.mkdirSync(guild_folder); }
+		if (!fs.existsSync(guild_folder)) { fs.mkdirSync(guild_folder, { recursive: true }); }
 
 		interaction.reply(i18next.t('music.startDownload'));
 		const track_name = await downloadTrack(guild_folder, interaction.options.getString('url'),
