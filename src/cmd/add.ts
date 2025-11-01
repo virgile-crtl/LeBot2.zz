@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import downloadTrack from '../utils/downloads';
 import fs from 'fs';
 import path from 'path';
@@ -43,7 +43,8 @@ export default {
 			interaction.options.getAttachment('track'));
 		interaction.editReply(i18next.t('music.downloadCompleted'));
 
-		const to_queue = interaction.options.getBoolean('to_queue') ?? true;
+		const to_queue = interaction.options.getBoolean('to_queue') ?? (interaction.member && (interaction.member instanceof GuildMember)
+				&& interaction.member.voice.channelId) ? true : false;
 		if (to_queue) {
 			await putTrackInPlayer(interaction, guild_folder, track_name, interaction.followUp.bind(interaction));
 		}

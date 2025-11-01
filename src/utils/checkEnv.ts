@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import setdefaultEnvVars from './setupEnv';
 
 function getEnvVars(): Array<{ name: string, is_folder?: boolean }> {
 	if (process.env.NODE_ENV === 'prod') {
@@ -26,6 +27,7 @@ function getEnvVars(): Array<{ name: string, is_folder?: boolean }> {
 }
 
 export default function checkEnv(): void {
+	setdefaultEnvVars();
 	const envVars: Array<{ name: string, is_folder?: boolean }> = getEnvVars();
 
 	for (const envVar of envVars) {

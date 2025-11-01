@@ -1,5 +1,10 @@
 import checkEnv from '../utils/checkEnv';
 
+jest.mock('../utils/setupEnv', () => ({
+	__esModule: true,
+	default: jest.fn(),
+}));
+
 describe('Check Environment Variables', () => {
 
 	beforeEach(() => {

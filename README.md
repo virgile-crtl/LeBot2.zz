@@ -2,7 +2,7 @@
 
 ![GitHub License](https://img.shields.io/github/license/virgile-crtl/LeBot2.zz)
 
-A **Discord bot** built in **TypeScript** that plays music and manages your server — from temporary voice channel creation to automatic role assignment once members accept the rules.
+A **Discord bot** built in **TypeScript** run with **docker** that plays music and manages your server — from temporary voice channel creation to automatic role assignment once members accept the rules.
 
 ---
 
@@ -18,9 +18,9 @@ A **Discord bot** built in **TypeScript** that plays music and manages your serv
 ## 🛠️ Tech Stack
 
 - **Language:** TypeScript
-- **Libraries:** `discord.js`, `ytdlp`, `ffmpeg`, `i18next`
+- **Libraries:** `discord.js`, `youtube-dl-exec`, `ffmpeg`, `i18next`
 - **Quality Tools:** `ESLint` for code style, `Jest` for testing
-- **Runtime:** Node.js
+- **Runtime:** Node.js, Docker
 - **Version Control:** Git / GitHub
 
 ---
@@ -36,11 +36,18 @@ It must be hosted continuously (e.g., on a VPS or a dedicated server).
 
 Before running the bot, make sure you have:
 
-- ✅ **Node.js** (latest LTS recommended)
-- ✅ **FFmpeg** installed and available in your PATH
 - ✅ A registered bot on the **[Discord Developer Portal](https://discord.com/developers/applications)** with:
   - `BOT_TOKEN`
   - `CLIENT_ID`
+
+### For run with Docker
+---
+- ✅ **Docker Docker-compose** (latest LTS recommended)
+
+### For run with Node
+---
+- ✅ **Node.js** (latest LTS recommended)
+- ✅ **FFmpeg** installed and available in your PATH
 
 ---
 
@@ -50,9 +57,6 @@ Before running the bot, make sure you have:
 # Clone the repository
 git clone https://github.com/virgile-crtl/LeBot2.zz.git
 cd LeBot2.zz
-
-# Install dependencies
-npm install
 ```
 
 Create your environment file(s):
@@ -65,18 +69,42 @@ Example configuration:
 ```env
 BOT_TOKEN=your_bot_token_here
 CLIENT_ID=your_client_id_here
-TRANSLATION_FOLDER=/absolute/path/to/locales
 PLAYLISTS_FOLDER=/absolute/path/to/playlists
-CMDS_FOLDER=/absolute/path/to/commands
 LANGUAGE=en
 ```
 
+For .env.dev add server id:
+
+```env
+GUILD_ID=serverid
+```
+
 > **Note:**
-> Paths (`*_FOLDER`) must be **absolute** paths to the respective directories.
+> Paths (`PLAYLISTS_FOLDER`) must be **absolute** paths to the respective directories.
 
 ---
 
 ## ▶️ Running the Bot
+
+### With Docker
+
+**Development mode:**
+```bash
+docker compose up dev
+```
+
+**Production mode:**
+```bash
+docker compose up prod
+```
+
+### With NODE
+---
+Before run install dependencies:
+
+```bash
+npm i
+```
 
 **Development mode:**
 ```bash
@@ -96,11 +124,45 @@ npm run start
 - **Formatting / Linting:** ESLint
 - **Unit testing:** Jest
 
-Run tests with:
+### With Docker
+---
+
+Run tests:
+
+```bash
+docker compose up test
+```
+
+Run linter
+```bash
+docker compose up lint
+```
+
+Run tests with coverage:
+```bash
+docker compose up test-coverage
+```
+
+### With Node
+---
+
+Install dependencies:
+
+```bash
+npm i
+```
+
+Run tests
 
 ```bash
 npm run test
 ```
+
+Run linter
+```bash
+npm run lint
+```
+
 
 Additional options:
 ```bash
@@ -114,6 +176,19 @@ Currently, only **unit tests** are implemented.
 
 ## 📦 Scripts Summary
 
+### Docker
+---
+| Command | Description |
+|----------|-------------|
+| `docker compose up prod` | Run project with docker in prod mode |
+| `docker compose up dev` | Run project with docker in dev mode |
+| `docker compose up test` | Run project tests with docker |
+| `docker compose up test-coverage` | Run project tests with coverage with docker |
+| `docker compose up lint` | Run linter with docker |
+
+
+### Node
+---
 | Command | Description |
 |----------|-------------|
 | `npm run build` | Compile TypeScript to JavaScript |
