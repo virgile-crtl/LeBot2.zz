@@ -2,7 +2,7 @@
 
 ![GitHub License](https://img.shields.io/github/license/virgile-crtl/LeBot2.zz)
 
-A **Discord bot** built in **TypeScript** that plays music and manages your server — from temporary voice channel creation to automatic role assignment once members accept the rules.
+A **Discord bot** built in **TypeScript** run with **docker** that plays music and manages your server — from temporary voice channel creation to automatic role assignment once members accept the rules.
 
 ---
 
@@ -18,9 +18,9 @@ A **Discord bot** built in **TypeScript** that plays music and manages your serv
 ## 🛠️ Tech Stack
 
 - **Language:** TypeScript
-- **Libraries:** `discord.js`, `ytdlp`, `ffmpeg`, `i18next`
+- **Libraries:** `discord.js`, `youtube-dl-exec`, `ffmpeg`, `i18next`
 - **Quality Tools:** `ESLint` for code style, `Jest` for testing
-- **Runtime:** Node.js
+- **Runtime:** Node.js, Docker
 - **Version Control:** Git / GitHub
 
 ---
@@ -37,6 +37,7 @@ It must be hosted continuously (e.g., on a VPS or a dedicated server).
 Before running the bot, make sure you have:
 
 - ✅ **Node.js** (latest LTS recommended)
+- ✅ **Docker Docker-compose** (latest LTS recommended)
 - ✅ **FFmpeg** installed and available in your PATH
 - ✅ A registered bot on the **[Discord Developer Portal](https://discord.com/developers/applications)** with:
   - `BOT_TOKEN`
@@ -50,9 +51,6 @@ Before running the bot, make sure you have:
 # Clone the repository
 git clone https://github.com/virgile-crtl/LeBot2.zz.git
 cd LeBot2.zz
-
-# Install dependencies
-npm install
 ```
 
 Create your environment file(s):
@@ -65,18 +63,39 @@ Example configuration:
 ```env
 BOT_TOKEN=your_bot_token_here
 CLIENT_ID=your_client_id_here
-TRANSLATION_FOLDER=/absolute/path/to/locales
 PLAYLISTS_FOLDER=/absolute/path/to/playlists
-CMDS_FOLDER=/absolute/path/to/commands
 LANGUAGE=en
 ```
 
+For .env.dev add server id:
+
+```env
+GUILD_ID=serverid
+```
+
 > **Note:**
-> Paths (`*_FOLDER`) must be **absolute** paths to the respective directories.
+> Paths (`PLAYLISTS_FOLDER`) must be **absolute** paths to the respective directories.
 
 ---
 
 ## ▶️ Running the Bot
+
+### With Docker
+
+**Production mode:**
+```bash
+docker compose up --build
+```
+
+
+### With NODE
+---
+Before run install dependencies:
+
+```bash
+npm i
+```
+
 
 **Development mode:**
 ```bash
@@ -96,10 +115,17 @@ npm run start
 - **Formatting / Linting:** ESLint
 - **Unit testing:** Jest
 
-Run tests with:
+Install dependencies:
+
+```bash
+npm i
+```
+
+Run tests
 
 ```bash
 npm run test
+npm run lint
 ```
 
 Additional options:
@@ -116,6 +142,7 @@ Currently, only **unit tests** are implemented.
 
 | Command | Description |
 |----------|-------------|
+| `docker compose up --build` | Run project with docker |
 | `npm run build` | Compile TypeScript to JavaScript |
 | `npm run start` | Start the bot in production |
 | `npm run dev` | Run the bot in development with `ts-node` |
