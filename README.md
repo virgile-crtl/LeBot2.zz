@@ -36,12 +36,18 @@ It must be hosted continuously (e.g., on a VPS or a dedicated server).
 
 Before running the bot, make sure you have:
 
-- ✅ **Node.js** (latest LTS recommended)
-- ✅ **Docker Docker-compose** (latest LTS recommended)
-- ✅ **FFmpeg** installed and available in your PATH
 - ✅ A registered bot on the **[Discord Developer Portal](https://discord.com/developers/applications)** with:
   - `BOT_TOKEN`
   - `CLIENT_ID`
+
+### For run with Docker
+---
+- ✅ **Docker Docker-compose** (latest LTS recommended)
+
+### For run with Node
+---
+- ✅ **Node.js** (latest LTS recommended)
+- ✅ **FFmpeg** installed and available in your PATH
 
 ---
 
@@ -82,11 +88,15 @@ GUILD_ID=serverid
 
 ### With Docker
 
-**Production mode:**
+**Development mode:**
 ```bash
-docker compose up --build
+docker compose up dev
 ```
 
+**Production mode:**
+```bash
+docker compose up prod
+```
 
 ### With NODE
 ---
@@ -95,7 +105,6 @@ Before run install dependencies:
 ```bash
 npm i
 ```
-
 
 **Development mode:**
 ```bash
@@ -115,6 +124,28 @@ npm run start
 - **Formatting / Linting:** ESLint
 - **Unit testing:** Jest
 
+### With Docker
+---
+
+Run tests:
+
+```bash
+docker compose up test
+```
+
+Run linter
+```bash
+docker compose up lint
+```
+
+Run tests with coverage:
+```bash
+docker compose up test-coverage
+```
+
+### With Node
+---
+
 Install dependencies:
 
 ```bash
@@ -125,8 +156,13 @@ Run tests
 
 ```bash
 npm run test
+```
+
+Run linter
+```bash
 npm run lint
 ```
+
 
 Additional options:
 ```bash
@@ -140,9 +176,21 @@ Currently, only **unit tests** are implemented.
 
 ## 📦 Scripts Summary
 
+### Docker
+---
 | Command | Description |
 |----------|-------------|
-| `docker compose up --build` | Run project with docker |
+| `docker compose up prod` | Run project with docker in prod mode |
+| `docker compose up dev` | Run project with docker in dev mode |
+| `docker compose up test` | Run project tests with docker |
+| `docker compose up test-coverage` | Run project tests with coverage with docker |
+| `docker compose up lint` | Run linter with docker |
+
+
+### Node
+---
+| Command | Description |
+|----------|-------------|
 | `npm run build` | Compile TypeScript to JavaScript |
 | `npm run start` | Start the bot in production |
 | `npm run dev` | Run the bot in development with `ts-node` |
