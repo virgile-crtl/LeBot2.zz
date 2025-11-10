@@ -18,18 +18,19 @@ describe('Setup Environment Variables', () => {
 
 		expect(process.env.TRANSLATION_FOLDER).toBe(path.resolve('locales'));
 		expect(process.env.CMDS_FOLDER).toBe(path.resolve('src/cmd'));
-		expect(process.env.PLAYLISTS_FOLDER).toBeUndefined();
+		expect(process.env.PLAYLISTS_FOLDER).toBe(path.resolve('playlists'));
 	});
 
 	test('should have the required environment variables set and prod env', () => {
 		process.env.NODE_ENV = 'prod';
+		process.env.PLAYLISTS_FOLDER = 'test';
 		delete process.env.CMDS_FOLDER;
 		delete process.env.TRANSLATION_FOLDER;
 		setupEnv();
 
 		expect(process.env.TRANSLATION_FOLDER).toBe(path.resolve('locales'));
 		expect(process.env.CMDS_FOLDER).toBe(path.resolve('dist/cmd'));
-		expect(process.env.PLAYLISTS_FOLDER).toBeUndefined();
+		expect(process.env.PLAYLISTS_FOLDER).toBe('test');
 	});
 
 	test('should create playlists folder if it does not exist', () => {
