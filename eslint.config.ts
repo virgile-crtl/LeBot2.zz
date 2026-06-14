@@ -5,7 +5,9 @@ import tsParser from '@typescript-eslint/parser';
 export default [
   js.configs.recommended,
   {
+    
     files: ['src/**/*.ts'],
+    ignores: ['src/prisma/**'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {

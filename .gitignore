@@ -7,3 +7,6 @@ test-results/
 .vscode/
 junit.xml
 src/tests/fixtures/
+/src/generated/prisma
+migrations/
+src/prisma/
