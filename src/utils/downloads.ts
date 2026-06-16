@@ -1,11 +1,12 @@
 import { Attachment } from 'discord.js';
+import { dbclient } from '../dbclient';
+import type { Music } from '../prisma/client';
 import ClientError from '../clientError';
 import fs from 'fs';
 import https from 'https';
 import i18next from 'i18next';
 import path from 'path';
 import ytdl, { Payload } from 'youtube-dl-exec';
-import { dbclient } from '../dbclient';
 
 async function getTrackName(url: string): Promise<string> {
 	const info: Payload | string = await ytdl(url, {
@@ -34,14 +35,14 @@ async function downloadTrackFromAttachement(attachment: Attachment, guild_folder
 			r.pipe(f).on('finish', () => f.close(() => resolve()));
 		}).on('error', reject);
 	});
-	return attachment.name.substring(0, attachment.name.lastIndexOf('.')) || attachment.name;
+	return attachment.name;
 }
 
-export default async function downloadTrack(guildId: string, url: string | null, attachment: Attachment | null): Promise<string> {
+export default async function downloadTrack(guildId: string, url: string | null, attachment: Attachment | null): Promise<Music> {
 	try {
 		if (url) {
 			const track_name: string = await downloadTrackFromYoutube(url);
-			await dbclient.music.create({
+			const track = await dbclient.music.create({
 				data: {
 					title: track_name,
 					path: path.join(process.env.MUSIC_FOLDER!, track_name + '.mp3'),
@@ -52,9 +53,23 @@ export default async function downloadTrack(guildId: string, url: string | null,
 					},
 				},
 			});
+			return track;
 		}
 		else if (attachment) {
-			return await downloadTrackFromAttachement(attachment, path.join(process.env.MUSIC_FOLDER!, guildId));
+			const track_name = await downloadTrackFromAttachement(attachment, path.join(process.env.MUSIC_FOLDER!, guildId));
+			const track = await dbclient.music.create({
+				data: {
+					title: track_name.substring(0, attachment.name.lastIndexOf('.')) || track_name,
+					path: path.join(process.env.MUSIC_FOLDER!, track_name),
+					private: true,
+					guilds: {
+						connect: {
+							guildId: guildId,
+						},
+					},
+				},
+			});
+			return track;
 		}
 	}
 	catch (err) {

@@ -21,7 +21,7 @@ export default class GuildPlayer {
 		this._is_rand = is_rand;
 		this._channel_id = channel_id;
 		this._stack = [];
-		this._random_stack = createShuffleStack(guild_id);
+		this._random_stack = [];
 		try {
 			this._player = createAudioPlayer();
 			const connection: VoiceConnection = joinVoiceChannel(voiceOption);
@@ -31,6 +31,13 @@ export default class GuildPlayer {
 		catch (err) {
 			throw new ClientError(i18next.t('errors.music.connectError'), err);
 		}
+	}
+
+	static async create(guild_id: string, is_rand: boolean, channel_id: string, dsClient: DsClient,
+		voiceOption: CreateVoiceConnectionOptions & JoinVoiceChannelOptions): Promise<GuildPlayer> {
+		const guildPlayer = new GuildPlayer(guild_id, is_rand, channel_id, dsClient, voiceOption);
+		guildPlayer._random_stack = await createShuffleStack(guild_id);
+		return guildPlayer;
 	}
 
 	public play(track_path: string): void {
@@ -77,9 +84,9 @@ export default class GuildPlayer {
 		}
 	}
 
-	public skip(): string | undefined {
+	public async skip(): Promise<string | undefined> {
 		if (this._is_rand || this._stack.length > 0) {
-			const track_name: string = this.getNextTrack();
+			const track_name: string = await this.getNextTrack();
 			this.play(track_name);
 			return path.parse(path.basename(track_name)).name;
 		}
@@ -100,7 +107,7 @@ export default class GuildPlayer {
 		this._channel_id = channel_id;
 	}
 
-	private getNextTrack(): string {
+	private async getNextTrack(): Promise<string> {
 		if (this._stack.length > 0) {
 			return path.join(process.env.MUSIC_FOLDER!, this._guild_id, this._stack.shift()! + '.mp3');
 		}
@@ -108,7 +115,7 @@ export default class GuildPlayer {
 			return path.join(process.env.MUSIC_FOLDER!, this._guild_id, this._random_stack.shift()! + '.mp3');
 		}
 		else {
-			this._random_stack = createShuffleStack(this._guild_id);
+			this._random_stack = await createShuffleStack(this._guild_id);
 			return path.join(process.env.MUSIC_FOLDER!, this._guild_id, this._random_stack.shift()! + '.mp3');
 		}
 	}
@@ -117,7 +124,7 @@ export default class GuildPlayer {
 		try {
 			const channel: Channel | null = await dsClient.channels.fetch(this._channel_id);
 			if (await dsClient.checkIfSomeoneIsHere(this._guild_id)) {
-			  const track_name: string | undefined = this.skip();
+			  const track_name: string | undefined = await this.skip();
 				if (track_name) { await (channel as TextChannel).send(i18next.t('music.play', { trackName: track_name })); }
 				else { await (channel as TextChannel).send(i18next.t('music.stopNoTracks')); }
 		  }

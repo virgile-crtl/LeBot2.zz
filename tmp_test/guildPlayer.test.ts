@@ -1,8 +1,8 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
 import { TextChannel } from 'discord.js';
-import createShuffleStack from '../utils/createShuffleStack';
-import DsClient from '../dsClient';
-import GuildPlayer from '../guildPlayer';
+import createShuffleStack from '../src/utils/createShuffleStack';
+import DsClient from '../src/dsClient';
+import GuildPlayer from '../src/guildPlayer';
 import path from 'path';
 
 jest.mock('../utils/createShuffleStack', () => jest.fn(() => ['track2', 'track1', 'track3']));
@@ -34,12 +34,12 @@ describe('GuildPlayer', () => {
 		send: jest.fn(),
 	} as any as jest.Mocked<TextChannel>;
 
-	beforeAll(() => {
+	beforeAll(async () => {
 		(createAudioPlayer as jest.Mock).mockReturnValue(mockPlayer);
 		(joinVoiceChannel as jest.Mock).mockReturnValue(mockConnection);
 
 		jest.spyOn(console, 'error').mockImplementation(() => {return;});
-		player = new GuildPlayer(guild_id, is_rand, channel_id, dsClient, voiceOption);
+		player = await GuildPlayer.create(guild_id, is_rand, channel_id, dsClient, voiceOption);
 		jest.clearAllMocks();
 	});
 
@@ -47,8 +47,8 @@ describe('GuildPlayer', () => {
 		jest.clearAllMocks();
 	});
 
-	test('Create instance', () => {
-		const res: GuildPlayer = new GuildPlayer(guild_id, is_rand, channel_id, dsClient, voiceOption);
+	test('Create instance', async () => {
+		const res: GuildPlayer = await GuildPlayer.create(guild_id, is_rand, channel_id, dsClient, voiceOption);
 
 		expect(res).toBeInstanceOf(GuildPlayer);
 		expect(createShuffleStack).toHaveBeenCalledTimes(1);

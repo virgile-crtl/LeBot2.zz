@@ -8,6 +8,6 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "tmp_test/guildPlayer.test.ts", "tmp_test/playerService.test.ts"],
   "exclude": ["node_modules", "dist"]
 }

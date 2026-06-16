@@ -4,9 +4,8 @@
 
 ```bash
 NODE_ENV=dev npx prisma generate
+
 ```
-
-
 ## Migrations
 
 ```bash

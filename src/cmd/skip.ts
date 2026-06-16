@@ -20,7 +20,7 @@ export default {
 
 		const playerService: PlayerService = PlayerService.getInstance();
 		const player: GuildPlayer = playerService.getGuildPlayer(interaction.guildId);
-		const track_name: string | undefined = player.skip();
+		const track_name: string | undefined = await player.skip();
 		if (track_name) {
 			player.updateChannelId(interaction.channelId);
 			await interaction.reply(i18next.t('music.skipTrack', { trackName: track_name }));
