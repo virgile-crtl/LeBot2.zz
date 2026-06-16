@@ -102,7 +102,7 @@ describe('GuildPlayer Errors', () => {
 		(createAudioResource as jest.Mock).mockImplementationOnce(() => {
 			throw new Error('Test error');
 		});
-		const track_name = path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3');
+		const track_name = path.join(process.env.MUSIC_FOLDER!, guild_id, 'track1.mp3');
 
 		expect(() => player.play(track_name)).toThrow('errors.music.playError\nTest error');
 		expect(createAudioResource).toHaveBeenCalledTimes(1);
@@ -113,7 +113,7 @@ describe('GuildPlayer Errors', () => {
 		mockPlayer.play.mockImplementationOnce(() => {
 			throw new Error('Test error');
 		});
-		const track_name = path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3');
+		const track_name = path.join(process.env.MUSIC_FOLDER!, guild_id, 'track1.mp3');
 
 		expect(() => player.play(track_name)).toThrow('errors.music.playError\nTest error');
 		expect(createAudioResource).toHaveBeenCalledTimes(1);

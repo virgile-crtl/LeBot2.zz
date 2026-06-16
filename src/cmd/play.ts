@@ -39,7 +39,7 @@ export default {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
-		const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER!, interaction.guildId);
+		const guild_folder: string = path.join(process.env.MUSIC_FOLDER!, interaction.guildId);
 		const track_name: string = interaction.options.getString('track')!;
 		if (!fs.existsSync(guild_folder)) {
 			throw new ClientError(i18next.t('errors.music.noTracksInServer'));

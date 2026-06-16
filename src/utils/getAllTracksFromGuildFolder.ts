@@ -4,7 +4,7 @@ import i18next from 'i18next';
 import path from 'path';
 
 export default function getAllTracksFromGuildFolder(guild_id: string): string[] {
-	const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER!, guild_id);
+	const guild_folder: string = path.join(process.env.MUSIC_FOLDER!, guild_id);
 	if (!fs.existsSync(guild_folder)) {
 		throw new ClientError(i18next.t('errors.music.noTracksInServer'));
 	}

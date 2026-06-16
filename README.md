@@ -69,7 +69,7 @@ Example configuration:
 ```env
 BOT_TOKEN=your_bot_token_here
 CLIENT_ID=your_client_id_here
-PLAYLISTS_FOLDER=/absolute/path/to/playlists
+MUSIC_FOLDER=/absolute/path/to/playlists
 LANGUAGE=en
 ```
 
@@ -80,7 +80,7 @@ GUILD_ID=serverid
 ```
 
 > **Note:**
-> Paths (`PLAYLISTS_FOLDER`) must be **absolute** paths to the respective directories.
+> Paths (`MUSIC_FOLDER`) must be **absolute** paths to the respective directories.
 
 ---
 

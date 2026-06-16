@@ -35,6 +35,7 @@
       "deployError": "⚠️ Error during deployment"
     },
     "cmd": {
+      "commandInGuild": "❌ You need to use this command in a guild",
       "cmdNotFound": "❌ Command not found: {{commandName}}",
       "noAutocomplete": "❌ The command {{commandName}} does not support autocomplete.",
       "commandInTextChannel": "❌ You need to use this command in a text channel to play a track"

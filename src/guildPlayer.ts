@@ -102,14 +102,14 @@ export default class GuildPlayer {
 
 	private getNextTrack(): string {
 		if (this._stack.length > 0) {
-			return path.join(process.env.PLAYLISTS_FOLDER!, this._guild_id, this._stack.shift()! + '.mp3');
+			return path.join(process.env.MUSIC_FOLDER!, this._guild_id, this._stack.shift()! + '.mp3');
 		}
 		else if (this._random_stack.length > 0) {
-			return path.join(process.env.PLAYLISTS_FOLDER!, this._guild_id, this._random_stack.shift()! + '.mp3');
+			return path.join(process.env.MUSIC_FOLDER!, this._guild_id, this._random_stack.shift()! + '.mp3');
 		}
 		else {
 			this._random_stack = createShuffleStack(this._guild_id);
-			return path.join(process.env.PLAYLISTS_FOLDER!, this._guild_id, this._random_stack.shift()! + '.mp3');
+			return path.join(process.env.MUSIC_FOLDER!, this._guild_id, this._random_stack.shift()! + '.mp3');
 		}
 	}
 
