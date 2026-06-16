@@ -47,15 +47,15 @@ describe('playCommand', () => {
 	});
 
 	test('Play track', async () => {
-		fs.mkdirSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id), { recursive: true });
-		fs.writeFileSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3'), 'data');
+		fs.mkdirSync(path.join(process.env.MUSIC_FOLDER!, guild_id), { recursive: true });
+		fs.writeFileSync(path.join(process.env.MUSIC_FOLDER!, guild_id, 'track1.mp3'), 'data');
 		Object.setPrototypeOf(mockInteraction.member, GuildMember.prototype);
 
 		await play.execute(mockInteraction);
 		expect(mockInteraction.options.getString).toHaveBeenCalledTimes(1);
 		expect(putTrackInPlayer).toHaveBeenCalledTimes(1);
 		expect(putTrackInPlayer).toHaveBeenCalledWith(mockInteraction,
-			path.join(process.env.PLAYLISTS_FOLDER!, guild_id),	'track1', expect.any(Function));
+			path.join(process.env.MUSIC_FOLDER!, guild_id),	'track1', expect.any(Function));
 	});
 
 	test('Play autocomplete with < 25', async () => {

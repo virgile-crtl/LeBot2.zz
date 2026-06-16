@@ -1,9 +1,9 @@
 import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { dbclient } from '../dbclient';
+import type { Music } from '../prisma/client';
 import ClientError from '../clientError';
-import fs from 'fs';
 import getAllTracksFromGuildFolder from '../utils/getAllTracksFromGuildFolder';
 import i18next from 'i18next';
-import path from 'path';
 import putTrackInPlayer from '../utils/putTrackInPlayer';
 
 export default {
@@ -26,7 +26,7 @@ export default {
 
 	async autocomplete(interaction: AutocompleteInteraction<'cached'>): Promise<void> {
 		const search_value: string = interaction.options.getFocused();
-		const filter_tracks_list: string[] = getAllTracksFromGuildFolder(interaction.guildId).filter(
+		const filter_tracks_list: string[] = (await getAllTracksFromGuildFolder(interaction.guildId)).filter(
 			(track: string) => track.toLowerCase().includes(search_value.toLowerCase()));
 
 		if (filter_tracks_list.length > 25) {
@@ -39,15 +39,12 @@ export default {
 	},
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
-		const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER!, interaction.guildId);
 		const track_name: string = interaction.options.getString('track')!;
-		if (!fs.existsSync(guild_folder)) {
-			throw new ClientError(i18next.t('errors.music.noTracksInServer'));
-		};
-		if (!fs.existsSync(path.join(guild_folder, track_name + '.mp3'))) {
+		const track: Music | null = await dbclient.music.findUnique({ where: { title: track_name } });
+
+		if (!track) {
 			throw new ClientError(i18next.t('errors.music.trackNotFound', { trackName: track_name }));
 		}
-
-		await putTrackInPlayer(interaction, guild_folder, track_name, interaction.reply.bind(interaction));
+		await putTrackInPlayer(interaction, track, interaction.reply.bind(interaction));
 	},
 };

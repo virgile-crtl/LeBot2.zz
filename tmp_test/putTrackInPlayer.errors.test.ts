@@ -11,14 +11,14 @@ describe('putTrackInPlayer error', () => {
 	};
 
 	test('putTrackInPlayer without text channel', async () => {
-		await expect(putTrackInPlayer(mockInteraction, path.join(process.env.PLAYLISTS_FOLDER!, guild_id), 'track1', mockReply())).rejects.toThrow('errors.cmd.commandInTextChannel');
+		await expect(putTrackInPlayer(mockInteraction, path.join(process.env.MUSIC_FOLDER!, guild_id), 'track1', mockReply())).rejects.toThrow('errors.cmd.commandInTextChannel');
 	});
 
 	test('Play whithout voice channel', async () => {
 		(mockInteraction as any).channel = mockChannel;
 		(mockInteraction as any).channelId = text_channel_id;
 
-		await expect(putTrackInPlayer(mockInteraction, path.join(process.env.PLAYLISTS_FOLDER!, guild_id), 'track1', mockReply())).rejects.toThrow('errors.music.needVoiceChannel');
+		await expect(putTrackInPlayer(mockInteraction, path.join(process.env.MUSIC_FOLDER!, guild_id), 'track1', mockReply())).rejects.toThrow('errors.music.needVoiceChannel');
 	});
 });
 

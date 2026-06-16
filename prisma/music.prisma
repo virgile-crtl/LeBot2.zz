@@ -1,0 +1,7 @@
+model Music {
+  title     String @id
+  path      String
+  private   Boolean  @default(false)
+  createdAt DateTime @default(now())
+	guilds 		Guild[]
+}

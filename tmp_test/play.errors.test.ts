@@ -21,7 +21,7 @@ describe('playCommand error', () => {
 	});
 
 	test('Play without track', async () => {
-		fs.mkdirSync(path.join(process.env.PLAYLISTS_FOLDER!, guild_id), { recursive: true });
+		fs.mkdirSync(path.join(process.env.MUSIC_FOLDER!, guild_id), { recursive: true });
 		await expect(play.execute(mockInteraction)).rejects.toThrow('errors.music.trackNotFound');
 	});
 });

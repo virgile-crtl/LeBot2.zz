@@ -1,7 +1,5 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import downloadTrack from '../utils/downloads';
-import fs from 'fs';
-import path from 'path';
 import putTrackInPlayer from '../utils/putTrackInPlayer';
 import i18next from 'i18next';
 
@@ -35,18 +33,15 @@ export default {
 		),
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
-		const guild_folder: string = path.join(process.env.PLAYLISTS_FOLDER!, interaction.guildId);
-		if (!fs.existsSync(guild_folder)) { fs.mkdirSync(guild_folder, { recursive: true }); }
-
 		interaction.reply(i18next.t('music.startDownload'));
-		const track_name = await downloadTrack(guild_folder, interaction.options.getString('url'),
+		const track = await downloadTrack(interaction.guildId, interaction.options.getString('url'),
 			interaction.options.getAttachment('track'));
 		interaction.editReply(i18next.t('music.downloadCompleted'));
 
 		const to_queue = interaction.options.getBoolean('to_queue') ?? (interaction.member && (interaction.member instanceof GuildMember)
 				&& interaction.member.voice.channelId) ? true : false;
 		if (to_queue) {
-			await putTrackInPlayer(interaction, guild_folder, track_name, interaction.followUp.bind(interaction));
+			await putTrackInPlayer(interaction, track, interaction.followUp.bind(interaction));
 		}
 	},
 };

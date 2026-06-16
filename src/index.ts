@@ -3,6 +3,8 @@ dotenv.config({ path: process.env.NODE_ENV === 'prod' ? '.env.prod' : '.env.dev'
 
 import { Command } from './types/command';
 import { Events, GatewayIntentBits } from 'discord.js';
+import { dbclient } from './dbclient';
+
 import Backend from 'i18next-fs-backend';
 import checkEnv from './utils/checkEnv';
 import ClientError from './clientError';
@@ -40,6 +42,15 @@ dsClient.on(Events.InteractionCreate, async interaction => {
 	const command: Command = dsClient.getCommand(interaction.commandName);
 
 	try {
+		if (interaction.guildId === null) throw new ClientError(i18next.t('errors.cmd.commandInGuild'));
+		await dbclient.guild.upsert({
+  		where: { guildId: interaction.guildId },
+  		update: {},
+  		create: {
+    		guildId: interaction.guildId,
+  		},
+		});
+
 		await command.execute(interaction);
 		console.info(i18next.t('usedCmd', { tag: interaction.user.tag,
 			commandName: interaction.commandName, name: interaction.guild!.name }));

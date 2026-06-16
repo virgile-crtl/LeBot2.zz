@@ -9,7 +9,7 @@ function getEnvVars(): Array<{ name: string, is_folder?: boolean }> {
 			{ name: 'CLIENT_ID' },
 			{ name: 'TRANSLATION_FOLDER', is_folder: true },
 			{ name: 'CMDS_FOLDER', is_folder: true },
-			{ name: 'PLAYLISTS_FOLDER', is_folder: true },
+			{ name: 'MUSIC_FOLDER', is_folder: true },
 			{ name: 'LANGUAGE' },
 		];
 	}
@@ -20,7 +20,7 @@ function getEnvVars(): Array<{ name: string, is_folder?: boolean }> {
 			{ name: 'GUILD_ID' },
 			{ name: 'TRANSLATION_FOLDER', is_folder: true },
 			{ name: 'CMDS_FOLDER', is_folder: true },
-			{ name: 'PLAYLISTS_FOLDER', is_folder: true },
+			{ name: 'MUSIC_FOLDER', is_folder: true },
 			{ name: 'LANGUAGE' },
 		];
 	}

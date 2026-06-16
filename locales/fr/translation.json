@@ -36,6 +36,7 @@
       "deployError": "⚠️ Erreur lors du déploiement"
     },
     "cmd": {
+      "commandInGuild": "❌ Vous devez utiliser cette commande dans un serveur",
       "cmdNotFound": "❌ Commande introuvable : {{commandName}}",
       "noAutocomplete": "❌ La commande {{commandName}} ne supporte pas l'autocomplétion",
       "commandInTextChannel": "❌ Vous devez utiliser cette commande dans un canal texte pour jouer un morceau"

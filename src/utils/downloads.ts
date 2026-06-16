@@ -1,4 +1,6 @@
 import { Attachment } from 'discord.js';
+import { dbclient } from '../dbclient';
+import type { Music } from '../prisma/client';
 import ClientError from '../clientError';
 import fs from 'fs';
 import https from 'https';
@@ -15,13 +17,13 @@ async function getTrackName(url: string): Promise<string> {
 	return info.title;
 }
 
-async function downloadTrackFromYoutube(url: string, outputDir: string): Promise<string> {
+async function downloadTrackFromYoutube(url: string): Promise<string> {
 	const track_name: string = await getTrackName(url);
 	await ytdl(url, {
 		noPlaylist: true,
 		extractAudio: true,
 		audioFormat: 'mp3',
-		output: path.join(outputDir, track_name + '.mp3'),
+		output: path.join(process.env.MUSIC_FOLDER!, track_name + '.mp3'),
 	});
 	return track_name;
 }
@@ -33,18 +35,41 @@ async function downloadTrackFromAttachement(attachment: Attachment, guild_folder
 			r.pipe(f).on('finish', () => f.close(() => resolve()));
 		}).on('error', reject);
 	});
-	return attachment.name.slice(0, -4);
-
+	return attachment.name;
 }
 
-export default async function downloadTrack(guild_folder: string, url: string | null, attachment: Attachment | null): Promise<string> {
-
+export default async function downloadTrack(guildId: string, url: string | null, attachment: Attachment | null): Promise<Music> {
 	try {
 		if (url) {
-			return await downloadTrackFromYoutube(url, guild_folder);
+			const track_name: string = await downloadTrackFromYoutube(url);
+			const track = await dbclient.music.create({
+				data: {
+					title: track_name,
+					path: path.join(process.env.MUSIC_FOLDER!, track_name + '.mp3'),
+					guilds: {
+						connect: {
+							guildId: guildId,
+						},
+					},
+				},
+			});
+			return track;
 		}
 		else if (attachment) {
-			return await downloadTrackFromAttachement(attachment, guild_folder);
+			const track_name = await downloadTrackFromAttachement(attachment, path.join(process.env.MUSIC_FOLDER!, guildId));
+			const track = await dbclient.music.create({
+				data: {
+					title: track_name.substring(0, attachment.name.lastIndexOf('.')) || track_name,
+					path: path.join(process.env.MUSIC_FOLDER!, track_name),
+					private: true,
+					guilds: {
+						connect: {
+							guildId: guildId,
+						},
+					},
+				},
+			});
+			return track;
 		}
 	}
 	catch (err) {

@@ -1,6 +1,7 @@
 node_modules/
 .env*
-playlists/
+music/
+db_data/
 dist/
 coverage/
 test-results/

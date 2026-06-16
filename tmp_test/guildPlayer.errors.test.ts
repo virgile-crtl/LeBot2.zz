@@ -34,14 +34,14 @@ describe('GuildPlayer Errors', () => {
 		send: jest.fn(),
 	} as any as jest.Mocked<TextChannel>;
 
-	beforeAll(() => {
+	beforeAll(async () => {
 		(createAudioPlayer as jest.Mock).mockReturnValue(mockPlayer);
 		(joinVoiceChannel as jest.Mock).mockReturnValue(mockConnection);
 
-		player = new GuildPlayer(guild_id, is_rand, channel_id, dsClient, voiceOption);
+		player = await GuildPlayer.create(guild_id, is_rand, channel_id, dsClient, voiceOption);
 	});
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		jest.clearAllMocks();
 	});
 
@@ -50,7 +50,7 @@ describe('GuildPlayer Errors', () => {
 			throw new Error('Test error');
 		});
 
-		expect(() => new GuildPlayer('guild1', true, 'channel1', {} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions)).toThrow('errors.music.connectError\nTest error');
+		expect(async () => await GuildPlayer.create('guild1', true, 'channel1', {} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions)).toThrow('errors.music.connectError\nTest error');
 		expect(createAudioPlayer).toHaveBeenCalledTimes(1);
 		expect(createAudioPlayer).toHaveBeenCalledWith();
 		expect(joinVoiceChannel).not.toHaveBeenCalled();
@@ -61,7 +61,7 @@ describe('GuildPlayer Errors', () => {
 			throw new Error('Test error');
 		});
 
-		expect(() => new GuildPlayer('guild1', true, 'channel1', {} as DsClient, voiceOption)).toThrow('errors.music.connectError\nTest error');
+		expect(() => await GuildPlayer.create('guild1', true, 'channel1', {} as DsClient, voiceOption)).toThrow('errors.music.connectError\nTest error');
 		expect(createAudioPlayer).toHaveBeenCalledTimes(1);
 		expect(createAudioPlayer).toHaveBeenCalledWith();
 		expect(joinVoiceChannel).toHaveBeenCalledTimes(1);
@@ -73,7 +73,7 @@ describe('GuildPlayer Errors', () => {
 			throw new Error('Test error');
 		});
 
-		expect(() => new GuildPlayer('guild1', true, 'channel1', {} as DsClient, voiceOption)).toThrow('errors.music.connectError\nTest error');
+		expect(async () => await GuildPlayer.create('guild1', true, 'channel1', {} as DsClient, voiceOption)).toThrow('errors.music.connectError\nTest error');
 		expect(createAudioPlayer).toHaveBeenCalledTimes(1);
 		expect(createAudioPlayer).toHaveBeenCalledWith();
 		expect(joinVoiceChannel).toHaveBeenCalledTimes(1);
@@ -87,7 +87,7 @@ describe('GuildPlayer Errors', () => {
 			throw new Error('Test error');
 		});
 
-		expect(() => new GuildPlayer('guild1', true, 'channel1', {} as DsClient, voiceOption)).toThrow('errors.music.connectError\nTest error');
+		expect(async () => await GuildPlayer.create('guild1', true, 'channel1', {} as DsClient, voiceOption)).toThrow('errors.music.connectError\nTest error');
 		expect(createAudioPlayer).toHaveBeenCalledTimes(1);
 		expect(createAudioPlayer).toHaveBeenCalledWith();
 		expect(joinVoiceChannel).toHaveBeenCalledTimes(1);
@@ -102,7 +102,7 @@ describe('GuildPlayer Errors', () => {
 		(createAudioResource as jest.Mock).mockImplementationOnce(() => {
 			throw new Error('Test error');
 		});
-		const track_name = path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3');
+		const track_name = path.join(process.env.MUSIC_FOLDER!, guild_id, 'track1.mp3');
 
 		expect(() => player.play(track_name)).toThrow('errors.music.playError\nTest error');
 		expect(createAudioResource).toHaveBeenCalledTimes(1);
@@ -113,7 +113,7 @@ describe('GuildPlayer Errors', () => {
 		mockPlayer.play.mockImplementationOnce(() => {
 			throw new Error('Test error');
 		});
-		const track_name = path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3');
+		const track_name = path.join(process.env.MUSIC_FOLDER!, guild_id, 'track1.mp3');
 
 		expect(() => player.play(track_name)).toThrow('errors.music.playError\nTest error');
 		expect(createAudioResource).toHaveBeenCalledTimes(1);

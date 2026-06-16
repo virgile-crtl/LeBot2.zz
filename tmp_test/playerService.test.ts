@@ -1,7 +1,7 @@
 import { CreateVoiceConnectionOptions, JoinVoiceChannelOptions } from '@discordjs/voice';
-import DsClient from '../dsClient';
-import GuildPlayer from '../guildPlayer';
-import PlayerService from '../playerService';
+import DsClient from '../src/dsClient';
+import GuildPlayer from '../src/guildPlayer';
+import PlayerService from '../src/playerService';
 
 jest.mock('../utils/createShuffleStack', () => jest.fn(() => ['track2', 'track1', 'track3']));
 
@@ -27,7 +27,7 @@ describe('DbClient', () => {
 		const spyDelete = jest.spyOn(playerService, 'deleteGuildPlayer');
 		const spyHas = jest.spyOn((playerService as any)._guildsPlayers, 'has');
 		const guild_id = 'guild1';
-		const player: GuildPlayer = new GuildPlayer(guild_id, true, 'channel1',
+		const player: GuildPlayer = await GuildPlayer.create(guild_id, true, 'channel1',
 			{} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions);
 
 		playerService.saveGuildPlayer(guild_id, player);
@@ -43,7 +43,7 @@ describe('DbClient', () => {
 		const spyDelete = jest.spyOn(playerService, 'deleteGuildPlayer');
 		const spyHas = jest.spyOn((playerService as any)._guildsPlayers, 'has');
 		const guild_id = 'guild1';
-		const player: GuildPlayer = new GuildPlayer(guild_id, true, 'channel1',
+		const player: GuildPlayer = await GuildPlayer.create(guild_id, true, 'channel1',
 			{} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions);
 
 		playerService.saveGuildPlayer(guild_id, player);
@@ -58,7 +58,7 @@ describe('DbClient', () => {
 
 	test('UpdatePlayer method with rand not null', () => {
 		const guild_id = 'guild1';
-		const player: GuildPlayer = new GuildPlayer(guild_id, true, 'channel1',
+		const player: GuildPlayer = await GuildPlayer.create(guild_id, true, 'channel1',
 			{} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions);
 		playerService.saveGuildPlayer(guild_id, player);
 		const spyGetGuildPlayer = jest.spyOn(playerService, 'getGuildPlayer');
@@ -66,7 +66,7 @@ describe('DbClient', () => {
 		const spyUpdateChannel = jest.spyOn(player, 'updateChannelId');
 		const spySetRandom = jest.spyOn(player, 'setRandom');
 
-		// playerService.saveGuildPlayer('guild2', new GuildPlayer('guild2', false, 'channel2',
+		// playerService.saveGuildPlayer('guild2', await GuildPlayer.create('guild2', false, 'channel2',
 		// {} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions));
 
 		playerService.updatePlayer('track2', guild_id, 'channel2', false);
@@ -82,7 +82,7 @@ describe('DbClient', () => {
 
 	test('UpdatePlayer method with rand not null', () => {
 		const guild_id = 'guild1';
-		const player: GuildPlayer = new GuildPlayer(guild_id, true, 'channel1',
+		const player: GuildPlayer = await GuildPlayer.create(guild_id, true, 'channel1',
 			{} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions);
 		playerService.saveGuildPlayer(guild_id, player);
 		const spyGetGuildPlayer = jest.spyOn(playerService, 'getGuildPlayer');
@@ -90,7 +90,7 @@ describe('DbClient', () => {
 		const spyUpdateChannel = jest.spyOn(player, 'updateChannelId');
 		const spySetRandom = jest.spyOn(player, 'setRandom');
 
-		// playerService.saveGuildPlayer('guild2', new GuildPlayer('guild2', false, 'channel2',
+		// playerService.saveGuildPlayer('guild2', await GuildPlayer.create('guild2', false, 'channel2',
 		// {} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions));
 
 		playerService.updatePlayer('track2', guild_id, 'channel2', null);
@@ -106,10 +106,10 @@ describe('DbClient', () => {
 	test('GetGuildPlayer method with existing guild', () => {
 		const spyGet = jest.spyOn((playerService as any)._guildsPlayers, 'get');
 		const guild_id = 'guild1';
-		const player = new GuildPlayer(guild_id, false, 'channel2',
+		const player = await GuildPlayer.create(guild_id, false, 'channel2',
 			{} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions);
 		playerService.saveGuildPlayer(guild_id, player);
-		playerService.saveGuildPlayer('guild2', new GuildPlayer('guild2', false, 'channel2',
+		playerService.saveGuildPlayer('guild2', await GuildPlayer.create('guild2', false, 'channel2',
 			{} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions));
 		const spyHas = jest.spyOn((playerService as any)._guildsPlayers, 'has');
 
@@ -131,12 +131,12 @@ describe('DbClient', () => {
 		expect(spyGet).toHaveBeenCalledTimes(0);
 	});
 
-	test('GetGuildPlayer method with existing guild', () => {
+	test('GetGuildPlayer method with existing guild', async () => {
 		const guild_id = 'guild1';
-		const player = new GuildPlayer(guild_id, true, 'channel1',
+		const player = await GuildPlayer.create(guild_id, true, 'channel1',
 			{} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions);
 		playerService.saveGuildPlayer(guild_id, player);
-		playerService.saveGuildPlayer('guild2', new GuildPlayer('guild2', false, 'channel1',
+		playerService.saveGuildPlayer('guild2', await GuildPlayer.create('guild2', false, 'channel1',
 			{} as DsClient, {} as CreateVoiceConnectionOptions & JoinVoiceChannelOptions));
 		const spyDelete = jest.spyOn((playerService as any)._guildsPlayers, 'delete');
 

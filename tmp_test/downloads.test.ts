@@ -17,7 +17,7 @@ jest.mock('youtube-dl-exec');
 
 describe('downloadTrack', () => {
 	const guild_id = 'guild1';
-	const guild_folder = path.join(process.env.PLAYLISTS_FOLDER!, guild_id);
+	const guild_folder = path.join(process.env.MUSIC_FOLDER!, guild_id);
 	const mockWriteStream = {
   	on: jest.fn().mockReturnThis(),
   	close: jest.fn((cb: any) => cb && cb()),
@@ -56,7 +56,7 @@ describe('downloadTrack', () => {
   	  return { on: jest.fn() };
   	});
 
-		expect(await downloadTrack(path.join(process.env.PLAYLISTS_FOLDER!, guild_id), null, attachment)).toBe('test');
+		expect(await downloadTrack(path.join(process.env.MUSIC_FOLDER!, guild_id), null, attachment)).toBe('test');
 		expect(fs.createWriteStream).toHaveBeenCalledTimes(1);
 		expect(fs.createWriteStream).toHaveBeenCalledWith(path.join(guild_folder, attachment.name));
 		expect(https.get).toHaveBeenCalledTimes(1);
@@ -67,7 +67,7 @@ describe('downloadTrack', () => {
 		fs.mkdirSync(guild_folder, { recursive: true });
 		(ytdl as any as jest.Mock).mockReturnValue({ title: 'faketrack' });
 
-		expect(await downloadTrack(path.join(process.env.PLAYLISTS_FOLDER!, guild_id), 'https://youtube.com/fakevideo', null)).toBe('faketrack');
+		expect(await downloadTrack(path.join(process.env.MUSIC_FOLDER!, guild_id), 'https://youtube.com/fakevideo', null)).toBe('faketrack');
 		expect(ytdl).toHaveBeenCalledTimes(2);
 		expect(ytdl).toHaveBeenNthCalledWith(1, 'https://youtube.com/fakevideo', {
 			noPlaylist: true,

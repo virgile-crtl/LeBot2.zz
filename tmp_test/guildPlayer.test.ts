@@ -1,8 +1,8 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
 import { TextChannel } from 'discord.js';
-import createShuffleStack from '../utils/createShuffleStack';
-import DsClient from '../dsClient';
-import GuildPlayer from '../guildPlayer';
+import createShuffleStack from '../src/utils/createShuffleStack';
+import DsClient from '../src/dsClient';
+import GuildPlayer from '../src/guildPlayer';
 import path from 'path';
 
 jest.mock('../utils/createShuffleStack', () => jest.fn(() => ['track2', 'track1', 'track3']));
@@ -34,12 +34,12 @@ describe('GuildPlayer', () => {
 		send: jest.fn(),
 	} as any as jest.Mocked<TextChannel>;
 
-	beforeAll(() => {
+	beforeAll(async () => {
 		(createAudioPlayer as jest.Mock).mockReturnValue(mockPlayer);
 		(joinVoiceChannel as jest.Mock).mockReturnValue(mockConnection);
 
 		jest.spyOn(console, 'error').mockImplementation(() => {return;});
-		player = new GuildPlayer(guild_id, is_rand, channel_id, dsClient, voiceOption);
+		player = await GuildPlayer.create(guild_id, is_rand, channel_id, dsClient, voiceOption);
 		jest.clearAllMocks();
 	});
 
@@ -47,8 +47,8 @@ describe('GuildPlayer', () => {
 		jest.clearAllMocks();
 	});
 
-	test('Create instance', () => {
-		const res: GuildPlayer = new GuildPlayer(guild_id, is_rand, channel_id, dsClient, voiceOption);
+	test('Create instance', async () => {
+		const res: GuildPlayer = await GuildPlayer.create(guild_id, is_rand, channel_id, dsClient, voiceOption);
 
 		expect(res).toBeInstanceOf(GuildPlayer);
 		expect(createShuffleStack).toHaveBeenCalledTimes(1);
@@ -69,7 +69,7 @@ describe('GuildPlayer', () => {
 	});
 
 	test('Play method', () => {
-		const track_name = path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track1.mp3');
+		const track_name = path.join(process.env.MUSIC_FOLDER!, guild_id, 'track1.mp3');
 
 		player.play(track_name);
 		expect(createAudioResource).toHaveBeenCalledTimes(1);
@@ -121,7 +121,7 @@ describe('GuildPlayer', () => {
 		expect((player as any)._random_stack).toEqual(['track1', 'track3']);
 		expect(spyGetNext).toHaveBeenCalledTimes(1);
 		expect(spyPlay).toHaveBeenCalledTimes(1);
-		expect(spyPlay).toHaveBeenCalledWith(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track2.mp3'));
+		expect(spyPlay).toHaveBeenCalledWith(path.join(process.env.MUSIC_FOLDER!, guild_id, 'track2.mp3'));
 	});
 
 	test('Skip method when stack not empty and rand is true', () => {
@@ -136,7 +136,7 @@ describe('GuildPlayer', () => {
 		expect((player as any)._random_stack).toEqual(['track2', 'track1', 'track3']);
 		expect(spyGetNext).toHaveBeenCalledTimes(1);
 		expect(spyPlay).toHaveBeenCalledTimes(1);
-		expect(spyPlay).toHaveBeenCalledWith(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track4.mp3'));
+		expect(spyPlay).toHaveBeenCalledWith(path.join(process.env.MUSIC_FOLDER!, guild_id, 'track4.mp3'));
 	});
 
 	test('skip method when stack not empty and rand is false', () => {
@@ -151,7 +151,7 @@ describe('GuildPlayer', () => {
 		expect((player as any)._random_stack).toEqual(['track2', 'track1', 'track3']);
 		expect(spyGetNext).toHaveBeenCalledTimes(1);
 		expect(spyPlay).toHaveBeenCalledTimes(1);
-		expect(spyPlay).toHaveBeenCalledWith(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track4.mp3'));
+		expect(spyPlay).toHaveBeenCalledWith(path.join(process.env.MUSIC_FOLDER!, guild_id, 'track4.mp3'));
 	});
 
 	test('setRandom method', () => {
@@ -183,7 +183,7 @@ describe('GuildPlayer', () => {
 		(player as any)._stack = ['track4', 'track5'];
 		(player as any)._random_stack = ['track2', 'track1', 'track3'];
 
-		expect((player as any).getNextTrack()).toBe(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track4.mp3'));
+		expect((player as any).getNextTrack()).toBe(path.join(process.env.MUSIC_FOLDER!, guild_id, 'track4.mp3'));
 		expect((player as any)._stack).toEqual(['track5']);
 		expect((player as any)._random_stack).toEqual(['track2', 'track1', 'track3']);
 	});
@@ -192,7 +192,7 @@ describe('GuildPlayer', () => {
 		(player as any)._stack = [];
 		(player as any)._random_stack = ['track2', 'track1', 'track3'];
 
-		expect((player as any).getNextTrack()).toBe(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track2.mp3'));
+		expect((player as any).getNextTrack()).toBe(path.join(process.env.MUSIC_FOLDER!, guild_id, 'track2.mp3'));
 		expect((player as any)._stack).toEqual([]);
 		expect((player as any)._random_stack).toEqual(['track1', 'track3']);
 	});
@@ -201,7 +201,7 @@ describe('GuildPlayer', () => {
 		(player as any)._stack = [];
 		(player as any)._random_stack = [];
 
-		expect((player as any).getNextTrack()).toBe(path.join(process.env.PLAYLISTS_FOLDER!, guild_id, 'track2.mp3'));
+		expect((player as any).getNextTrack()).toBe(path.join(process.env.MUSIC_FOLDER!, guild_id, 'track2.mp3'));
 		expect((player as any)._stack).toEqual([]);
 		expect((player as any)._random_stack).toEqual(['track1', 'track3']);
 		expect(createShuffleStack).toHaveBeenCalledTimes(1);
