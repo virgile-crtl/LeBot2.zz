@@ -15,6 +15,7 @@ FROM base AS builder
 
 COPY package*.json ./
 COPY tsconfig.json ./
+COPY tsconfig.build.json ./
 COPY prisma ./prisma/
 COPY prisma.config.ts ./ 
 COPY src ./src/

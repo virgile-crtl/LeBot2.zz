@@ -6,7 +6,7 @@
   "author": "LaMenace2zz",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --project tsconfig.build.json",
     "start": "NODE_ENV=prod node dist/index.js",
     "dev": "NODE_ENV=dev tsx watch src/index.ts",
     "lint": "eslint 'src/**/*.ts'",
