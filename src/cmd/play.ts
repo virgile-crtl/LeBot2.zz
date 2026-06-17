@@ -1,6 +1,6 @@
 import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { dbclient } from '../dbclient';
-import type { Music } from '../prisma/client';
+import type { Music } from '@prisma/client';
 import ClientError from '../clientError';
 import getAllTracksFromGuildFolder from '../utils/getAllTracksFromGuildFolder';
 import i18next from 'i18next';

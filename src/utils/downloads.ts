@@ -1,6 +1,6 @@
 import { Attachment } from 'discord.js';
 import { dbclient } from '../dbclient';
-import type { Music } from '../prisma/client';
+import type { Music } from '@prisma/client';
 import ClientError from '../clientError';
 import fs from 'fs';
 import https from 'https';

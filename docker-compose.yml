@@ -1,34 +1,48 @@
 services:
   dev:
-    build: .
+    build:
+      context: .
+      target: dev
     volumes:
-      - .:/app
-      - ./music:/mnt/music
+      - .:/lebot2.zz
+      - music_data:/lebot2.zz/music
     env_file:
       - ./.env.dev
-    command: npm run dev
-    profiles: ["dev"]
+    profiles: ["dev"] 
 
   test:
-    build: .
+    build:
+      context: .
+      target: dev
+    volumes:
+      - .:/lebot2.zz
     command: npm run test
     profiles: ["test"]
-
+    
   test-coverage:
-    build: .
+    build:
+      context: .
+      target: dev
+    volumes:
+      - .:/lebot2.zz
     command: npm run test:coverage
     profiles: ["coverage"]
 
   lint:
-    build: .
+    build:
+      context: .
+      target: dev
+    volumes:
+      - .:/lebot2.zz
     command: npm run lint
     profiles: ["lint"]
 
   prod:
-    build: .
-    command: bash -c "npm run build ; npm run start"
+    image: lamenace2zz/lebot2zz:latest
     env_file:
-      - ./.env.proda
+      - ./.env.prod
+    volumes:
+      - music_data:/lebot2.zz/music
     profiles: ["prod"]
 
   db:
@@ -39,5 +53,9 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     profiles: ["prod", "dev"]
+
+volumes:
+  db_data:
+  music_data:
