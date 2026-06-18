@@ -1,35 +1,105 @@
 services:
   dev:
-    build: .
+    build:
+      context: .
+      target: dev
     volumes:
-      - .:/app
-      - ./music:/mnt/music
+      - ./locales:/lebot2.zz/locales
+      - ./prisma:/lebot2.zz/prisma
+      - ./src:/lebot2.zz/src
+      - ./package.json:/lebot2.zz/package.json
+      - ./package-lock.json:/lebot2.zz/package-lock.json
+      - ./prisma.config.ts:/lebot2.zz/prisma.config.ts
+      - ./tsconfig.json:/lebot2.zz/tsconfig.json
+      - music_data:/mnt/music
     env_file:
       - ./.env.dev
-    command: npm run dev
-    profiles: ["dev"]
+    profiles: ["dev"] 
+    depends_on:
+      - db
 
   test:
-    build: .
-    command: npm run test
+    build:
+      context: .
+      target: dev
+    volumes:
+      - ./locales:/lebot2.zz/locales
+      - ./prisma:/lebot2.zz/prisma
+      - ./src:/lebot2.zz/src
+      - ./jest.config.js:/lebot2.zz/jest.config.js
+      - ./package.json:/lebot2.zz/package.json
+      - ./package-lock.json:/lebot2.zz/package-lock.json
+      - ./prisma.config.ts:/lebot2.zz/prisma.config.ts
+      - ./tsconfig.json:/lebot2.zz/tsconfig.json
+    command: sh -c "npx prisma generate && npm run test"
+    environment:
+      - DATABASE_URL=tmp_fake
     profiles: ["test"]
-
+    
   test-coverage:
-    build: .
-    command: npm run test:coverage
+    build:
+      context: .
+      target: dev
+    volumes:
+      - ./locales:/lebot2.zz/locales
+      - ./prisma:/lebot2.zz/prisma
+      - ./src:/lebot2.zz/src
+      - ./jest.config.js:/lebot2.zz/jest.config.js
+      - ./package.json:/lebot2.zz/package.json
+      - ./package-lock.json:/lebot2.zz/package-lock.json
+      - ./prisma.config.ts:/lebot2.zz/prisma.config.ts
+      - ./tsconfig.json:/lebot2.zz/tsconfig.json
+    environment:
+      - DATABASE_URL=tmp_fake
+    command: sh -c "npx prisma generate && npm run test:coverage"
     profiles: ["coverage"]
 
+  test-ci:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - ./locales:/lebot2.zz/locales
+      - ./prisma:/lebot2.zz/prisma
+      - ./src:/lebot2.zz/src
+      - ./jest.config.js:/lebot2.zz/jest.config.js
+      - ./package.json:/lebot2.zz/package.json
+      - ./package-lock.json:/lebot2.zz/package-lock.json
+      - ./prisma.config.ts:/lebot2.zz/prisma.config.ts
+      - ./tsconfig.json:/lebot2.zz/tsconfig.json
+    environment:
+      - DATABASE_URL=tmp_fake
+    command: sh -c "npx prisma generate && npm run test:ci"
+    profiles: ["ci"]
+
   lint:
-    build: .
+    build:
+      context: .
+      target: dev
+    volumes:
+      - ./locales:/lebot2.zz/locales
+      - ./prisma:/lebot2.zz/prisma
+      - ./src:/lebot2.zz/src
+      - ./eslint.config.ts:/lebot2.zz/eslint.config.ts
+      - ./package.json:/lebot2.zz/package.json
+      - ./package-lock.json:/lebot2.zz/package-lock.json
+      - ./prisma.config.ts:/lebot2.zz/prisma.config.ts
+      - ./tsconfig.json:/lebot2.zz/tsconfig.json
     command: npm run lint
     profiles: ["lint"]
 
   prod:
-    build: .
-    command: bash -c "npm run build ; npm run start"
+    build:
+      context: .
+      target: prod
+    image: ghcr.io/lamenace2zz/lebot2zz:latest
     env_file:
-      - ./.env.proda
+      - ./.env.prod
+    volumes:
+      - music_data:/mnt/music
     profiles: ["prod"]
+    depends_on:
+      - db
 
   db:
     hostname: db
@@ -39,5 +109,9 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     profiles: ["prod", "dev"]
+
+volumes:
+  db_data:
+  music_data:

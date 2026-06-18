@@ -1,16 +1,38 @@
-FROM node:latest
+FROM node:latest AS base
 
 WORKDIR /lebot2.zz
 
+RUN apt-get update && apt-get upgrade -y && apt-get install -y ffmpeg
+
+FROM base AS dev
+
+COPY package*.json ./
+RUN npm install
+
+CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npm run dev"]
+
+FROM base AS builder
+
 COPY package*.json ./
 COPY tsconfig.json ./
-COPY jest.config.js ./
-COPY eslint.config.ts ./
+COPY tsconfig.build.json ./
+COPY prisma ./prisma/
+COPY prisma.config.ts ./ 
 COPY src ./src/
 COPY locales ./locales/
 
-RUN apt-get -y upgrade
-RUN apt-get -y update
-RUN apt-get install -y ffmpeg
+RUN npm install
+RUN npx prisma generate
+RUN npm run build
 
-RUN  npm install
+FROM base AS prod
+
+COPY --from=builder /lebot2.zz/dist ./dist
+COPY --from=builder /lebot2.zz/locales ./locales
+COPY --from=builder /lebot2.zz/prisma ./prisma
+COPY --from=builder /lebot2.zz/prisma.config.ts ./
+COPY package*.json ./
+
+RUN npm install --omit=dev
+
+CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npm run start"]

@@ -7,7 +7,7 @@ export default [
   {
     
     files: ['src/**/*.ts'],
-    ignores: ['src/prisma/**'],
+    ignores: ['src/tests/**/*.ts'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {

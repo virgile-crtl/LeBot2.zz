@@ -1,12 +1,9 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: process.env.NODE_ENV === 'prod' ? '.env.prod' : '.env.dev' });
-
+import checkEnv from './utils/checkEnv';
 import { Command } from './types/command';
 import { Events, GatewayIntentBits } from 'discord.js';
 import { dbclient } from './dbclient';
 
 import Backend from 'i18next-fs-backend';
-import checkEnv from './utils/checkEnv';
 import ClientError from './clientError';
 import DsClient from './dsClient';
 import i18next from 'i18next';

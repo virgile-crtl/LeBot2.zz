@@ -1,6 +1,6 @@
 import { getVoiceConnection } from '@discordjs/voice';
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
-import type { Music } from '../prisma/client';
+import type { Music } from '@prisma/client';
 import ClientError from '../clientError';
 import DsClient from '../dsClient';
 import GuildPlayer from '../guildPlayer';

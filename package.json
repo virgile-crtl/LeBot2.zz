@@ -6,9 +6,9 @@
   "author": "LaMenace2zz",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --project tsconfig.build.json",
     "start": "NODE_ENV=prod node dist/index.js",
-    "dev": "NODE_ENV=dev ts-node --files src/index.ts",
+    "dev": "NODE_ENV=dev tsx watch src/index.ts",
     "lint": "eslint 'src/**/*.ts'",
     "test": "jest --runInBand",
     "test:coverage": "jest --coverage --runInBand",
@@ -32,7 +32,7 @@
     "@eslint/js": "^9.34.0",
     "@types/i18next": "^12.1.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.3.1",
+    "@types/node": "^24.13.2",
     "@types/pg": "^8.20.0",
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
@@ -44,6 +44,7 @@
     "prisma": "^7.8.0",
     "ts-jest": "^29.4.10",
     "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
     "typescript": "^5.9.2"
   }
 }

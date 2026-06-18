@@ -1,5 +1,6 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, CreateVoiceConnectionOptions, getVoiceConnection, joinVoiceChannel, JoinVoiceChannelOptions, VoiceConnection } from '@discordjs/voice';
 import { Channel, TextChannel } from 'discord.js';
+import { dbclient } from './dbclient';
 import ClientError from './clientError';
 import createShuffleStack from './utils/createShuffleStack';
 import DsClient from './dsClient';
@@ -109,14 +110,18 @@ export default class GuildPlayer {
 
 	private async getNextTrack(): Promise<string> {
 		if (this._stack.length > 0) {
-			return path.join(process.env.MUSIC_FOLDER!, this._guild_id, this._stack.shift()! + '.mp3');
+			const track = await dbclient.music.findUniqueOrThrow({ where: { title: this._stack.shift() }, select: { path: true } });
+			return track.path;
+			// return path.join(process.env.MUSIC_FOLDER!, this._guild_id, this._stack.shift()! + '.mp3');
 		}
 		else if (this._random_stack.length > 0) {
-			return path.join(process.env.MUSIC_FOLDER!, this._guild_id, this._random_stack.shift()! + '.mp3');
+			const track = await dbclient.music.findUniqueOrThrow({ where: { title: this._random_stack.shift() }, select: { path: true } });
+			return track.path;
 		}
 		else {
 			this._random_stack = await createShuffleStack(this._guild_id);
-			return path.join(process.env.MUSIC_FOLDER!, this._guild_id, this._random_stack.shift()! + '.mp3');
+			const track = await dbclient.music.findUniqueOrThrow({ where: { title: this._random_stack.shift() }, select: { path: true } });
+			return track.path;
 		}
 	}
 
