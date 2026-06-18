@@ -42,7 +42,7 @@ Before running the bot, make sure you have:
 
 ### For run with Docker
 ---
-- ✅ **Docker Docker-compose** (latest LTS recommended)
+- ✅ **Docker Docker-compose**
 
 ### For run with Node
 ---
@@ -69,8 +69,7 @@ Example configuration:
 ```env
 BOT_TOKEN=your_bot_token_here
 CLIENT_ID=your_client_id_here
-MUSIC_FOLDER=/absolute/path/to/playlists
-LANGUAGE=en
+DATABASE_URL=your_database_url_here
 ```
 
 For .env.dev add server id:
@@ -78,9 +77,6 @@ For .env.dev add server id:
 ```env
 GUILD_ID=serverid
 ```
-
-> **Note:**
-> Paths (`MUSIC_FOLDER`) must be **absolute** paths to the respective directories.
 
 ---
 
@@ -90,12 +86,12 @@ GUILD_ID=serverid
 
 **Development mode:**
 ```bash
-docker compose up dev
+docker compose --profile dev up
 ```
 
 **Production mode:**
 ```bash
-docker compose up prod
+docker compose --profile produp
 ```
 
 ### With NODE
@@ -130,18 +126,22 @@ npm run start
 Run tests:
 
 ```bash
-docker compose up test
+docker compose --profile test up
 ```
 
 Run linter
 ```bash
-docker compose up lint
+docker compose --profile lint up
 ```
 
-Run tests with coverage:
+
+Additional options:
 ```bash
-docker compose up test-coverage
+docker compose --profile coverage up
+docker compose --profile test:ci up 
 ```
+
+
 
 ### With Node
 ---
@@ -180,11 +180,11 @@ Currently, only **unit tests** are implemented.
 ---
 | Command | Description |
 |----------|-------------|
-| `docker compose up prod` | Run project with docker in prod mode |
-| `docker compose up dev` | Run project with docker in dev mode |
-| `docker compose up test` | Run project tests with docker |
-| `docker compose up test-coverage` | Run project tests with coverage with docker |
-| `docker compose up lint` | Run linter with docker |
+| `docker compose --profile prod up` | Run project with docker in prod mode |
+| `docker compose --profile dev up` | Run project with docker in dev mode |
+| `docker compose --profile test up` | Run project tests with docker |
+| `docker compose --profile coverage up` | Run project tests with coverage with docker |
+| `docker compose --profile lint up` | Run linter with docker |
 
 
 ### Node
