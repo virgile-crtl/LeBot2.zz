@@ -92,7 +92,7 @@ services:
     build:
       context: .
       target: prod
-    image: lamenace2zz/lebot2zz:latest
+    image: ghcr.io/lamenace2zz/lebot2zz:latest
     env_file:
       - ./.env.prod
     volumes:
@@ -100,7 +100,6 @@ services:
     profiles: ["prod"]
     depends_on:
       - db
-    restart: unless-stopped
 
   db:
     hostname: db
