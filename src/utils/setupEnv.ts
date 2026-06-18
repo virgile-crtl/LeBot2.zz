@@ -11,5 +11,6 @@ function isRunningInDocker(): boolean {
 export default function setdefaultEnvVars(): void {
 	process.env.MUSIC_FOLDER = path.resolve(isRunningInDocker() ? '/mnt/music' : 'music');
 	process.env.TRANSLATION_FOLDER = path.resolve('locales');
+	process.env.LANGUAGE = process.env.LANGUAGE || 'en';
 	process.env.CMDS_FOLDER = process.env.NODE_ENV === 'prod' ? path.resolve('dist/cmd') : path.resolve('src/cmd');
 }

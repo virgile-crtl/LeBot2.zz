@@ -1,10 +1,6 @@
 name: Deploy Bot
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+on: [push]
 
 jobs:
   build-and-push:
