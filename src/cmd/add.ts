@@ -34,6 +34,7 @@ export default {
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>): Promise<void> {
 		interaction.reply(i18next.t('music.startDownload'));
+		console.log('TEST IF THE CD WORKS');
 		const track = await downloadTrack(interaction.guildId, interaction.options.getString('url'),
 			interaction.options.getAttachment('track'));
 		interaction.editReply(i18next.t('music.downloadCompleted'));
