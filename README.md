@@ -102,6 +102,11 @@ Before run install dependencies:
 npm i
 ```
 
+install latest version of youtube-dl-exec:
+```bash
+npm install youtube-dl-exec@latest
+```
+
 **Development mode:**
 ```bash
 npm run dev
@@ -138,7 +143,7 @@ docker compose --profile lint up
 Additional options:
 ```bash
 docker compose --profile coverage up
-docker compose --profile test:ci up 
+docker compose --profile test:ci up
 ```
 
 
