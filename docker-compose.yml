@@ -14,7 +14,7 @@ services:
       - music_data:/mnt/music
     env_file:
       - ./.env.dev
-    profiles: ["dev"] 
+    profiles: ["dev"]
     depends_on:
       - db
 
@@ -35,7 +35,7 @@ services:
     environment:
       - DATABASE_URL=tmp_fake
     profiles: ["test"]
-    
+
   test-coverage:
     build:
       context: .
